@@ -1,0 +1,28 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-davidwebstar-dev-203303-authRole",
+      "UnauthRoleArn": "arn:aws:iam::565864078715:role/amplify-davidwebstar-dev-203303-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::565864078715:role/amplify-davidwebstar-dev-203303-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-davidwebstar-dev-203303-deployment",
+      "UnauthRoleName": "amplify-davidwebstar-dev-203303-unauthRole",
+      "StackName": "amplify-davidwebstar-dev-203303",
+      "StackId": "arn:aws:cloudformation:eu-west-1:565864078715:stack/amplify-davidwebstar-dev-203303/eb82ac90-f322-11ec-9977-02dabbac0d63",
+      "AmplifyAppId": "d1k7d4p2z29kvh"
+    }
+  },
+  "wcloud": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-davidwebstar-wcloud-155125-authRole",
+      "UnauthRoleArn": "arn:aws:iam::565864078715:role/amplify-davidwebstar-wcloud-155125-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::565864078715:role/amplify-davidwebstar-wcloud-155125-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-davidwebstar-wcloud-155125-deployment",
+      "UnauthRoleName": "amplify-davidwebstar-wcloud-155125-unauthRole",
+      "StackName": "amplify-davidwebstar-wcloud-155125",
+      "StackId": "arn:aws:cloudformation:eu-west-1:565864078715:stack/amplify-davidwebstar-wcloud-155125/a8840a20-3f60-11ee-ad62-0658477f5d63",
+      "AmplifyAppId": "d2z2zv9c345d08"
+    }
+  }
+}

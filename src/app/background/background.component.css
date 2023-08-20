@@ -1,0 +1,8 @@
+#rendererContainer {
+    position: relative;
+  }
+
+  #highlighted-text {
+    color: lime;
+  }
+  

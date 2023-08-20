@@ -1,0 +1,46 @@
+<!-- <div #rendererContainer style="width:300px;height:300px;">
+    <span style="color:white;z-index:1000000;position: absolute;margin-top:100px;">{{my_message}}</span>
+</div> -->
+
+<div #rendererContainer style="width:300px;height:300px;">
+    <div class="container-fluid" style="position: absolute; z-index: 2;">
+        <div class="row justify-content-md-left col-gap">
+            <div class="col-sm-4 text-left" style="min-width:400px;top: 200px;">
+                <!-- <span style="font-size:40px;color: white;">{{ text }}</span> -->
+                <span style="font-size:20px;color:white;z-index:1000000;margin-top:100px;">{{displayedMessage}}</span>
+                <br/><br/><br/>
+                <input class="form-control" type="text" placeholder="Ask me a question" [(ngModel)]="question" [disabled]="isDisabled" (keyup.enter)="askQuestion()">
+                <!-- <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">Send</button> -->
+                <br/><br/><br/>
+                <!-- <button type="button" routerLink="/contact" class="btn btn-success">CV</button>&nbsp;&nbsp; -->
+                <!-- <button type="button" routerLink="/contact" class="btn btn-success">Customers</button>&nbsp;&nbsp; -->
+                <!-- <button type="button" routerLink="/contact" class="btn btn-success">Email</button>&nbsp;&nbsp; -->
+                <!-- <strong><span style="font-size:40px;">Feel a <span style="color: orange">Wave</span> of disruption in your 
+                        <span style="color: #689cff">Organization</span></span></strong> -->
+            </div>
+            <!-- <div class="col-md-auto text-center">
+                <img src="./assets/images/mylogo.png" height="100" width="300" style="margin-top:50px;">
+            </div> -->
+        </div>
+        <!-- <div class="row justify-content-md-center col-gap">
+            <div class="col-sm-4 text-center" style="min-width:400px;top:200px;margin-top:200px;">
+                <div *ngIf="displayedMessage === myMessage">
+                    <a href="https://www.example.com/link1">Link 1</a>
+                    <a href="https://www.example.com/link2">Link 2</a>
+                    <a href="https://www.example.com/link3">Link 3</a>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>
+
+<!-- <div #rendererContainer style="width:300px;height:300px;">
+    <div class="container-fluid">
+        <div class="row justify-content-md-center col-gap">
+            <div class="col-sm-4 text-center" style="min-width:400px;top: 200px;">
+                <span style="color:white;z-index:1000000;margin-top:100px;">{{displayedMessage}}</span>
+            </div>
+        </div>
+        
+    </div>
+</div> -->

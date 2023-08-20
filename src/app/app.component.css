@@ -1,0 +1,33 @@
+.navbar-fixed-left {
+    width: 100px;
+    position: fixed;
+    border-radius: 0;
+}
+
+.navbar-fixed-left .navbar-nav>li {
+    float: none;
+    /* Cancel default li float: left */
+    width: 19px;
+}
+
+/* On using dropdown menu (To right shift popuped) */
+.navbar-fixed-left .navbar-nav>li>.dropdown-menu {
+    margin-top: -50px;
+    margin-left: 140px;
+}
+
+.navbar {
+    box-shadow: none;
+}
+
+.col-gap {
+    column-gap: 8rem;
+}
+
+.nav-link:hover {
+    color: lime !important;
+}
+
+.navbar-brand:hover {
+    color: lime !important;
+}
