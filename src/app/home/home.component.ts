@@ -12,7 +12,7 @@ export class HomeComponent {
   texts = [
     'Ever used a service and thought, <strong style="color:lime;">this could be better?</strong>',
     'Your idea could revolutionize the <strong style="color:lime;">customer experience</strong>',
-    'Lets turn your <strong style="color:lime;">vision</strong> into <strong style="color:lime;">reality.</strong> Reach out today.'
+    'Lets turn your <strong style="color:lime;">vision</strong> into <strong style="color:lime;">reality.</strong>'
   ];
 
   prevSlide() {
