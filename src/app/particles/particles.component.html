@@ -7,7 +7,9 @@
         <div class="row justify-content-md-left col-gap">
             <div class="col-sm-4 text-left" style="min-width:400px;top: 200px;">
                 <!-- <span style="font-size:40px;color: white;">{{ text }}</span> -->
-                <span style="font-size:20px;color:white;z-index:1000000;margin-top:100px;">{{displayedMessage}}</span>
+                <span style="font-size:20px;color:white;z-index:1000000;margin-top:100px;">
+                    {{displayedMessage}}{{displayedDots}}
+                  </span>
                 <br/><br/><br/>
                 <input class="form-control" type="text" placeholder="Ask me a question" [(ngModel)]="question" [disabled]="isDisabled" (keyup.enter)="askQuestion()">
                 <!-- <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">Send</button> -->

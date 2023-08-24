@@ -28,10 +28,13 @@ export class ParticlesComponent implements AfterViewInit {
   isDisabled: boolean = false;
 
 
-  public myMessage = 'Hello, this is Dave 2.0 - webstarcloud@gmail.com';
+  public myMessage = 'Hello, this is Dave 2.0 - david@webstarcloud.com';
   public displayedMessage = '';
   private speed = 100;
   private intervalId: any;
+
+  dotsIntervalId: any;
+  displayedDots: string = '';
 
   constructor(private http: HttpClient) {
     this.scene = new THREE.Scene();
@@ -79,15 +82,44 @@ export class ParticlesComponent implements AfterViewInit {
     });
 
     this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, {headers}).subscribe(response => {
-      this.startTyping(response.toString())
-    }, error => {
-      console.error(error);
-      this.startTyping("My brain hurts to much today")
-    });
+    this.stopDotsAnimation();  // Stop the dots animation once response is received
+    this.startTyping(response.toString())
+  }, error => {
+    this.stopDotsAnimation();  // Stop the dots animation on error as well
+    console.error(error);
+    this.startTyping("My brain hurts to much today")
+  });
   }
 
-  startTyping(my_msg:string) {
+  askQuestion() {
+    this.isDisabled = true;
+    this.displayedMessage = "Braining";
+    this.startDotsAnimation();
+    this.getData(this.question);
+  }
+  
+  startDotsAnimation() {
+    let dotCount = 0;
+    this.dotsIntervalId = setInterval(() => {
+      this.displayedDots += '.';
+      dotCount++;
+      if (dotCount > 3) {
+        this.displayedDots = '';
+        dotCount = 0;
+      }
+    }, 500);  // Adjust the speed as needed
+  }
+  
+  stopDotsAnimation() {
+    console.log("Stopping dots animation"); // Debugging line
+    clearInterval(this.dotsIntervalId);
+    this.displayedDots = ''; // Reset the dots string
+  }
+  
+
+  startTyping(my_msg: string) {
     let i = 0;
+    this.displayedMessage = "";  // Reset displayedMessage to an empty string
     this.intervalId = setInterval(() => {
       if (i < my_msg.length) {
         this.displayedMessage += my_msg[i];
@@ -98,12 +130,7 @@ export class ParticlesComponent implements AfterViewInit {
       }
     }, this.speed);
   }
-
-  askQuestion() {
-    this.isDisabled = true;
-    this.displayedMessage = ""
-    this.getData(this.question);
-  }
+  
 
   resetObject() {
     // Traverse the scene and find the object by name
