@@ -30,7 +30,7 @@ export class ParticlesComponent implements AfterViewInit {
 
   public myMessage = 'Hello, this is Dave 2.0 - david@webstarcloud.com';
   public displayedMessage = '';
-  private speed = 100;
+  private speed = 50;
   private intervalId: any;
 
   dotsIntervalId: any;
