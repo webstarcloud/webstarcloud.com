@@ -65,10 +65,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "webstarcloud:build:production"
+              "buildTarget": "webstarcloud:build:production"
             },
             "development": {
-              "browserTarget": "webstarcloud:build:development"
+              "buildTarget": "webstarcloud:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -76,7 +76,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "webstarcloud:build"
+            "buildTarget": "webstarcloud:build"
           }
         },
         "test": {
