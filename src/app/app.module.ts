@@ -18,6 +18,8 @@ import { ParticlesComponent } from './particles/particles.component';
 import { LogoComponent } from './logo/logo.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { WasmComponent } from './wasm/wasm.component';
+import { CommonModule } from '@angular/common';
 
 
 @NgModule({
@@ -39,7 +41,8 @@ import { FormsModule } from '@angular/forms';
     AppRoutingModule,
     AmplifyAuthenticatorModule,
     BrowserAnimationsModule,
-    HttpClientModule
+    HttpClientModule,
+    CommonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

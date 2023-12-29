@@ -4,6 +4,7 @@ import { HomeComponent } from './home/home.component';
 import { PrivacyComponent } from './privacy/privacy.component';
 import { ContactComponent } from './contact/contact.component';
 import { DisruptionComponent } from './disruption/disruption.component';
+import { WasmGraphophileComponent } from './wasm-graphophile/wasm-graphophile.component';
 
 const routes: Routes = [
   {
@@ -21,6 +22,10 @@ const routes: Routes = [
   {
     path: "disrupt",
     component: DisruptionComponent
+  },
+  {
+    path: 'wasm-graphophile',
+    component: WasmGraphophileComponent
   },
   {
     path: '**',
