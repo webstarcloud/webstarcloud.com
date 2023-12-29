@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { PrivacyComponent } from './privacy/privacy.component';
 import { ContactComponent } from './contact/contact.component';
+import { DisruptionComponent } from './disruption/disruption.component';
 
 const routes: Routes = [
   {
@@ -16,6 +17,10 @@ const routes: Routes = [
   {
     path: "privacy",
     component: PrivacyComponent
+  },
+  {
+    path: "disrupt",
+    component: DisruptionComponent
   },
   {
     path: '**',
