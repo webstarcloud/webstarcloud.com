@@ -1,12 +1,12 @@
 import { Component, OnInit, ElementRef, Renderer2, ViewChild } from '@angular/core';
 
 @Component({
-  selector: 'app-wasm-component',
-  templateUrl: './wasm.component.html',
-  styleUrls: ['./wasm.component.css'],
+  selector: 'app-simple-wasm',
+  templateUrl: './simple-wasm.component.html',
+  styleUrls: ['./simple-wasm.component.css'],
   standalone: true
 })
-export class WasmComponent implements OnInit {
+export class SimpleWasmComponent implements OnInit {
   @ViewChild('wasmContainer', { static: true }) wasmContainer?: ElementRef;
   @ViewChild('fpsDisplay') fpsDisplay?: ElementRef;
   
@@ -87,7 +87,7 @@ export class WasmComponent implements OnInit {
       // Event listener to call load function after mq_js_bundle.js is loaded
       mqBundleScript.onload = () => {
         const wasmScript = this.renderer.createElement('script');
-        this.renderer.setProperty(wasmScript, 'innerHTML', `load('assets/view_sphere.wasm');`);
+        this.renderer.setProperty(wasmScript, 'innerHTML', `load('assets/view_social_network.wasm');`);
         this.renderer.appendChild(container, wasmScript);
       };
 
