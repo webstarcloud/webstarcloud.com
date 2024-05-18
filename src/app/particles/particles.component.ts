@@ -154,7 +154,7 @@ export class ParticlesComponent implements AfterViewInit {
   loadOBJModel = () => {
     const loader = new OBJLoader();
     loader.load(
-      '../../webstarcloud.com/assets/me.obj',
+      '../../assets/me.obj',
       (object: any) => {
 
         // object.rotation.set(0, 0, 0);
