@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { DisruptionComponent } from '../disruption/disruption.component';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
+  // standalone: true,
+  // imports: [DisruptionComponent]
 })
 export class HomeComponent {
   activeSlideIndex = 0;

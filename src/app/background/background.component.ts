@@ -83,14 +83,14 @@ export class BackgroundComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.renderer.setSize(window.innerWidth, window.innerHeight * 0.85);
+    // this.renderer.setSize(window.innerWidth, window.innerHeight * 0.85);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
     this.animate();
   }
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    // this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   animate() {

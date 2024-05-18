@@ -5,6 +5,7 @@ import { PrivacyComponent } from './privacy/privacy.component';
 import { ContactComponent } from './contact/contact.component';
 import { DisruptionComponent } from './disruption/disruption.component';
 import { WasmGraphophileComponent } from './wasm-graphophile/wasm-graphophile.component';
+import { HomomorphicComponent } from './homomorphic/homomorphic.component';
 
 const routes: Routes = [
   {
@@ -26,6 +27,10 @@ const routes: Routes = [
   {
     path: 'wasm-graphophile',
     component: WasmGraphophileComponent
+  },
+  {
+    path: 'homomorphic',
+    component: HomomorphicComponent
   },
   {
     path: '**',

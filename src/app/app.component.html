@@ -1,21 +1,7 @@
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#6f2da8;">
-  <!-- <img src="assets/images/me.png" height="80" width="80" /> -->
+<div class="test">
   <app-logo></app-logo>
-
   <a class="navbar-brand" href="#">WebstarCloud</a>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-    <ul class="navbar-nav ml-auto">
-      <li><a class="nav-link" [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home </a></li>
-      <li><a class="nav-link" [routerLink]="['/disrupt']" routerLinkActive="active">Disrupt</a></li>
-      <li><a class="nav-link" [routerLink]="['/contact']" routerLinkActive="active">Contact</a></li>
-    </ul>
-  </div>
-</nav>
+</div>
 
 <div>
   <router-outlet #routerOutlet="outlet"></router-outlet>
@@ -37,7 +23,7 @@
         <a class="nav-link" href="/privacy" style="text-decoration: none;color:white;">Privacy</a>
       </div>
       <div class="col-md-auto text-center" style="color:white;">
-        <a class="nav-link" href="/contact" style="text-decoration: none;color:white;">Contact</a>
+        <a class="nav-link" href="/assets/cv.pdf" download="David_Webster_CV.pdf" style="text-decoration: none;color:white;">CV</a>
       </div>
     </div>
   </div>

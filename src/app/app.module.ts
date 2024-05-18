@@ -19,6 +19,8 @@ import { LogoComponent } from './logo/logo.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { DisruptionComponent } from './disruption/disruption.component';
+import { HomomorphicComponent } from './homomorphic/homomorphic.component';
 
 
 @NgModule({
@@ -41,7 +43,9 @@ import { CommonModule } from '@angular/common';
     AmplifyAuthenticatorModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    CommonModule
+    CommonModule,
+    HomomorphicComponent,
+    DisruptionComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

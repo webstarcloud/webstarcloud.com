@@ -67,11 +67,11 @@ export class ParticlesComponent implements AfterViewInit {
 
   getData(prompt: string) {
 
-    let api_key = "YubCyyGw6R17z659SP1R96V2U3FcZcXM23EfRd1E"
+    let api_key = "rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI"
 
     const body = {
       "prompt": prompt
-    }; 
+    };
 
     const headers = new HttpHeaders({
       "Content-Type": "application/json",
@@ -81,14 +81,14 @@ export class ParticlesComponent implements AfterViewInit {
       // "Access-Control-Allow-Credentials": "true"
     });
 
-    this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, {headers}).subscribe(response => {
-    this.stopDotsAnimation();  // Stop the dots animation once response is received
-    this.startTyping(response.toString())
-  }, error => {
-    this.stopDotsAnimation();  // Stop the dots animation on error as well
-    console.error(error);
-    this.startTyping("My brain hurts to much today")
-  });
+    this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe(response => {
+      this.stopDotsAnimation();  // Stop the dots animation once response is received
+      this.startTyping(response.toString())
+    }, error => {
+      this.stopDotsAnimation();  // Stop the dots animation on error as well
+      console.error(error);
+      this.startTyping("My brain hurts to much today")
+    });
   }
 
   askQuestion() {
@@ -97,7 +97,7 @@ export class ParticlesComponent implements AfterViewInit {
     this.startDotsAnimation();
     this.getData(this.question);
   }
-  
+
   startDotsAnimation() {
     let dotCount = 0;
     this.dotsIntervalId = setInterval(() => {
@@ -109,13 +109,13 @@ export class ParticlesComponent implements AfterViewInit {
       }
     }, 500);  // Adjust the speed as needed
   }
-  
+
   stopDotsAnimation() {
     console.log("Stopping dots animation"); // Debugging line
     clearInterval(this.dotsIntervalId);
     this.displayedDots = ''; // Reset the dots string
   }
-  
+
 
   startTyping(my_msg: string) {
     let i = 0;
@@ -130,7 +130,7 @@ export class ParticlesComponent implements AfterViewInit {
       }
     }, this.speed);
   }
-  
+
 
   resetObject() {
     // Traverse the scene and find the object by name
