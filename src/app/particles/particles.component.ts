@@ -38,7 +38,8 @@ export class ParticlesComponent implements AfterViewInit {
 
   constructor(private http: HttpClient) {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x6f2da8);
+    // this.scene.background = new THREE.Color(0x6f2da8);
+    this.scene.background = new THREE.Color(0xffffff);
 
     this.camera = new THREE.PerspectiveCamera(55, 1, 0.1, 2000);
 

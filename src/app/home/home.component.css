@@ -1,0 +1,4 @@
+.container {
+    position: relative;
+    z-index: 10; /* Ensures the image is above the particles */
+}

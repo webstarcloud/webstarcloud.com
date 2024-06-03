@@ -19,7 +19,7 @@ export class LogoComponent implements OnInit, AfterViewInit {
 
   constructor() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x6f2da8);
+    this.scene.background = new THREE.Color(0xffffff);
 
     this.camera = new THREE.PerspectiveCamera(40, this.width / this.height, 1, 400);
     this.camera.position.z = 2000;
@@ -33,8 +33,8 @@ export class LogoComponent implements OnInit, AfterViewInit {
 
     // define what the particles look like
     var material = new THREE.PointsMaterial({
-      color: 0x00ff00,
-      size: 80
+      color: 0x6f2da8,
+      size: 40
     });
 
     // x y z coordinates
@@ -93,9 +93,9 @@ export class LogoComponent implements OnInit, AfterViewInit {
     var object = this.scene.children[0];
   
     //set rotation
-    object.rotation.x -= Math.random() * 0.001 - 0.005;
-    object.rotation.y -= Math.random() * 0.001 - 0.005;
-    object.rotation.z -= Math.random() * 0.001 - 0.005;
+    object.rotation.x -= Math.random() * 0.001 - 0.002;
+    object.rotation.y -= Math.random() * 0.001 - 0.002;
+    object.rotation.z -= Math.random() * 0.001 - 0.002;
   
     this.renderer.render(this.scene, this.camera);
   }

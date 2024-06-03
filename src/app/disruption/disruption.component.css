@@ -1,4 +1,19 @@
 .nav-link:hover {
-    color: #6f2da8 !important;
+    color: #fff !important;
     background-color: lime;
+}
+
+.a {
+    color: #6f2da8;
+    text-decoration: none;
+}
+
+div {
+    color: #6f2da8;
+}
+
+.nav-link {
+    width: 300px;
+    text-decoration: none;
+    color: #6f2da8;
 }

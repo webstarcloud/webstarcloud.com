@@ -18,7 +18,7 @@ export class IcosahedronComponent implements OnInit {
 
   constructor() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x6f2da8);
+    this.scene.background = new THREE.Color(0xffffff);
 
     this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);  // Set aspect ratio to 1 for now
     this.camera.position.z = 5;
