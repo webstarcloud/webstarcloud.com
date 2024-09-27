@@ -12,7 +12,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class ParticlesComponent implements AfterViewInit {
 
   @ViewChild('rendererContainer') rendererContainer!: ElementRef;
-
   renderer = new THREE.WebGLRenderer({ alpha: true });
   scene;
   camera;
@@ -50,15 +49,14 @@ export class ParticlesComponent implements AfterViewInit {
   }
 
   getData(prompt: string) {
-    let api_key = "rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI"
 
     const body = { "prompt": prompt };
     const headers = new HttpHeaders({
       "Content-Type": "application/json",
-      "x-api-key": api_key
+      'Access-Control-Allow-Origin': '*'
     });
 
-    this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe(response => {
+    this.http.post('https://plain-dream-f089.dwebster182.workers.dev', body, { headers }).subscribe(response => {
       this.stopDotsAnimation();  // Stop the dots animation once response is received
       this.startTyping(response.toString())
     }, error => {
@@ -186,26 +184,31 @@ export class ParticlesComponent implements AfterViewInit {
     this.setRendererSize();
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
 
-    window.addEventListener('resize', () => {
-      this.setRendererSize();
-    });
+    // Set initial camera position
+    // this.camera.position.set(0, -5, -5);  // Camera starts below and behind the object
+    // this.camera.lookAt(0, 0, 0);  // Look at the center of the scene
 
+    // Initialize OrbitControls before accessing its properties
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     // Optional: Configure controls
     this.controls.enableDamping = true; // Enable smooth damping of the controls
     this.controls.dampingFactor = 0.1;
-    this.controls.rotateSpeed = 0.5; // Adjust if the controls rotate too fast
-
-    // Disable panning and zooming
+    this.controls.rotateSpeed = 0.5;
     this.controls.enablePan = false;
     this.controls.enableZoom = false;
 
-    // Restrict rotation to only the Y-axis (left and right)
-    this.controls.minPolarAngle = Math.PI / 2;
-    this.controls.maxPolarAngle = Math.PI / 2;
+    // Disable controls during animation
+    this.controls.enabled = false;
 
+    // Start animation
     this.animate();
+
+    window.addEventListener('resize', () => {
+      this.setRendererSize();
+    });
+
+    console.log('Camera initial position:', this.camera.position);
   }
 
   setRendererSize() {
@@ -220,16 +223,15 @@ export class ParticlesComponent implements AfterViewInit {
     if (!this.active) return;
 
     window.requestAnimationFrame(() => this.animate());
-    this.renderer.render(this.scene, this.camera);
 
+    // Pixel cloud special effects (retain this logic)
     this.frame += 0.05; // Adjust the increment for faster or slower motion
 
-    // Update the vertex positions of the loaded object's meshes
     this.scene.traverse((object: any) => {
       if (object instanceof THREE.Mesh) {
         const positionAttribute = object.geometry.getAttribute('position');
         const positionArray = positionAttribute.array as Float32Array;
-        const originalArray = object.userData['originalPositions'] as Float32Array; // Use the stored original positions
+        const originalArray = object.userData['originalPositions'] as Float32Array;
 
         for (let i = 0; i < positionArray.length; i += 3) {
           const x = originalArray[i];
@@ -246,6 +248,139 @@ export class ParticlesComponent implements AfterViewInit {
         positionAttribute.needsUpdate = true;
       }
     });
+
+    // Camera animation (move it up and forward to the final position)
+    const targetPosition = new THREE.Vector3(0, 0, -1);  // Final camera position
+    const animationSpeed = 0.02;  // Adjust speed as necessary
+
+    // Move the camera toward the target Y and Z positions
+    if (this.camera.position.y < targetPosition.y) {
+      this.camera.position.y += animationSpeed;
+    } else {
+      this.camera.position.y = targetPosition.y;
+    }
+
+    if (this.camera.position.z < targetPosition.z) {
+      this.camera.position.z += animationSpeed;
+    } else {
+      this.camera.position.z = targetPosition.z;
+    }
+
+    // Handle the "rotate up" animation first
+    if (this.isRotatingUp) {
+      this.rotateUpAnimation();
+    } else {
+      // Once the object is upright, handle the random rotation
+      this.randomModelRotation();
+    }
+
+    // Ensure the camera looks at the target (center) while it moves
+    if (!this.camera.position.equals(targetPosition)) {
+      this.camera.lookAt(0, 0, 0);  // Ensure the camera looks at the scene's center
+    }
+
+    // Re-enable controls after the camera reaches the final position
+    if (this.camera.position.equals(targetPosition)) {
+      this.controls.enabled = true;
+    }
+
+    // Render the scene
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  // Variables for rotating the object up from a flat position
+  isRotatingUp = true;  // Start by rotating the object up
+  rotationUpDuration = 1000;  // Time to complete the rotation (1 second)
+  rotationUpStartTime = 0;
+
+  rotateUpAnimation() {
+    const currentTime = performance.now();
+
+    // Get the model object by name
+    const object = this.scene.getObjectByName('myObject');  // Ensure the model's name is correct
+
+    // If we are rotating the object up, handle that first
+    if (this.isRotatingUp) {
+      // Set the start time if it's the first frame
+      if (this.rotationUpStartTime === 0) {
+        this.rotationUpStartTime = currentTime;
+      }
+
+      const elapsedTime = currentTime - this.rotationUpStartTime;
+      const rotationFactor = elapsedTime / this.rotationUpDuration;  // From 0 to 1
+
+      // Apply the rotation: lying flat to upright (rotating around the Z-axis)
+      if (object) {
+        object.rotation.x = Math.PI / 2 * (1 - rotationFactor);  // Rotate from 90 degrees to 0
+        console.log(`Rotating up, current Z: ${object.rotation.z}`);
+      }
+
+      // Once the object is upright, stop the rotation and proceed with normal animation
+      if (elapsedTime >= this.rotationUpDuration) {
+        this.isRotatingUp = false;  // End the "rotate up" animation
+        if (object) {
+          object.rotation.x = 0;  // Ensure it's perfectly upright at the end
+        }
+      }
+    }
+  }
+
+  lastRotationTime = 0;
+  nextRotationDelay = (Math.random() * 2 + 1) * 1000;  // Random delay between 1 and 3 seconds
+  rotationDuration = 1000;  // Duration of the full rotation cycle (1 second)
+  rotating = false;
+  rotationStartTime = 0;
+  originalRotation = 0;  // Store the original Y-axis rotation of the model
+  startRight = false;  // Track whether the rotation should start right or left
+
+  randomModelRotation() {
+    const currentTime = performance.now();
+
+    // Get the model object by name
+    const object = this.scene.getObjectByName('myObject');  // Ensure the model's name is correct
+
+    // If the object exists and the original rotation has not been set, store the initial Y rotation
+    if (object && this.originalRotation === 0) {
+      this.originalRotation = object.rotation.y;  // Set the original rotation (typically 0)
+    }
+
+    // Check if the random delay has passed to start the rotation
+    if (!this.rotating && currentTime - this.lastRotationTime > this.nextRotationDelay) {
+      this.rotating = true;
+      this.rotationStartTime = currentTime;
+      this.lastRotationTime = currentTime;
+      this.nextRotationDelay = (Math.random() * 9 + 1) * 1000;  // New random delay between 1 and 3 seconds
+
+      // Randomly decide whether to start by rotating right or left
+      this.startRight = Math.random() < 0.5;  // 50% chance to start by rotating right
+      console.log(`Starting rotation, next in: ${this.nextRotationDelay / 1000} seconds. Direction: ${this.startRight ? 'Right' : 'Left'}`);
+    }
+
+    // Smoothly handle the rotation if the model is currently rotating
+    if (this.rotating) {
+      const elapsedTime = currentTime - this.rotationStartTime;
+      const rotationFactor = Math.sin((elapsedTime / this.rotationDuration) * Math.PI);  // Smooth sine wave (-1 to 1)
+
+      const rotationAmplitude = Math.PI / 64;  // Amplitude of rotation (in radians, adjust as necessary)
+
+      // Determine whether to start moving left or right, based on the startRight flag
+      const directionMultiplier = this.startRight ? 1 : -1;
+
+      // Apply the smooth rotation to the Y axis, moving either left or right based on the random direction
+      if (object) {
+        object.rotation.y = this.originalRotation + directionMultiplier * rotationAmplitude * rotationFactor;
+        console.log(`Rotating Y: ${object.rotation.y}`);  // Debugging to verify left and right movement
+      }
+
+      // Stop rotating after the full rotation cycle duration and reset to the original position
+      if (elapsedTime >= this.rotationDuration) {
+        this.rotating = false;
+        if (object) {
+          object.rotation.y = this.originalRotation;  // Return to original Y rotation
+          console.log(`Reset Y rotation to: ${this.originalRotation}`);
+        }
+      }
+    }
   }
 
   ngOnDestroy() {

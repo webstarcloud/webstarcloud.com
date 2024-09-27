@@ -1,21 +1,20 @@
 .form-control {
     background-color: #fff; /* Input box background color */
-    color: white; /* Text color */
+    color: #6f2da8; /* Text color */
     border: 2px solid limegreen; /* Lime green border around the input box */
     padding: 8px 12px; /* Some padding to make the input box look nice */
     width: 90%;
   }
   
   .form-control::placeholder {
-    color: white; /* Placeholder text color */
+    color: #6f2da8; /* Placeholder text color */
   }
   .renderer-container {
-    position: fixed;
-    margin-bottom: 30px;
-    bottom: 0;
-    right: 0;
-    width: 200px;  /* Adjust the width as needed */
-    height: 100px; /* Adjust the height as needed */
-    z-index: 1000; /* Ensure it’s on top of other elements if necessary */
+    /* position: fixed; */
+    /* margin-bottom: 30px; */
+    /* bottom: 0; */
+    /* right: 0; */
+    width: 500px;  /* Adjust the width as needed */
+    height: 500px; /* Adjust the height as needed */
     background: transparent;
 }

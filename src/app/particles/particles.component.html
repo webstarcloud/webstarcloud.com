@@ -1,1 +1,16 @@
-<div #rendererContainer class="renderer-container"></div>
+<div #rendererContainer class="renderer-container" style="position: relative; z-index: 1;">
+    <!-- The Three.js rendering will be injected here -->
+</div>
+
+<!-- Form and button container -->
+<div class="container-fluid" style="position: relative; z-index: 2; margin-top: 20px;">
+    <div class="row justify-content-md-left col-gap">
+        <div class="col-sm-4 text-left" style="min-width:400px;">
+            <!-- Use d-flex to align input and button horizontally -->
+            <div class="d-flex">
+                <input class="form-control me-2" type="text" placeholder="Ask me a question" [(ngModel)]="question" [disabled]="isDisabled" (keyup.enter)="askQuestion()">
+                <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
