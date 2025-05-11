@@ -21,7 +21,7 @@ export class ParticlesComponent implements AfterViewInit {
   question = "";
   isDisabled: boolean = false;
 
-  public myMessage = 'Hello, this is Dave 2.0 - david@webstarcloud.com';
+  public myMessage = 'Hello, this is Dave 2.0 - dwebster182@gmail.com';
   public displayedMessage = '';
   private speed = 50;
   private intervalId: any;
@@ -53,10 +53,10 @@ export class ParticlesComponent implements AfterViewInit {
     const body = { "prompt": prompt };
     const headers = new HttpHeaders({
       "Content-Type": "application/json",
-      'Access-Control-Allow-Origin': '*'
+      'x-api-key': "rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI"
     });
 
-    this.http.post('https://plain-dream-f089.dwebster182.workers.dev', body, { headers }).subscribe(response => {
+    this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe(response => {
       this.stopDotsAnimation();  // Stop the dots animation once response is received
       this.startTyping(response.toString())
     }, error => {
@@ -143,10 +143,11 @@ export class ParticlesComponent implements AfterViewInit {
         `;
 
         const fragmentShader = `
-          void main() {
-            gl_FragColor = vec4(0.5, 0.0, 1.0, 1.0); // RGBA for purple
-          }
-        `;
+  varying vec2 vUv;
+  void main() {
+    gl_FragColor = vec4(vUv, 0.5, 1.0);
+  }
+`;
 
         const material = new THREE.ShaderMaterial({
           vertexShader: vertexShader,
@@ -172,7 +173,7 @@ export class ParticlesComponent implements AfterViewInit {
         this.scene.add(object);
       },
       (xhr: any) => {
-        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
       },
       (error: any) => {
         console.log('An error occurred while loading the .obj model');
@@ -208,7 +209,7 @@ export class ParticlesComponent implements AfterViewInit {
       this.setRendererSize();
     });
 
-    console.log('Camera initial position:', this.camera.position);
+    // console.log('Camera initial position:', this.camera.position);
   }
 
   setRendererSize() {
@@ -312,7 +313,7 @@ export class ParticlesComponent implements AfterViewInit {
       // Apply the rotation: lying flat to upright (rotating around the Z-axis)
       if (object) {
         object.rotation.x = Math.PI / 2 * (1 - rotationFactor);  // Rotate from 90 degrees to 0
-        console.log(`Rotating up, current Z: ${object.rotation.z}`);
+        // console.log(`Rotating up, current Z: ${object.rotation.z}`);
       }
 
       // Once the object is upright, stop the rotation and proceed with normal animation
@@ -353,7 +354,7 @@ export class ParticlesComponent implements AfterViewInit {
 
       // Randomly decide whether to start by rotating right or left
       this.startRight = Math.random() < 0.5;  // 50% chance to start by rotating right
-      console.log(`Starting rotation, next in: ${this.nextRotationDelay / 1000} seconds. Direction: ${this.startRight ? 'Right' : 'Left'}`);
+      // console.log(`Starting rotation, next in: ${this.nextRotationDelay / 1000} seconds. Direction: ${this.startRight ? 'Right' : 'Left'}`);
     }
 
     // Smoothly handle the rotation if the model is currently rotating
@@ -369,7 +370,7 @@ export class ParticlesComponent implements AfterViewInit {
       // Apply the smooth rotation to the Y axis, moving either left or right based on the random direction
       if (object) {
         object.rotation.y = this.originalRotation + directionMultiplier * rotationAmplitude * rotationFactor;
-        console.log(`Rotating Y: ${object.rotation.y}`);  // Debugging to verify left and right movement
+        // console.log(`Rotating Y: ${object.rotation.y}`);  // Debugging to verify left and right movement
       }
 
       // Stop rotating after the full rotation cycle duration and reset to the original position
@@ -377,7 +378,7 @@ export class ParticlesComponent implements AfterViewInit {
         this.rotating = false;
         if (object) {
           object.rotation.y = this.originalRotation;  // Return to original Y rotation
-          console.log(`Reset Y rotation to: ${this.originalRotation}`);
+          // console.log(`Reset Y rotation to: ${this.originalRotation}`);
         }
       }
     }

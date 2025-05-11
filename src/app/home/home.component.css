@@ -4,12 +4,11 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 100vh; /* Takes full viewport height */
 }
 
 .container .nav-link {
     text-decoration: none;
-    color: #6f2da8;
+    color: lime;;
 }
 
 .nav-link:hover {
@@ -18,12 +17,12 @@
 }
 
 .a {
-    color: #6f2da8;
+    color: lime;;
     text-decoration: none;
 }
 
 div {
-    color: #6f2da8;
+    color: lime;;
 }
 
 .nav-link {
@@ -31,3 +30,19 @@ div {
     text-decoration: none;
     color: #6f2da8;
 }
+
+.footer-links {
+    margin-top: 40px; /* Adds space above footer */
+    margin-bottom: 20px; /* Adds gap from bottom of page */
+  }
+  
+  .footer-links a {
+    color: lime;
+    margin: 0 12px;
+    text-decoration: none;
+  }
+  
+  .footer-links a:hover {
+    color: white;
+    background-color: lime;
+  }
