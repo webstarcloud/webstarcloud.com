@@ -146,8 +146,7 @@ export class ParticlesComponent implements AfterViewInit {
     loader.load(
       '../../assets/me.obj',
       (object: any) => {
-        object.position.set(80, 60, -20);
-
+        object.position.set(80, 20, -20);
         object.name = 'myObject';
         object.scale.set(10, 10, 10); // Adjust as necessary
 
