@@ -29,6 +29,10 @@ export class ParticlesComponent implements AfterViewInit {
   dotsIntervalId: any;
   displayedDots: string = '';
 
+  loading = true;
+  loadingDots: string = '';
+  loadingDotsIntervalId: any;
+
   constructor(private http: HttpClient) {
     this.scene = new THREE.Scene();
     this.scene.background = null; // Ensure background is transparent
@@ -71,6 +75,24 @@ export class ParticlesComponent implements AfterViewInit {
     this.displayedMessage = "Braining";
     this.startDotsAnimation();
     this.getData(this.question);
+  }
+
+  startLoadingDotsAnimation() {
+    let dotCount = 0;
+    this.loadingDots = '';
+    this.loadingDotsIntervalId = setInterval(() => {
+      this.loadingDots += '.';
+      dotCount++;
+      if (dotCount > 3) {
+        this.loadingDots = '';
+        dotCount = 0;
+      }
+    }, 500);
+  }
+
+  stopLoadingDotsAnimation() {
+    clearInterval(this.loadingDotsIntervalId);
+    this.loadingDots = '';
   }
 
   startDotsAnimation() {
@@ -119,6 +141,7 @@ export class ParticlesComponent implements AfterViewInit {
   }
 
   loadOBJModel = () => {
+    this.startLoadingDotsAnimation();
     const loader = new OBJLoader();
     loader.load(
       '../../assets/me.obj',
@@ -171,12 +194,16 @@ export class ParticlesComponent implements AfterViewInit {
         });
 
         this.scene.add(object);
+        this.loading = false;
+        this.stopLoadingDotsAnimation();
       },
       (xhr: any) => {
         // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
       },
       (error: any) => {
         console.log('An error occurred while loading the .obj model');
+        this.loading = false;
+        this.stopLoadingDotsAnimation();
       }
     );
   }
