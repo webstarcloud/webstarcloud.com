@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>David Webster – Blog</title>
+    <link>https://davidwebstar.com</link>
+    <description>Updates on software, ai, cloud, and quantum.</description>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 14 May 2025 12:00:00 GMT</lastBuildDate>
+
+    <item>
+      <title>Deepfaking</title>
+      <link>https://davidwebstar.com/deepfaking</link>
+      <description>A short intro into deepfaking</description>
+      <pubDate>Tue, 14 May 2025 08:00:00 GMT</pubDate>
+      <guid>https://davidwebstar.com/deepfaking</guid>
+    </item>
+  </channel>
+</rss>
