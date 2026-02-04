@@ -1,0 +1,61 @@
+<div class="page">
+  <div class="shell">
+    <p class="eyebrow">R&amp;D</p>
+    <h1>Experiments under constraints.</h1>
+    <p class="lead">
+      R&amp;D here is not a product backlog. It is a lab for primitives: narrow experiments that force hard
+      architectural choices early, so the system can survive irreversible decisions later.
+    </p>
+
+    <div class="section">
+      <h2>Flagship artifacts</h2>
+      <p class="muted">Each artifact states the question, the primitive it isolates, why it matters, and status.</p>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Holodeck</h3>
+          <p class="muted">Question: How do we simulate production constraints before the first migration?</p>
+          <div class="divider"></div>
+          <p><strong>Primitive</strong>: deterministic environment playback and reversible state shards.</p>
+          <p><strong>Why it matters at scale</strong>: allows irreversible changes to be rehearsed under real load.</p>
+          <p><strong>Status</strong>: Active</p>
+        </div>
+        <div class="card">
+          <h3>Radar</h3>
+          <p class="muted">Question: Can drift signals be detected before they become outages?</p>
+          <div class="divider"></div>
+          <p><strong>Primitive</strong>: multi-signal anomaly fusion with tiered confidence gates.</p>
+          <p><strong>Why it matters at scale</strong>: catches weak signals early when rollbacks are still possible.</p>
+          <p><strong>Status</strong>: Active</p>
+        </div>
+        <div class="card">
+          <h3>Invariant Ledger</h3>
+          <p class="muted">Question: How do we make architectural invariants explicit and enforceable?</p>
+          <div class="divider"></div>
+          <p><strong>Primitive</strong>: policy-bound data contracts with drift detection at the edge.</p>
+          <p><strong>Why it matters at scale</strong>: prevents silent erosion of guarantees across teams.</p>
+          <p><strong>Status</strong>: Experimental</p>
+        </div>
+        <div class="card">
+          <h3>Failsafe Mesh</h3>
+          <p class="muted">Question: What is the minimum viable containment layer for agentic systems?</p>
+          <div class="divider"></div>
+          <p><strong>Primitive</strong>: guardrail orchestration with explicit blast-radius limits.</p>
+          <p><strong>Why it matters at scale</strong>: keeps autonomy safe under adversarial and unknown inputs.</p>
+          <p><strong>Status</strong>: Experimental</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>R&amp;D operating constraints</h2>
+      <div class="card">
+        <div class="pill-row">
+          <span class="pill">Prototypes must surface irreversible decisions</span>
+          <span class="pill">Only primitives, no product polish</span>
+          <span class="pill">Security and recovery are first-class</span>
+          <span class="pill">Evidence over intuition</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

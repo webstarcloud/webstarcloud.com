@@ -1,0 +1,6 @@
+<svg width="180" height="36" viewBox="0 0 180 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0.75" y="0.75" width="178.5" height="34.5" rx="17.25" fill="#0F1622" stroke="#6F5BFF" stroke-width="1.5"/>
+  <circle cx="18" cy="18" r="9" fill="#6F5BFF"/>
+  <circle cx="18" cy="18" r="4" fill="#0B0F14"/>
+  <text x="38" y="23" fill="#EEF3FF" font-family="Space Grotesk, sans-serif" font-size="12" letter-spacing="1.2">KUBESTRONAUT</text>
+</svg>

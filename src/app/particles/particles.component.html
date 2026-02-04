@@ -1,25 +1,22 @@
-<div class="canvas-wrapper">
-    <div #rendererContainer class="renderer-container">
-        <!-- Three.js canvas will be injected here -->
-    </div>
+<div class="avatar-shell">
+  <div #rendererContainer class="renderer-container"></div>
+  <div *ngIf="loading" class="loading-overlay">Rendering interface{{ loadingDots }}</div>
+  <div *ngIf="!webglSupported" class="loading-overlay error">WebGL unavailable</div>
 </div>
 
-<div *ngIf="loading" class="loading-overlay">
-    <p>Loading Dave 2.0{{ loadingDots }}</p>
-</div>
-
-
-<div class="d-flex justify-content-center" style="margin-top: 20px;">
-    <div class="text-center">
-        <div class="d-flex align-items-center justify-content-center gap-2">
-            <input class="form-control me-2" type="text" placeholder="Ask me a question" [(ngModel)]="question"
-                [disabled]="isDisabled" (keyup.enter)="askQuestion()">
-            <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">
-                >>
-            </button>
-        </div>
-        <p style="color: lime; margin-top: 10px;">
-            {{ displayedMessage }}{{ displayedDots }}
-        </p>
-    </div>
+<div class="interface-panel">
+  <label class="interface-label mono">Ask about my systems &amp; work</label>
+  <div class="input-row">
+    <input
+      class="interface-input"
+      type="text"
+      placeholder="Holodeck, Radar, homomorphic systems, platform rebuilds"
+      [(ngModel)]="question"
+      [disabled]="isDisabled"
+      (keyup.enter)="askQuestion()">
+    <button class="btn btn-primary" type="button" (click)="askQuestion()" [disabled]="isDisabled">Send</button>
+  </div>
+  <p class="interface-response" aria-live="polite">{{ displayedMessage }}{{ displayedDots }}</p>
+  <p class="interface-hint muted">Guardrails: architecture, systems, and R&amp;D only.</p>
+  <p *ngIf="errorMessage" class="muted mono">{{ errorMessage }}</p>
 </div>

@@ -1,0 +1,50 @@
+<div class="page">
+  <div class="shell">
+    <p class="eyebrow">Writing</p>
+    <h1>Diagram-first architecture notes.</h1>
+    <p class="lead">
+      Writing is a forcing function for clarity. Only pieces aligned to the core pillars live here; everything else is archived.
+    </p>
+
+    <div class="section">
+      <h2>Curated writing</h2>
+      <div class="card-grid">
+        <div class="card">
+          <p class="mono muted">Draft</p>
+          <h3>Rebuilds Without Rollback</h3>
+          <p class="muted">How to design migrations when the exit door is welded shut.</p>
+        </div>
+        <div class="card">
+          <p class="mono muted">Draft</p>
+          <h3>Secure Computation in the Real World</h3>
+          <p class="muted">Why privacy guarantees collapse when orchestration is an afterthought.</p>
+        </div>
+        <div class="card">
+          <p class="mono muted">Draft</p>
+          <h3>Agentic Systems Need Containment</h3>
+          <p class="muted">A practical argument for guardrails as a first-class primitive.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Architecture notes (diagram-first)</h2>
+      <div class="card-grid">
+        <div class="card">
+          <pre class="diagram">[Signal Intake] → [Constraint Gate] → [Invariant Ledger]
+      ↘                               ↘
+    [Human Review]                [Fail-Safe Mesh]</pre>
+          <h3>Constraint-First Decisioning</h3>
+          <p class="muted">Principle: push constraints upstream so recovery is possible downstream.</p>
+        </div>
+        <div class="card">
+          <pre class="diagram">[Legacy System] ──▶ [Shadow Compute] ──▶ [Cutover]
+       │                     │
+       └──────────▶ [Truth Table] ◀──────────┘</pre>
+          <h3>Irreversible Migration Pattern</h3>
+          <p class="muted">Principle: dual-validated compute before a single irreversible move.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,37 @@
-  <router-outlet #routerOutlet="outlet"></router-outlet>
+<div class="site">
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" routerLink="/">David Webster</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a routerLink="/rd" routerLinkActive="active">R&amp;D</a>
+        <a routerLink="/selected-work" routerLinkActive="active">Selected System Work</a>
+        <a routerLink="/writing" routerLinkActive="active">Writing</a>
+        <a routerLink="/about" routerLinkActive="active">About</a>
+      </nav>
+      <a class="btn btn-outline header-cta" routerLink="/about">Engage</a>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <router-outlet #routerOutlet="outlet"></router-outlet>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-brand">
+        <p class="footer-name">David Webster</p>
+        <p class="footer-tag">R&amp;D-forward systems architect • Builder of primitives</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.linkedin.com/in/webstar/" target="_blank" rel="noreferrer">LinkedIn</a>
+        <a href="https://github.com/davidwebstar34" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://x.com/WebstarDavid" target="_blank" rel="noreferrer">X</a>
+        <a routerLink="/privacy">Privacy</a>
+      </div>
+      <div class="footer-meta">
+        <span>© 2026</span>
+        <span class="mono">Systems. Primitives. R&amp;D.</span>
+      </div>
+    </div>
+  </footer>
+</div>

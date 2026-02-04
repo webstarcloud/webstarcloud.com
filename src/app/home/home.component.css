@@ -1,48 +1,91 @@
-.container {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+.home h1 {
+  font-size: clamp(2.6rem, 4.5vw, 4rem);
+  margin: 0 0 16px;
 }
 
-.container .nav-link {
-    text-decoration: none;
-    color: lime;;
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 48px;
+  align-items: start;
 }
 
-.nav-link:hover {
-    color: #fff !important;
-    background-color: lime;
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 24px 0;
 }
 
-.a {
-    color: lime;;
-    text-decoration: none;
+.hero-pillars {
+  margin-top: 16px;
 }
 
-div {
-    color: lime;;
+.hero-interface {
+  position: relative;
 }
 
-.nav-link {
-    width: 300px;
-    text-decoration: none;
-    color: #6f2da8;
+.interface-card {
+  background: rgba(15, 22, 34, 0.75);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 24px 50px var(--shadow);
 }
 
-.footer-links {
-    margin-top: 40px; /* Adds space above footer */
-    margin-bottom: 20px; /* Adds gap from bottom of page */
+.interface-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--text-2);
+}
+
+.status.active {
+  color: var(--accent);
+}
+
+.interface-body {
+  min-height: 320px;
+}
+
+.interface-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 12px;
+}
+
+.placeholder-orb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(75, 214, 255, 0.35), rgba(10, 20, 36, 0.9));
+  border: 1px solid rgba(75, 214, 255, 0.4);
+  box-shadow: 0 18px 40px rgba(8, 12, 20, 0.6);
+}
+
+.interface-footer {
+  border-top: 1px solid rgba(75, 214, 255, 0.08);
+  padding-top: 12px;
+}
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
   }
-  
-  .footer-links a {
-    color: lime;
-    margin: 0 12px;
-    text-decoration: none;
+
+  .interface-body {
+    min-height: 280px;
   }
-  
-  .footer-links a:hover {
-    color: white;
-    background-color: lime;
-  }
+}

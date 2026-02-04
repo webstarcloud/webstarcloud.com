@@ -1,0 +1,45 @@
+<div class="page">
+  <div class="shell">
+    <p class="eyebrow">Selected System Work</p>
+    <h1>Credibility spine.</h1>
+    <p class="lead">
+      A subset of high-stakes systems where correctness, security, and irreversible decisions are the real constraints.
+      Details are intentionally architectural and sanitized.
+    </p>
+
+    <div class="section">
+      <div class="card-grid">
+        <div class="card">
+          <h3>Homomorphic Encryption Systems</h3>
+          <p class="muted">Problem framing: compute on sensitive data without exposing it at rest or in use.</p>
+          <div class="divider"></div>
+          <p><strong>Constraints</strong>: latency ceilings, cryptographic correctness, and provable auditability.</p>
+          <p><strong>Architectural insight</strong>: separate key orchestration from compute pipelines to contain blast radius.</p>
+          <p><strong>What this changed</strong>: treat privacy guarantees as product behavior, not a bolt-on layer.</p>
+        </div>
+        <div class="card">
+          <h3>TMNL Platform Rebuild (World-First)</h3>
+          <p class="muted">Problem framing: rebuild a live platform with zero rollback tolerance.</p>
+          <div class="divider"></div>
+          <p><strong>Constraints</strong>: continuous service, hard deadlines, and irreversible data migration paths.</p>
+          <p><strong>Architectural insight</strong>: migration truth tables + parallel-validated compute to prevent silent drift.</p>
+          <p><strong>What this changed</strong>: always design for irreversible moves before a single line ships.</p>
+        </div>
+        <div class="card">
+          <h3>High-Stakes Production Controls</h3>
+          <p class="muted">Problem framing: guard critical workloads where downtime is a direct business event.</p>
+          <div class="divider"></div>
+          <p><strong>Constraints</strong>: audit requirements, shared tenancy, and adversarial traffic patterns.</p>
+          <p><strong>Architectural insight</strong>: enforce invariant-led controls at ingress rather than post-facto analysis.</p>
+          <p><strong>What this changed</strong>: reliability becomes a policy surface, not just an SRE function.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="card">
+        <p class="muted mono">No logos. No metrics. Only patterns and decisions that matter.</p>
+      </div>
+    </div>
+  </div>
+</div>

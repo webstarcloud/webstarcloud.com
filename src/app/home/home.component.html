@@ -1,15 +1,73 @@
-<div class="container d-flex flex-column justify-content-start min-vh-100"
-    style="position: relative; z-index: 2;">
-    <div>
-        <app-particles></app-particles>
-    </div>
-
-    <div class="row justify-content-md-center">
-        <div class="footer-links text-center mt-5">
-            <a class="nav-link d-inline" href="https://www.linkedin.com/in/webstar/">Linkedin</a>
-            <a class="nav-link d-inline" href="https://github.com/davidwebstar34">Github</a>
-            <a class="nav-link d-inline" href="https://x.com/WebstarDavid">X</a>
-            <a class="nav-link d-inline" routerLink="/privacy">Privacy</a>
+<div class="page home">
+  <div class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">David Webster</p>
+        <h1>R&amp;D-forward systems architect building primitives for irreversible decisions.</h1>
+        <p class="lead">
+          I design agentic and cloud-scale systems where security, recovery, and correctness are first-class.
+          The work is experimental, but the standards are production.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" routerLink="/rd">Explore R&amp;D</a>
+          <button class="btn btn-ghost" type="button" (click)="activateInterface()">Ask about my systems &amp; work</button>
         </div>
-    </div>
+        <div class="pill-row hero-pillars">
+          <span class="pill">Agentic &amp; AI systems</span>
+          <span class="pill">Cloud &amp; distributed architecture</span>
+          <span class="pill">R&amp;D experiments / primitives</span>
+          <span class="pill">Production truths</span>
+        </div>
+      </div>
+
+      <div class="hero-interface" #interfacePanel>
+        <div class="interface-card">
+          <div class="interface-header">
+            <p class="mono">System Interface</p>
+            <span class="status" [class.active]="interfaceActive">{{ interfaceActive ? 'Active' : 'Idle' }}</span>
+          </div>
+          <div class="interface-body">
+            <ng-container *ngIf="interfaceActive; else interfacePlaceholder">
+              <app-particles></app-particles>
+            </ng-container>
+            <ng-template #interfacePlaceholder>
+              <div class="interface-placeholder">
+                <div class="placeholder-orb"></div>
+                <p class="muted">Activate to ask about systems, architecture, and active R&amp;D.</p>
+                <button class="btn btn-outline" type="button" (click)="activateInterface()">
+                  Activate interface
+                </button>
+              </div>
+            </ng-template>
+          </div>
+          <div class="interface-footer">
+            <p class="muted mono">Capabilities: projects, architecture rationale, R&amp;D primitives, navigation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card-grid">
+        <div class="card">
+          <h2>R&amp;D Primitives</h2>
+          <p class="muted">Experiments that isolate the primitives behind secure, irreversible decisions.</p>
+          <div class="divider"></div>
+          <a class="btn btn-ghost" routerLink="/rd">See R&amp;D artifacts</a>
+        </div>
+        <div class="card">
+          <h2>Selected System Work</h2>
+          <p class="muted">High-stakes systems built under constraints: security, correctness, and scale.</p>
+          <div class="divider"></div>
+          <a class="btn btn-ghost" routerLink="/selected-work">Review architectural work</a>
+        </div>
+        <div class="card">
+          <h2>Writing &amp; Architecture</h2>
+          <p class="muted">Diagram-first notes on constraints, guardrails, and platform rebuilds.</p>
+          <div class="divider"></div>
+          <a class="btn btn-ghost" routerLink="/writing">Read the notes</a>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>

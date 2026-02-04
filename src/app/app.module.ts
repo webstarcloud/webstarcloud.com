@@ -13,14 +13,15 @@ import { DodecahedronComponent } from './dodecahedron/dodecahedron.component';
 import { IcosahedronComponent } from './icosahedron/icosahedron.component';
 import { OctahedronComponent } from './octahedron/octahedron.component';
 import { BackgroundComponent } from './background/background.component';
-import { ContactComponent } from './contact/contact.component';
 import { ParticlesComponent } from './particles/particles.component';
 import { LogoComponent } from './logo/logo.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DisruptionComponent } from './disruption/disruption.component';
-import { HomomorphicComponent } from './homomorphic/homomorphic.component';
+import { RdComponent } from './rd/rd.component';
+import { SelectedWorkComponent } from './selected-work/selected-work.component';
+import { WritingComponent } from './writing/writing.component';
+import { AboutComponent } from './about/about.component';
 
 
 @NgModule({
@@ -32,9 +33,12 @@ import { HomomorphicComponent } from './homomorphic/homomorphic.component';
     IcosahedronComponent,
     OctahedronComponent,
     BackgroundComponent,
-    ContactComponent,
     ParticlesComponent,
     LogoComponent,
+    RdComponent,
+    SelectedWorkComponent,
+    WritingComponent,
+    AboutComponent,
   ],
   imports: [
     FormsModule,
@@ -43,9 +47,7 @@ import { HomomorphicComponent } from './homomorphic/homomorphic.component';
     AmplifyAuthenticatorModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    CommonModule,
-    HomomorphicComponent,
-    DisruptionComponent
+    CommonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

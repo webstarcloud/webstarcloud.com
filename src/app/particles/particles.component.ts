@@ -1,428 +1,392 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+interface ResponsePreset {
+  keywords: string[];
+  response: string;
+}
 
 @Component({
   selector: 'app-particles',
   templateUrl: './particles.component.html',
   styleUrls: ['./particles.component.css']
 })
-export class ParticlesComponent implements AfterViewInit {
+export class ParticlesComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
 
-  @ViewChild('rendererContainer') rendererContainer!: ElementRef;
-  renderer = new THREE.WebGLRenderer({ alpha: true });
-  scene;
-  camera;
-  controls: any;
-  frame = 0;
-  active: boolean = true;
-  question = "";
-  isDisabled: boolean = false;
+  renderer: THREE.WebGLRenderer;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+  model: THREE.Object3D | null = null;
+  active = true;
+  frameId?: number;
 
-  public myMessage = 'Hello, this is Dave 2.0 - dwebster182@gmail.com';
-  public displayedMessage = '';
-  private speed = 50;
-  private intervalId: any;
-
-  dotsIntervalId: any;
-  displayedDots: string = '';
+  question = '';
+  isDisabled = false;
+  displayedMessage = '';
+  displayedDots = '';
 
   loading = true;
-  loadingDots: string = '';
-  loadingDotsIntervalId: any;
+  loadingDots = '';
+  webglSupported = true;
+  errorMessage = '';
 
-  constructor(private http: HttpClient) {
-    this.scene = new THREE.Scene();
-    this.scene.background = null; // Ensure background is transparent
+  private typingIntervalId?: number;
+  private dotsIntervalId?: number;
+  private loadingDotsIntervalId?: number;
+  private readonly typingSpeed = 24;
+  private readonly reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  private readonly modelBaseX = 0;
+  private readonly modelBaseY = 20;
+  private readonly modelFill = 40;
+  private readonly jitterRotation = new THREE.Vector3(0.006, 0.02, 0.004);
+  private readonly jitterPosition = new THREE.Vector3(0.08, 0.004, 0);
 
-    this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
-    this.camera.position.set(0, 0, -1);
+  private readonly responsePresets: ResponsePreset[] = [
+    {
+      keywords: ['holodeck', 'simulation', 'rehearsal'],
+      response: 'Holodeck is an R&D sandbox for rehearsing irreversible migrations under production constraints.'
+    },
+    {
+      keywords: ['radar', 'drift', 'anomaly'],
+      response: 'Radar fuses weak signals across systems to surface drift before it becomes an outage.'
+    },
+    {
+      keywords: ['homomorphic', 'secure computation', 'encryption'],
+      response: 'I build systems that keep data encrypted while it is processed, so privacy is a runtime guarantee.'
+    },
+    {
+      keywords: ['tmnl', 'platform rebuild', 'migration'],
+      response: 'The TMNL rebuild focused on parallel-validated compute to avoid irreversible cutovers without truth tables.'
+    },
+    {
+      keywords: ['agentic', 'agents', 'guardrail'],
+      response: 'Agentic systems need containment layers that define blast radius and escalation boundaries.'
+    },
+    {
+      keywords: ['architecture', 'systems', 'primitives'],
+      response: 'My work centers on primitives: the smallest durable abstractions that keep systems safe at scale.'
+    }
+  ];
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    this.scene.add(ambientLight);
+  private readonly allowedKeywords = [
+    'holodeck',
+    'radar',
+    'invariant',
+    'failsafe',
+    'agentic',
+    'agents',
+    'architecture',
+    'systems',
+    'primitives',
+    'cloud',
+    'distributed',
+    'secure',
+    'homomorphic',
+    'encryption',
+    'tmnl',
+    'rebuild',
+    'migration',
+    'platform'
+  ];
 
-    const pointLight = new THREE.PointLight(0xffffff, 1, 0, 2);
-    pointLight.position.set(50, 50, 50);
-    this.scene.add(pointLight);
+  private readonly guardrailResponse =
+    'Scope is limited to systems, architecture, and active R&D. Ask about Holodeck, Radar, homomorphic systems, or rebuild strategy.';
 
-    this.loadOBJModel();
-    this.startTyping(this.myMessage);
+  private readonly defaultResponse =
+    'I can answer about projects, architectural rationale, and R&D primitives. Try a specific system or constraint.';
+
+  constructor() {
+    this.scene.background = null;
+    this.renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      powerPreference: 'low-power'
+    });
+
+    this.camera.position.set(0, 0, 6);
+
+    const ambientLight = new THREE.AmbientLight(0x9a8bff, 0.9);
+    const keyLight = new THREE.DirectionalLight(0x6f5bff, 0.8);
+    keyLight.position.set(4, 6, 8);
+    const rimLight = new THREE.DirectionalLight(0x5a3dff, 0.4);
+    rimLight.position.set(-6, 2, -4);
+
+    this.scene.add(ambientLight, keyLight, rimLight);
   }
 
-  getData(prompt: string) {
+  ngAfterViewInit() {
+    try {
+      this.setRendererSize();
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+      this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
+      this.loadOBJModel();
 
-    const body = { "prompt": prompt };
-    const headers = new HttpHeaders({
-      "Content-Type": "application/json",
-      'x-api-key': "rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI"
-    });
+      if (this.reducedMotion) {
+        this.renderOnce();
+      } else {
+        this.animate();
+      }
+    } catch (error) {
+      console.error('Avatar render failed:', error);
+      this.webglSupported = false;
+      this.loading = false;
+      this.errorMessage = 'WebGL is unavailable in this environment.';
+    }
+  }
 
-    this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe(response => {
-      this.stopDotsAnimation();  // Stop the dots animation once response is received
-      this.startTyping(response.toString())
-    }, error => {
-      this.stopDotsAnimation();  // Stop the dots animation on error as well
-      console.error(error);
-      this.startTyping("My brain hurts to much today")
-    });
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.setRendererSize();
   }
 
   askQuestion() {
+    const prompt = this.question.trim();
+    if (!prompt) {
+      this.startTyping('Ask about a system, constraint, or R&D artifact.');
+      return;
+    }
+
     this.isDisabled = true;
-    this.displayedMessage = "Braining";
+    this.displayedMessage = 'Synthesizing';
     this.startDotsAnimation();
-    this.getData(this.question);
+
+    this.generateResponse(prompt)
+      .then((response) => {
+        this.stopDotsAnimation();
+        this.startTyping(response);
+      })
+      .catch((error) => {
+        console.error('Interface response failed:', error);
+        this.stopDotsAnimation();
+        this.startTyping('Interface unavailable. Use the About page to connect.');
+      });
   }
 
-  startLoadingDotsAnimation() {
+  private async generateResponse(prompt: string): Promise<string> {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    const normalized = prompt.toLowerCase();
+
+    if (!this.allowedKeywords.some((keyword) => normalized.includes(keyword))) {
+      return this.guardrailResponse;
+    }
+
+    const preset = this.responsePresets.find((entry) =>
+      entry.keywords.some((keyword) => normalized.includes(keyword))
+    );
+
+    return preset ? preset.response : this.defaultResponse;
+  }
+
+  private startDotsAnimation() {
+    this.displayedDots = '';
+    this.dotsIntervalId = window.setInterval(() => {
+      this.displayedDots = this.displayedDots.length >= 3 ? '' : `${this.displayedDots}.`;
+    }, 450);
+  }
+
+  private stopDotsAnimation() {
+    if (this.dotsIntervalId) {
+      window.clearInterval(this.dotsIntervalId);
+      this.dotsIntervalId = undefined;
+    }
+    this.displayedDots = '';
+  }
+
+  private startTyping(message: string) {
+    if (this.typingIntervalId) {
+      window.clearInterval(this.typingIntervalId);
+    }
+
+    let index = 0;
+    this.displayedMessage = '';
+    this.typingIntervalId = window.setInterval(() => {
+      if (index < message.length) {
+        this.displayedMessage += message[index];
+        index += 1;
+      } else {
+        if (this.typingIntervalId) {
+          window.clearInterval(this.typingIntervalId);
+          this.typingIntervalId = undefined;
+        }
+        this.isDisabled = false;
+      }
+    }, this.typingSpeed);
+  }
+
+  private startLoadingDotsAnimation() {
     let dotCount = 0;
     this.loadingDots = '';
-    this.loadingDotsIntervalId = setInterval(() => {
-      this.loadingDots += '.';
-      dotCount++;
-      if (dotCount > 3) {
-        this.loadingDots = '';
-        dotCount = 0;
-      }
+    this.loadingDotsIntervalId = window.setInterval(() => {
+      this.loadingDots = `${'.'.repeat(dotCount)}`;
+      dotCount = dotCount >= 3 ? 0 : dotCount + 1;
     }, 500);
   }
 
-  stopLoadingDotsAnimation() {
-    clearInterval(this.loadingDotsIntervalId);
+  private stopLoadingDotsAnimation() {
+    if (this.loadingDotsIntervalId) {
+      window.clearInterval(this.loadingDotsIntervalId);
+      this.loadingDotsIntervalId = undefined;
+    }
     this.loadingDots = '';
   }
 
-  startDotsAnimation() {
-    let dotCount = 0;
-    this.dotsIntervalId = setInterval(() => {
-      this.displayedDots += '.';
-      dotCount++;
-      if (dotCount > 3) {
-        this.displayedDots = '';
-        dotCount = 0;
-      }
-    }, 500);  // Adjust the speed as needed
-  }
-
-  stopDotsAnimation() {
-    clearInterval(this.dotsIntervalId);
-    this.displayedDots = ''; // Reset the dots string
-  }
-
-  startTyping(my_msg: string) {
-    let i = 0;
-    this.displayedMessage = "";  // Reset displayedMessage to an empty string
-    this.intervalId = setInterval(() => {
-      if (i < my_msg.length) {
-        this.displayedMessage += my_msg[i];
-        i++;
-      } else {
-        clearInterval(this.intervalId);
-        this.isDisabled = false;
-      }
-    }, this.speed);
-  }
-
-  resetObject() {
-    // Traverse the scene and find the object by name
-    this.scene.traverse((object: any) => {
-      if (object.name === 'myObject') {
-        // Reset the object's position, rotation, and scale to the initial values
-        object.position.set(-30, 90, 0);
-        object.rotation.set(0, 0, 0);
-        object.rotation.z = THREE.MathUtils.degToRad(90);
-        object.rotation.y = THREE.MathUtils.degToRad(-10);
-        object.scale.set(10, 10, 10);
-      }
-    });
-  }
-
-  loadOBJModel = () => {
+  private loadOBJModel() {
     this.startLoadingDotsAnimation();
     const loader = new OBJLoader();
+
     loader.load(
-      '../../assets/me.obj',
-      (object: any) => {
-        object.position.set(80, 20, -20);
-        object.name = 'myObject';
-        object.scale.set(10, 10, 10); // Adjust as necessary
+      'assets/me.obj',
+      (object) => {
+        const box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
 
-        object.rotation.z = THREE.MathUtils.degToRad(90);
-        object.rotation.y = THREE.MathUtils.degToRad(-10);
-        object.rotation.x = THREE.MathUtils.degToRad(-10);
+        object.position.sub(center);
+        object.rotation.set(0, Math.PI, Math.PI / 2);
+        object.updateMatrixWorld(true);
 
-        const vertexShader = `
-          uniform float pointSize;
-          varying vec2 vUv;
-          uniform float time;
-          void main() {
-            gl_PointSize = pointSize;
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `;
+        const rotatedBox = new THREE.Box3().setFromObject(object);
+        const size = rotatedBox.getSize(new THREE.Vector3());
+        this.setRendererSize();
+        const viewHeight =
+          2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * this.camera.position.z;
+        const viewWidth = viewHeight * this.camera.aspect;
+        const baseScale = Math.min(
+          viewWidth / (size.x || 1),
+          viewHeight / (size.y || 1)
+        );
+        object.scale.setScalar(baseScale * this.modelFill);
 
-        const fragmentShader = `
-  varying vec2 vUv;
-  void main() {
-    gl_FragColor = vec4(vUv, 0.5, 1.0);
-  }
-`;
-
-        const material = new THREE.ShaderMaterial({
-          vertexShader: vertexShader,
-          fragmentShader: fragmentShader,
-          uniforms: {
-            pointSize: { value: 1 },
-            time: { value: 0 }
-          }
+        const material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(0x6f5bff),
+          roughness: 0.35,
+          metalness: 0.4,
+          transparent: true,
+          opacity: 0.85
         });
 
-        object.traverse((child: any) => {
+        object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.material = material;
-
-            // Store the original vertex positions
-            const positionAttribute = child.geometry.getAttribute('position');
-            const positionArray = positionAttribute.array as Float32Array;
-            child.userData['originalPositions'] = new Float32Array(positionArray.length);
-            child.userData['originalPositions'].set(positionArray);
           }
         });
 
-        this.scene.add(object);
+        const group = new THREE.Group();
+        group.add(object);
+        group.position.set(this.modelBaseX, this.modelBaseY, 0);
+
+        this.model = group;
+        this.scene.add(group);
         this.loading = false;
         this.stopLoadingDotsAnimation();
+        if (this.reducedMotion) {
+          this.renderOnce();
+        }
       },
-      (xhr: any) => {
-        // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-      },
-      (error: any) => {
-        console.log('An error occurred while loading the .obj model');
-        this.loading = false;
-        this.stopLoadingDotsAnimation();
+      undefined,
+      (error) => {
+        console.error('Avatar model failed to load:', error);
+        this.buildFallbackModel();
       }
     );
   }
 
-  ngAfterViewInit() {
-    this.setRendererSize();
-    this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
-
-    // Set initial camera position
-    // this.camera.position.set(0, -5, -5);  // Camera starts below and behind the object
-    // this.camera.lookAt(0, 0, 0);  // Look at the center of the scene
-
-    // Initialize OrbitControls before accessing its properties
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    // Optional: Configure controls
-    this.controls.enableDamping = true; // Enable smooth damping of the controls
-    this.controls.dampingFactor = 0.1;
-    this.controls.rotateSpeed = 0.5;
-    this.controls.enablePan = false;
-    this.controls.enableZoom = false;
-
-    // Disable controls during animation
-    this.controls.enabled = false;
-
-    // Start animation
-    this.animate();
-
-    window.addEventListener('resize', () => {
-      this.setRendererSize();
+  private buildFallbackModel() {
+    const geometry = new THREE.IcosahedronGeometry(1.6, 1);
+    const material = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(0x6f5bff),
+      wireframe: true,
+      transparent: true,
+      opacity: 0.7
     });
 
-    // console.log('Camera initial position:', this.camera.position);
+    this.model = new THREE.Mesh(geometry, material);
+    this.scene.add(this.model);
+    this.loading = false;
+    this.stopLoadingDotsAnimation();
+    this.errorMessage = 'Loaded fallback avatar.';
+    if (this.reducedMotion) {
+      this.renderOnce();
+    }
   }
 
-  setRendererSize() {
+  private setRendererSize() {
+    if (!this.rendererContainer?.nativeElement) {
+      return;
+    }
     const width = this.rendererContainer.nativeElement.clientWidth;
     const height = this.rendererContainer.nativeElement.clientHeight;
+    if (!width || !height) {
+      return;
+    }
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
 
-  animate() {
-    if (!this.active) return;
-
-    window.requestAnimationFrame(() => this.animate());
-
-    // Pixel cloud special effects (retain this logic)
-    this.frame += 0.05; // Adjust the increment for faster or slower motion
-
-    this.scene.traverse((object: any) => {
-      if (object instanceof THREE.Mesh) {
-        const positionAttribute = object.geometry.getAttribute('position');
-        const positionArray = positionAttribute.array as Float32Array;
-        const originalArray = object.userData['originalPositions'] as Float32Array;
-
-        for (let i = 0; i < positionArray.length; i += 3) {
-          const x = originalArray[i];
-          const y = originalArray[i + 1];
-          const z = originalArray[i + 2];
-
-          const position_multiplier = 0.2;
-
-          positionArray[i] = x + Math.cos(this.frame + x) * position_multiplier;
-          positionArray[i + 1] = y + Math.sin(this.frame + y) * position_multiplier;
-          positionArray[i + 2] = z + Math.cos(this.frame + z) * position_multiplier;
-        }
-
-        positionAttribute.needsUpdate = true;
-      }
-    });
-
-    // Camera animation (move it up and forward to the final position)
-    const targetPosition = new THREE.Vector3(0, 0, -1);  // Final camera position
-    const animationSpeed = 0.02;  // Adjust speed as necessary
-
-    // Move the camera toward the target Y and Z positions
-    if (this.camera.position.y < targetPosition.y) {
-      this.camera.position.y += animationSpeed;
-    } else {
-      this.camera.position.y = targetPosition.y;
-    }
-
-    if (this.camera.position.z < targetPosition.z) {
-      this.camera.position.z += animationSpeed;
-    } else {
-      this.camera.position.z = targetPosition.z;
-    }
-
-    // Handle the "rotate up" animation first
-    if (this.isRotatingUp) {
-      this.rotateUpAnimation();
-    } else {
-      // Once the object is upright, handle the random rotation
-      this.randomModelRotation();
-    }
-
-    // Ensure the camera looks at the target (center) while it moves
-    if (!this.camera.position.equals(targetPosition)) {
-      this.camera.lookAt(0, 0, 0);  // Ensure the camera looks at the scene's center
-    }
-
-    // Re-enable controls after the camera reaches the final position
-    if (this.camera.position.equals(targetPosition)) {
-      this.controls.enabled = true;
-    }
-
-    // Render the scene
+  private renderOnce() {
     this.renderer.render(this.scene, this.camera);
   }
 
-  // Variables for rotating the object up from a flat position
-  isRotatingUp = true;  // Start by rotating the object up
-  rotationUpDuration = 1000;  // Time to complete the rotation (1 second)
-  rotationUpStartTime = 0;
-
-  rotateUpAnimation() {
-    const currentTime = performance.now();
-
-    // Get the model object by name
-    const object = this.scene.getObjectByName('myObject');  // Ensure the model's name is correct
-
-    // If we are rotating the object up, handle that first
-    if (this.isRotatingUp) {
-      // Set the start time if it's the first frame
-      if (this.rotationUpStartTime === 0) {
-        this.rotationUpStartTime = currentTime;
-      }
-
-      const elapsedTime = currentTime - this.rotationUpStartTime;
-      const rotationFactor = elapsedTime / this.rotationUpDuration;  // From 0 to 1
-
-      // Apply the rotation: lying flat to upright (rotating around the Z-axis)
-      if (object) {
-        object.rotation.x = Math.PI / 2 * (1 - rotationFactor);  // Rotate from 90 degrees to 0
-        // console.log(`Rotating up, current Z: ${object.rotation.z}`);
-      }
-
-      // Once the object is upright, stop the rotation and proceed with normal animation
-      if (elapsedTime >= this.rotationUpDuration) {
-        this.isRotatingUp = false;  // End the "rotate up" animation
-        if (object) {
-          object.rotation.x = 0;  // Ensure it's perfectly upright at the end
-        }
-      }
-    }
-  }
-
-  lastRotationTime = 0;
-  nextRotationDelay = (Math.random() * 2 + 1) * 1000;  // Random delay between 1 and 3 seconds
-  rotationDuration = 1000;  // Duration of the full rotation cycle (1 second)
-  rotating = false;
-  rotationStartTime = 0;
-  originalRotation = 0;  // Store the original Y-axis rotation of the model
-  startRight = false;  // Track whether the rotation should start right or left
-
-  randomModelRotation() {
-    const currentTime = performance.now();
-
-    // Get the model object by name
-    const object = this.scene.getObjectByName('myObject');  // Ensure the model's name is correct
-
-    // If the object exists and the original rotation has not been set, store the initial Y rotation
-    if (object && this.originalRotation === 0) {
-      this.originalRotation = object.rotation.y;  // Set the original rotation (typically 0)
+  private animate() {
+    if (!this.active) {
+      return;
     }
 
-    // Check if the random delay has passed to start the rotation
-    if (!this.rotating && currentTime - this.lastRotationTime > this.nextRotationDelay) {
-      this.rotating = true;
-      this.rotationStartTime = currentTime;
-      this.lastRotationTime = currentTime;
-      this.nextRotationDelay = (Math.random() * 9 + 1) * 1000;  // New random delay between 1 and 3 seconds
+    this.frameId = window.requestAnimationFrame(() => this.animate());
 
-      // Randomly decide whether to start by rotating right or left
-      this.startRight = Math.random() < 0.5;  // 50% chance to start by rotating right
-      // console.log(`Starting rotation, next in: ${this.nextRotationDelay / 1000} seconds. Direction: ${this.startRight ? 'Right' : 'Left'}`);
+    if (this.model) {
+      const time = performance.now() * 0.001;
+      const jitterX = Math.sin(time * 0.6) * this.jitterRotation.x;
+      const jitterY = Math.cos(time * 0.5) * this.jitterRotation.y;
+      const jitterZ = Math.sin(time * 0.4) * this.jitterRotation.z;
+
+      const bobX = Math.sin(time * 0.7) * this.jitterPosition.x;
+      const bobY = Math.cos(time * 0.9) * this.jitterPosition.y;
+      const bobZ = Math.sin(time * 0.3) * this.jitterPosition.z;
+
+      this.model.position.set(
+        this.modelBaseX + bobX,
+        this.modelBaseY + bobY,
+        bobZ
+      );
+      this.model.rotation.set(jitterX, jitterY, jitterZ);
     }
 
-    // Smoothly handle the rotation if the model is currently rotating
-    if (this.rotating) {
-      const elapsedTime = currentTime - this.rotationStartTime;
-      const rotationFactor = Math.sin((elapsedTime / this.rotationDuration) * Math.PI);  // Smooth sine wave (-1 to 1)
-
-      const rotationAmplitude = Math.PI / 64;  // Amplitude of rotation (in radians, adjust as necessary)
-
-      // Determine whether to start moving left or right, based on the startRight flag
-      const directionMultiplier = this.startRight ? 1 : -1;
-
-      // Apply the smooth rotation to the Y axis, moving either left or right based on the random direction
-      if (object) {
-        object.rotation.y = this.originalRotation + directionMultiplier * rotationAmplitude * rotationFactor;
-        // console.log(`Rotating Y: ${object.rotation.y}`);  // Debugging to verify left and right movement
-      }
-
-      // Stop rotating after the full rotation cycle duration and reset to the original position
-      if (elapsedTime >= this.rotationDuration) {
-        this.rotating = false;
-        if (object) {
-          object.rotation.y = this.originalRotation;  // Return to original Y rotation
-          // console.log(`Reset Y rotation to: ${this.originalRotation}`);
-        }
-      }
-    }
+    this.renderer.render(this.scene, this.camera);
   }
 
   ngOnDestroy() {
     this.active = false;
+
+    if (this.frameId) {
+      window.cancelAnimationFrame(this.frameId);
+    }
+
+    if (this.typingIntervalId) {
+      window.clearInterval(this.typingIntervalId);
+    }
+
+    if (this.dotsIntervalId) {
+      window.clearInterval(this.dotsIntervalId);
+    }
+
+    if (this.loadingDotsIntervalId) {
+      window.clearInterval(this.loadingDotsIntervalId);
+    }
+
     this.renderer.dispose();
 
-    // Dispose of materials, geometry, and controls
-    this.scene.traverse((object: any) => {
+    this.scene.traverse((object) => {
       if (object instanceof THREE.Mesh) {
-        object.material.dispose();
         object.geometry.dispose();
+        if (Array.isArray(object.material)) {
+          object.material.forEach((material) => material.dispose());
+        } else {
+          object.material.dispose();
+        }
       }
     });
-
-    this.controls.dispose();
   }
 }
