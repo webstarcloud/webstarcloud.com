@@ -42,8 +42,6 @@ export class BackgroundComponent implements OnInit, AfterViewInit {
     const positionAttribute = this.planeMesh.geometry.getAttribute('position') as THREE.BufferAttribute;
     const positionArray = new Float32Array(positionAttribute.array);
 
-    console.log(this.planeMesh.geometry)
-
     for (let i = 0; i < positionArray.length; i += 3) {
       if (i % 3 == 0) {
         const x = positionArray[i];

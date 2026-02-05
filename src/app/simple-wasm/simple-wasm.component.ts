@@ -105,7 +105,6 @@ export class SimpleWasmComponent implements OnInit {
     const canvasY = (event.clientY - rect.top) * scaleY;
   
     // Example interaction: Log the coordinates or pass them to the WASM module
-    console.log(`Mouse position on canvas: (${canvasX}, ${canvasY})`);
     // If you have a function in your WASM to handle these coordinates, call it here
   }
 

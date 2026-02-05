@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://davidwebstar.com/sitemap.xml

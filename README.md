@@ -23,3 +23,12 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 ## Running end-to-end tests
 
 Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+
+## Production checklist
+
+- Run `npm run build` and verify the bundle output.
+- Confirm `robots.txt`, `sitemap.xml`, and `404.html` are present in the build.
+- Validate OG/social preview image renders as expected.
+- Check the System Interface fallback (WebGL unavailable).
+- Verify color contrast and focus states for keyboard navigation.
+- Confirm redirects for legacy routes behave as expected.

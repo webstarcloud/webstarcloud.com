@@ -1,5 +1,10 @@
 <div class="avatar-shell">
   <div #rendererContainer class="renderer-container"></div>
+  <img
+    *ngIf="fallbackVisible"
+    class="fallback-avatar"
+    src="assets/avatar-fallback.svg"
+    alt="Avatar placeholder">
   <div *ngIf="loading" class="loading-overlay">Rendering interface{{ loadingDots }}</div>
   <div *ngIf="!webglSupported" class="loading-overlay error">WebGL unavailable</div>
 </div>
@@ -11,10 +16,11 @@
       class="interface-input"
       type="text"
       placeholder="Holodeck, Radar, homomorphic systems, platform rebuilds"
+      aria-label="Ask about systems and work"
       [(ngModel)]="question"
       [disabled]="isDisabled"
       (keyup.enter)="askQuestion()">
-    <button class="btn btn-primary" type="button" (click)="askQuestion()" [disabled]="isDisabled">Send</button>
+    <button class="btn btn-primary" type="button" (click)="askQuestion()" [disabled]="isDisabled" aria-label="Send question">Send</button>
   </div>
   <p class="interface-response" aria-live="polite">{{ displayedMessage }}{{ displayedDots }}</p>
   <p class="interface-hint muted">Guardrails: architecture, systems, and R&amp;D only.</p>

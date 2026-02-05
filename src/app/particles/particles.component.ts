@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { ErrorReportingService } from '../core/error-reporting.service';
 
 interface ResponsePreset {
   keywords: string[];
@@ -19,6 +20,8 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
   model: THREE.Object3D | null = null;
+  modelRoot?: THREE.Object3D;
+  modelSize?: THREE.Vector3;
   active = true;
   frameId?: number;
 
@@ -31,10 +34,13 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   loadingDots = '';
   webglSupported = true;
   errorMessage = '';
+  fallbackVisible = false;
 
   private typingIntervalId?: number;
   private dotsIntervalId?: number;
   private loadingDotsIntervalId?: number;
+  private intersectionObserver?: IntersectionObserver;
+  private hasLoadedModel = false;
   private readonly typingSpeed = 24;
   private readonly reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   private readonly modelBaseX = 0;
@@ -97,7 +103,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   private readonly defaultResponse =
     'I can answer about projects, architectural rationale, and R&D primitives. Try a specific system or constraint.';
 
-  constructor() {
+  constructor(private errorReporter: ErrorReportingService) {
     this.scene.background = null;
     this.renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -118,10 +124,31 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     try {
+      if (!this.isWebGLAvailable()) {
+        this.webglSupported = false;
+        this.loading = false;
+        this.fallbackVisible = true;
+        this.errorMessage = 'WebGL unavailable. Showing fallback.';
+        return;
+      }
+
       this.setRendererSize();
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
-      this.loadOBJModel();
+
+      if ('IntersectionObserver' in window) {
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+          if (entries.some((entry) => entry.isIntersecting) && !this.hasLoadedModel) {
+            this.hasLoadedModel = true;
+            this.loadOBJModel();
+            this.intersectionObserver?.disconnect();
+          }
+        });
+        this.intersectionObserver.observe(this.rendererContainer.nativeElement);
+      } else {
+        this.hasLoadedModel = true;
+        this.loadOBJModel();
+      }
 
       if (this.reducedMotion) {
         this.renderOnce();
@@ -129,9 +156,10 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
         this.animate();
       }
     } catch (error) {
-      console.error('Avatar render failed:', error);
+      this.errorReporter.report({ context: 'avatar-render', error });
       this.webglSupported = false;
       this.loading = false;
+      this.fallbackVisible = true;
       this.errorMessage = 'WebGL is unavailable in this environment.';
     }
   }
@@ -139,6 +167,9 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   @HostListener('window:resize')
   onWindowResize() {
     this.setRendererSize();
+    if (this.modelRoot && this.modelSize) {
+      this.applyScaleToModel(this.modelRoot, this.modelSize);
+    }
   }
 
   askQuestion() {
@@ -158,7 +189,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
         this.startTyping(response);
       })
       .catch((error) => {
-        console.error('Interface response failed:', error);
+        this.errorReporter.report({ context: 'interface-response', error });
         this.stopDotsAnimation();
         this.startTyping('Interface unavailable. Use the About page to connect.');
       });
@@ -248,15 +279,9 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
         const rotatedBox = new THREE.Box3().setFromObject(object);
         const size = rotatedBox.getSize(new THREE.Vector3());
-        this.setRendererSize();
-        const viewHeight =
-          2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * this.camera.position.z;
-        const viewWidth = viewHeight * this.camera.aspect;
-        const baseScale = Math.min(
-          viewWidth / (size.x || 1),
-          viewHeight / (size.y || 1)
-        );
-        object.scale.setScalar(baseScale * this.modelFill);
+        this.modelRoot = object;
+        this.modelSize = size;
+        this.applyScaleToModel(object, size);
 
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(0x6f5bff),
@@ -286,7 +311,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       },
       undefined,
       (error) => {
-        console.error('Avatar model failed to load:', error);
+        this.errorReporter.report({ context: 'avatar-model', error });
         this.buildFallbackModel();
       }
     );
@@ -325,6 +350,30 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.camera.updateProjectionMatrix();
   }
 
+  private applyScaleToModel(object: THREE.Object3D, size: THREE.Vector3) {
+    this.setRendererSize();
+    const viewHeight =
+      2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * this.camera.position.z;
+    const viewWidth = viewHeight * this.camera.aspect;
+    const baseScale = Math.min(
+      viewWidth / (size.x || 1),
+      viewHeight / (size.y || 1)
+    );
+    object.scale.setScalar(baseScale * this.modelFill);
+  }
+
+  private isWebGLAvailable(): boolean {
+    try {
+      const canvas = document.createElement('canvas');
+      return !!(
+        window.WebGLRenderingContext &&
+        (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+      );
+    } catch {
+      return false;
+    }
+  }
+
   private renderOnce() {
     this.renderer.render(this.scene, this.camera);
   }
@@ -359,6 +408,10 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.active = false;
+
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
 
     if (this.frameId) {
       window.cancelAnimationFrame(this.frameId);

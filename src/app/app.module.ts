@@ -1,7 +1,6 @@
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,6 +21,7 @@ import { RdComponent } from './rd/rd.component';
 import { SelectedWorkComponent } from './selected-work/selected-work.component';
 import { WritingComponent } from './writing/writing.component';
 import { AboutComponent } from './about/about.component';
+import { GlobalErrorHandler } from './core/global-error-handler';
 
 
 @NgModule({
@@ -44,12 +44,16 @@ import { AboutComponent } from './about/about.component';
     FormsModule,
     BrowserModule,
     AppRoutingModule,
-    AmplifyAuthenticatorModule,
     BrowserAnimationsModule,
     HttpClientModule,
     CommonModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
