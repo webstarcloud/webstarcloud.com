@@ -27,7 +27,7 @@
   z-index: 10;
   background: rgba(10, 14, 22, 0.82);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(111, 91, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header-inner {
@@ -71,7 +71,7 @@
 }
 
 .site-footer {
-  border-top: 1px solid rgba(111, 91, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 40px 0 56px;
 }
 

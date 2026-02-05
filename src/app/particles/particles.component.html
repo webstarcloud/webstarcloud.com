@@ -15,12 +15,21 @@
     <input
       class="interface-input"
       type="text"
-      placeholder="Holodeck, Radar, homomorphic systems, platform rebuilds"
+      placeholder="Ask about systems and work"
       aria-label="Ask about systems and work"
       [(ngModel)]="question"
       [disabled]="isDisabled"
       (keyup.enter)="askQuestion()">
     <button class="btn btn-primary" type="button" (click)="askQuestion()" [disabled]="isDisabled" aria-label="Send question">Send</button>
+  </div>
+  <div class="example-row">
+    <button
+      class="example-chip"
+      type="button"
+      *ngFor="let example of examplePrompts"
+      (click)="useExample(example)">
+      {{ example }}
+    </button>
   </div>
   <p class="interface-response" aria-live="polite">{{ displayedMessage }}{{ displayedDots }}</p>
   <p class="interface-hint muted">Guardrails: architecture, systems, and R&amp;D only.</p>

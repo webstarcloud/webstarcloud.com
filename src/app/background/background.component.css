@@ -3,6 +3,6 @@
   }
 
   #highlighted-text {
-    color: lime;
+    color: var(--text-1);
   }
   

@@ -25,7 +25,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   active = true;
   frameId?: number;
 
-  question = '';
+  question = 'Tell me about Holodeck';
   isDisabled = false;
   displayedMessage = '';
   displayedDots = '';
@@ -102,6 +102,11 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
   private readonly defaultResponse =
     'I can answer about projects, architectural rationale, and R&D primitives. Try a specific system or constraint.';
+  readonly examplePrompts = [
+    'Tell me about Holodeck',
+    'Explain secure computation work',
+    'Show selected system work'
+  ];
 
   constructor(private errorReporter: ErrorReportingService) {
     this.scene.background = null;
@@ -113,10 +118,10 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
     this.camera.position.set(0, 0, 6);
 
-    const ambientLight = new THREE.AmbientLight(0x9a8bff, 0.9);
-    const keyLight = new THREE.DirectionalLight(0x6f5bff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xd5dbea, 0.85);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.7);
     keyLight.position.set(4, 6, 8);
-    const rimLight = new THREE.DirectionalLight(0x5a3dff, 0.4);
+    const rimLight = new THREE.DirectionalLight(0xb8c4da, 0.35);
     rimLight.position.set(-6, 2, -4);
 
     this.scene.add(ambientLight, keyLight, rimLight);
@@ -193,6 +198,11 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
         this.stopDotsAnimation();
         this.startTyping('Interface unavailable. Use the About page to connect.');
       });
+  }
+
+  useExample(example: string) {
+    this.question = example;
+    this.askQuestion();
   }
 
   private async generateResponse(prompt: string): Promise<string> {
@@ -284,7 +294,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
         this.applyScaleToModel(object, size);
 
         const material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(0x6f5bff),
+          color: new THREE.Color(0xc6d3e5),
           roughness: 0.35,
           metalness: 0.4,
           transparent: true,
@@ -320,7 +330,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   private buildFallbackModel() {
     const geometry = new THREE.IcosahedronGeometry(1.6, 1);
     const material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(0x6f5bff),
+      color: new THREE.Color(0xc6d3e5),
       wireframe: true,
       transparent: true,
       opacity: 0.7

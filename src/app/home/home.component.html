@@ -3,22 +3,21 @@
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">David Webster</p>
-        <h1>R&amp;D-forward systems architect building primitives for irreversible decisions.</h1>
+        <h1>R&amp;D systems architect building primitives for irreversible, high‑stakes platform decisions.</h1>
         <p class="lead">
-          I design agentic and cloud-scale systems where security, recovery, and correctness are first-class.
-          The work is experimental, but the standards are production.
+          Designing AI and cloud systems where privacy, recovery, and correctness are non‑negotiable.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" routerLink="/rd" aria-label="Explore research and development">Explore R&amp;D</a>
-          <button class="btn btn-ghost" type="button" (click)="activateInterface()" aria-label="Open system interface">
-            Ask about my systems &amp; work
-          </button>
+          <a class="btn btn-secondary" routerLink="/selected-work" aria-label="View selected system work">
+            Selected Work
+          </a>
         </div>
+        <p class="credibility muted">Kubestronaut · Built privacy‑preserving systems under strict constraints</p>
         <div class="pill-row hero-pillars">
           <span class="pill">Agentic &amp; AI systems</span>
           <span class="pill">Cloud &amp; distributed architecture</span>
-          <span class="pill">R&amp;D experiments / primitives</span>
-          <span class="pill">Production truths</span>
+          <span class="pill">R&amp;D primitives &amp; production truths</span>
         </div>
       </div>
 
@@ -49,102 +48,77 @@
       </div>
     </section>
 
-    <section class="section decision">
-      <div class="card">
-        <p class="eyebrow">Decision Framework</p>
-        <h2>Constraints → Primitives → Proof</h2>
-        <p class="muted">
-          No hype. Only constraints, architectural primitives, and evidence that the system survives irreversible moves.
-        </p>
-        <div class="framework-grid">
-          <div>
-            <h3>Constraints</h3>
-            <p class="muted">Regulation, privacy, latency, and recovery define the real architecture.</p>
-          </div>
-          <div>
-            <h3>Primitives</h3>
-            <p class="muted">Small, durable building blocks that keep the system safe at scale.</p>
-          </div>
-          <div>
-            <h3>Proof</h3>
-            <p class="muted">Demonstrated under load, not just in theory or demos.</p>
-          </div>
-        </div>
+    <section class="section selected-work">
+      <div class="section-header">
+        <h2>Selected System Work</h2>
+        <p class="muted">Three systems. High‑stakes constraints. Clear architectural shifts.</p>
       </div>
+      <div class="work-stack">
+        <article class="work-item featured">
+          <h3>Privacy‑Preserving Analytics Platform</h3>
+          <p class="muted">Constraint: sensitive data could not move or be duplicated.</p>
+          <p class="muted">Insight: access‑bounded streams + invariant contracts prevent drift.</p>
+          <p class="muted">Shift: treat privacy as a runtime system behavior, not a policy layer.</p>
+        </article>
+        <article class="work-item">
+          <h3>Irreversible Platform Rebuild</h3>
+          <p class="muted">Constraint: zero rollback during live migration.</p>
+          <p class="muted">Insight: truth‑table validation before any cutover.</p>
+          <p class="muted">Shift: design for irreversibility from day one.</p>
+        </article>
+        <article class="work-item">
+          <h3>Secure Computation at Scale</h3>
+          <p class="muted">Constraint: encrypted data must remain encrypted in use.</p>
+          <p class="muted">Insight: separate key orchestration from compute planes.</p>
+          <p class="muted">Shift: security becomes a primitive, not a feature.</p>
+        </article>
+      </div>
+      <a class="view-more" routerLink="/selected-work">View more →</a>
     </section>
 
     <section class="section signals">
       <div class="section-header">
         <h2>Current R&amp;D Signals</h2>
-        <p class="muted">Active experiments that surface irreversibility early.</p>
+        <p class="muted">Active probes that surface irreversibility early.</p>
       </div>
-      <div class="card-grid">
-        <div class="card signal-card">
+      <div class="signal-stack">
+        <article class="signal-item featured">
           <p class="mono muted">Active</p>
           <h3>Holodeck</h3>
           <p class="muted">Rehearsal harness for migrations with no rollback path.</p>
-        </div>
-        <div class="card signal-card">
+        </article>
+        <article class="signal-item">
           <p class="mono muted">Active</p>
           <h3>Radar</h3>
           <p class="muted">Multi‑signal drift detection before systems break.</p>
-        </div>
-        <div class="card signal-card">
+        </article>
+        <article class="signal-item">
           <p class="mono muted">Experimental</p>
           <h3>Invariant Ledger</h3>
           <p class="muted">Explicit contracts for architectural guarantees.</p>
-        </div>
+        </article>
       </div>
+      <a class="view-more" routerLink="/rd">View more →</a>
     </section>
 
-    <section class="section intents">
+    <section class="section writing-preview">
       <div class="section-header">
-        <h2>Choose Your Entry Point</h2>
-        <p class="muted">Pick the lens that matches your role.</p>
+        <h2>Writing &amp; Architecture</h2>
+        <p class="muted">Diagram‑first notes on constraints, guardrails, and rebuilds.</p>
       </div>
-      <div class="card-grid">
-        <div class="card">
-          <h3>Founder / CTO</h3>
-          <p class="muted">See how primitives de‑risk irreversible platform bets.</p>
-          <div class="divider"></div>
-          <a class="btn btn-ghost" routerLink="/selected-work">Review system work</a>
-        </div>
-        <div class="card">
-          <h3>Security / Privacy</h3>
-          <p class="muted">Explore secure computation patterns and guardrails.</p>
-          <div class="divider"></div>
-          <a class="btn btn-ghost" routerLink="/rd">Explore R&amp;D</a>
-        </div>
-        <div class="card">
-          <h3>Systems Architect</h3>
-          <p class="muted">Deep dive into architecture notes and decision frameworks.</p>
-          <div class="divider"></div>
-          <a class="btn btn-ghost" routerLink="/writing">Read the notes</a>
-        </div>
+      <div class="writing-stack">
+        <article class="writing-item featured">
+          <p class="mono muted">Draft</p>
+          <h3>Rebuilds Without Rollback</h3>
+          <p class="muted">How to migrate live systems when the exit door is welded shut.</p>
+        </article>
+        <article class="writing-item">
+          <p class="mono muted">Draft</p>
+          <h3>Secure Computation in Practice</h3>
+          <p class="muted">Why privacy guarantees collapse when orchestration is an afterthought.</p>
+        </article>
       </div>
-    </section>
-
-    <section class="section">
-      <div class="card-grid">
-        <div class="card">
-          <h2>R&amp;D Primitives</h2>
-          <p class="muted">Experiments that isolate the primitives behind secure, irreversible decisions.</p>
-          <div class="divider"></div>
-          <a class="btn btn-ghost" routerLink="/rd">See R&amp;D artifacts</a>
-        </div>
-        <div class="card">
-          <h2>Selected System Work</h2>
-          <p class="muted">High-stakes systems built under constraints: security, correctness, and scale.</p>
-          <div class="divider"></div>
-          <a class="btn btn-ghost" routerLink="/selected-work">Review architectural work</a>
-        </div>
-        <div class="card">
-          <h2>Writing &amp; Architecture</h2>
-          <p class="muted">Diagram-first notes on constraints, guardrails, and platform rebuilds.</p>
-          <div class="divider"></div>
-          <a class="btn btn-ghost" routerLink="/writing">Read the notes</a>
-        </div>
-      </div>
+      <a class="view-more" routerLink="/writing">View more →</a>
     </section>
   </div>
 </div>

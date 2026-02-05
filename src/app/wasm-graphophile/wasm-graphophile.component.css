@@ -1,5 +1,5 @@
 .btn-success {
-    color: #fff;
-    background-color: lime;
-    border-color: lime;
+  color: var(--text-0);
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
 }

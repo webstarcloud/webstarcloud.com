@@ -9,7 +9,7 @@
   --text-2: #8d9bb1;
   --accent: #6f5bff;
   --accent-strong: #5a3dff;
-  --line: rgba(111, 91, 255, 0.22);
+  --line: rgba(255, 255, 255, 0.12);
   --shadow: rgba(6, 12, 22, 0.75);
   --max-width: 1160px;
   --radius: 18px;
@@ -43,9 +43,9 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 15% 20%, rgba(111, 91, 255, 0.2), transparent 45%),
-    radial-gradient(circle at 80% 10%, rgba(39, 123, 255, 0.2), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(14, 24, 40, 0.95), transparent 55%);
+    radial-gradient(circle at 15% 20%, rgba(16, 22, 34, 0.45), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(18, 26, 38, 0.4), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(14, 24, 40, 0.9), transparent 55%);
   z-index: -2;
   pointer-events: none;
 }
@@ -133,8 +133,8 @@ img {
 .pill {
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(111, 91, 255, 0.08);
-  border: 1px solid rgba(111, 91, 255, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-1);
   font-size: 0.9rem;
 }
@@ -178,6 +178,17 @@ img {
   color: var(--accent);
 }
 
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-0);
+}
+
+.btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--text-0);
+}
+
 .btn-outline {
   background: transparent;
   border: 1px solid rgba(111, 91, 255, 0.4);
@@ -208,7 +219,7 @@ img {
 
 pre.diagram {
   background: rgba(8, 13, 21, 0.85);
-  border: 1px solid rgba(111, 91, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   padding: 18px;
   color: var(--text-1);

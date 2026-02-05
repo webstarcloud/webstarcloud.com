@@ -33,7 +33,7 @@ export class LogoComponent implements OnInit, AfterViewInit {
 
     // define what the particles look like
     var material = new THREE.PointsMaterial({
-      color: 0x6f2da8,
+      color: 0xc6d3e5,
       size: 40
     });
 
