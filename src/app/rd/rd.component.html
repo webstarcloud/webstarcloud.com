@@ -1,69 +1,72 @@
 <div class="page">
   <div class="shell">
     <p class="eyebrow">R&amp;D</p>
-    <h1>Experiments under constraints.</h1>
+    <h1>Experiments with evidence.</h1>
     <p class="lead">
-      R&amp;D here is not a product backlog. It is a lab for primitives: narrow experiments that force hard
-      architectural choices early, so the system can survive irreversible decisions later.
+      This R&amp;D surface maps to real repositories. Each artefact states the question it isolates, the primitive it
+      proves, and the evidence trail.
     </p>
+    <p class="mono muted">Pillars: R&amp;D + Primitives + Systems</p>
 
     <div class="section">
+      <p class="mono muted">Pillars: Judgement + Primitives</p>
       <div class="card">
         <h2>How to read this</h2>
         <p class="muted">
-          Each artifact is a probe. Look for the constraint it isolates, the primitive it proves, and how it survives
-          irreversible decisions in production conditions.
+          Each artefact is a probe. Track the question, primitive, evidence, and current status.
         </p>
       </div>
     </div>
 
     <div class="section">
-      <h2>Flagship artifacts</h2>
-      <p class="muted">Each artifact states the question, the primitive it isolates, why it matters, and status.</p>
+      <h2>Flagship artefacts</h2>
+      <p class="mono muted">Pillars: R&amp;D + Systems + Primitives</p>
+      <p class="muted">Real projects under active development and maintenance.</p>
       <div class="card-grid">
         <div class="card">
           <h3>Holodeck</h3>
-          <p class="muted">Question: How do we simulate production constraints before the first migration?</p>
+          <p class="muted"><strong>Question</strong>: How can architecture options be rehearsed before production cutover?</p>
           <div class="divider"></div>
-          <p><strong>Primitive</strong>: deterministic environment playback and reversible state shards.</p>
-          <p><strong>Why it matters at scale</strong>: allows irreversible changes to be rehearsed under real load.</p>
+          <p><strong>Primitive</strong>: diagram and architecture rehearsal tooling for decision walkthroughs.</p>
+          <p><strong>Evidence</strong>: <a href="https://github.com/davidwebstar34/holodeck" target="_blank" rel="noreferrer">github.com/davidwebstar34/holodeck</a></p>
+          <p><strong>Status</strong>: Active prototype</p>
+        </div>
+        <div class="card">
+          <h3>Worktree Swarm</h3>
+          <p class="muted"><strong>Question</strong>: Can multi-agent coding stay inspectable without hidden orchestration state?</p>
+          <div class="divider"></div>
+          <p><strong>Primitive</strong>: task-driven git worktree orchestration with explicit merge boundaries.</p>
+          <p><strong>Evidence</strong>: <a href="https://github.com/davidwebstar34/agent-swarmkit" target="_blank" rel="noreferrer">github.com/davidwebstar34/agent-swarmkit</a></p>
           <p><strong>Status</strong>: Active</p>
         </div>
         <div class="card">
-          <h3>Radar</h3>
-          <p class="muted">Question: Can drift signals be detected before they become outages?</p>
+          <h3>News Radar</h3>
+          <p class="muted"><strong>Question</strong>: How do we rank fast-moving ecosystem signals without feeding noise into decisions?</p>
           <div class="divider"></div>
-          <p><strong>Primitive</strong>: multi-signal anomaly fusion with tiered confidence gates.</p>
-          <p><strong>Why it matters at scale</strong>: catches weak signals early when rollbacks are still possible.</p>
+          <p><strong>Primitive</strong>: weighted feed ingestion with topic confidence and source diversity controls.</p>
+          <p><strong>Evidence</strong>: <a href="https://github.com/davidwebstar34/news-radar" target="_blank" rel="noreferrer">github.com/davidwebstar34/news-radar</a></p>
           <p><strong>Status</strong>: Active</p>
         </div>
         <div class="card">
-          <h3>Invariant Ledger</h3>
-          <p class="muted">Question: How do we make architectural invariants explicit and enforceable?</p>
+          <h3>Semblance</h3>
+          <p class="muted"><strong>Question</strong>: Can dependency and capability drift be surfaced early for agent services?</p>
           <div class="divider"></div>
-          <p><strong>Primitive</strong>: policy-bound data contracts with drift detection at the edge.</p>
-          <p><strong>Why it matters at scale</strong>: prevents silent erosion of guarantees across teams.</p>
-          <p><strong>Status</strong>: Experimental</p>
-        </div>
-        <div class="card">
-          <h3>Failsafe Mesh</h3>
-          <p class="muted">Question: What is the minimum viable containment layer for agentic systems?</p>
-          <div class="divider"></div>
-          <p><strong>Primitive</strong>: guardrail orchestration with explicit blast-radius limits.</p>
-          <p><strong>Why it matters at scale</strong>: keeps autonomy safe under adversarial and unknown inputs.</p>
-          <p><strong>Status</strong>: Experimental</p>
+          <p><strong>Primitive</strong>: repository diffing for capability and dependency changes with structured output.</p>
+          <p><strong>Evidence</strong>: <a href="https://github.com/davidwebstar34/semblance" target="_blank" rel="noreferrer">github.com/davidwebstar34/semblance</a></p>
+          <p><strong>Status</strong>: Active buildout</p>
         </div>
       </div>
     </div>
 
     <div class="section">
       <h2>R&amp;D operating constraints</h2>
+      <p class="mono muted">Pillars: Judgement + Systems</p>
       <div class="card">
         <div class="pill-row">
-          <span class="pill">Prototypes must surface irreversible decisions</span>
-          <span class="pill">Only primitives, no product polish</span>
-          <span class="pill">Security and recovery are first-class</span>
-          <span class="pill">Evidence over intuition</span>
+          <span class="pill">Surface invariants early</span>
+          <span class="pill">Contain failure blast radius</span>
+          <span class="pill">Keep recovery paths explicit</span>
+          <span class="pill">Prefer auditability over ambiguity</span>
         </div>
       </div>
     </div>

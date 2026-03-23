@@ -1,271 +1,128 @@
-# tasks.md — AAA Visual & Narrative Upgrade (Visible Improvements Only)
-
-Goal:
-Make davidwebstar.com immediately read as:
-**R&D-forward systems architect · builder of primitives · deep-tech founder energy**
-
-This plan intentionally ignores:
-
-- SEO
-- perf
-- accessibility
-- governance
-- future scaling
-
-This is about **what the user sees and feels**.
-
----
-
-## 1) Hero Section — Make the Page Hit Harder
-
-### 1.1 Replace Generic Intro with Thesis Hero
-
-- [x] Rewrite hero H1 to a single, sharp thesis line
-  - [x] Max 10–12 words
-  - [x] No tools
-  - [x] No buzzwords
-  - [x] Must describe _what kind of builder you are_
-
-- [x] Add one supporting line under H1
-  - [x] Explains what you build _under what constraints_
-  - [x] Reads calm, senior, confident
-
-Example structure (do not copy verbatim):
-
-> R&D-forward systems architect  
-> Designing AI and cloud systems that survive real constraints
-
----
-
-### 1.2 Fix Hero Layout (This Is Visual, Not Copy)
-
-- [x] Ensure hero is the **only dominant element above the fold**
-- [x] Remove or downplay anything competing with the hero
-- [x] Increase vertical spacing above and below hero text
-- [x] Ensure eye path is:
-  - [x] H1
-  - [x] Supporting line
-  - [x] CTA
-
-If the hero feels “nice” instead of “obvious”, it’s still wrong.
-
----
-
-### 1.3 Add Exactly Two CTAs
-
-- [x] Primary CTA: “Explore R&D”
-- [x] Secondary CTA: “Selected Work”
-
-Rules:
-
-- [x] No more than two
-- [x] Same visual style
-- [x] Accent color only on primary CTA
-
----
-
-## 2) Kill Card Soup — Introduce Curation
-
-### 2.1 Reduce Visible Items Everywhere
-
-- [x] No section shows more than **3 items**
-- [x] Everything else goes behind “View more”
-- [x] Remove any section that exists “just in case”
-
-If a visitor sees 10 things at once, authority drops.
-
----
-
-### 2.2 Replace “Feed” Layouts with “Exhibit” Layouts
-
-- [x] Change cards from equal-weight grid → curated stack
-- [x] One item visually featured
-- [x] Others secondary
-
-Think:
-
-- Museum exhibit
-- Research paper figures
-- Not blog feed
-
----
-
-## 3) Establish a Credibility Spine (Quiet, Immediate)
-
-### 3.1 Add a Single-Line Credibility Strip
-
-Place directly **under the hero**.
-
-- [x] One line only
-- [x] Muted text (not accent)
-- [x] No icons unless extremely subtle
-
-Example structure:
-
-> Kubestronaut · 13× AWS Certified · Built systems under strict constraints
-
-Rules:
-
-- [x] No brag paragraphs
-- [x] No badges wall
-- [x] No scrolling required to see it
-
-This should change how the page feels instantly.
-
----
-
-## 4) Bot & Avatar — Make It an Interface, Not a Feature
-
-### 4.1 Change How the Bot Is Introduced
-
-- [x] Remove “chatbot” framing
-- [x] Rename it implicitly as an interface
-
-Examples:
-
-- “Ask about my systems”
-- “Query my work”
-- “Explore via interface”
-
----
-
-### 4.2 Reduce Visual Dominance of Avatar
-
-- [x] Avatar should not compete with hero text
-- [x] Avatar should be:
-  - [x] Smaller
-  - [x] Offset
-  - [x] Secondary
-
-If the avatar draws the eye before the thesis, it’s too loud.
-
----
-
-### 4.3 Make the First Prompt Obvious
-
-- [x] Pre-fill prompt with examples:
-  - [x] “Tell me about Holodeck”
-  - [x] “Explain secure computation work”
-  - [x] “Show selected system work”
-
-This instantly reframes the bot as _useful_.
-
----
-
-## 5) Color & Accent Discipline (Immediate Visual Upgrade)
-
-### 5.1 Enforce One Accent Color Rule
-
-- [x] Choose ONE accent color
-- [x] Remove all other accent usage
-- [x] Accent color allowed only for:
-  - [x] CTAs
-  - [x] Links
-  - [x] Focus/hover states
-  - [x] Very small dividers
-
-If you see accent color in large backgrounds → fail.
-
----
-
-### 5.2 Neutralize the Background
-
-- [x] Background should be:
-  - [x] Neutral
-  - [x] Cool-toned
-  - [x] Calm
-
-- [x] If using gradients:
-  - [x] Extremely subtle
-  - [x] No high contrast behind text
-  - [x] No “movement for vibes”
-
-The background exists to disappear.
-
----
-
-## 6) Typography — Make It Feel Like a Research Lab
-
-### 6.1 Simplify Font Usage
-
-- [x] One primary sans-serif font for 90% of text
-- [x] Optional mono font ONLY for:
-  - [x] labels
-  - [x] timestamps
-  - [x] code-ish UI
-
-If typography feels “fun” or “playful”, it’s off-brand.
-
----
-
-### 6.2 Increase Type Hierarchy Contrast
-
-- [x] H1 clearly larger than everything else
-- [x] Section headers clearly distinct
-- [x] Body text calm and readable
-
-Many sites fail because everything is the same size.
-
----
-
-## 7) Add “Selected Work” as a Visual Anchor
-
-### 7.1 Create a Small, High-Impact Section
-
-- [x] Section title: “Selected System Work”
-- [x] Exactly 3 entries max
-- [x] Each entry is 3–4 lines only
-
-Each entry structure:
-
-- [x] Constraint
-- [x] System insight
-- [x] How it changed your thinking
-
-No dates. No companies. No metrics.
-
----
-
-### 7.2 Make This Section Feel Heavy
-
-- [x] More whitespace
-- [x] Slightly larger text
-- [x] No cards if possible
-- [x] Looks intentional and serious
-
-This section should feel like a pause.
-
----
-
-## 8) Remove Anything That Feels Like “Portfolio Noise”
-
-- [x] Remove any section that:
-  - [x] Exists without content
-  - [x] Exists “for later”
-  - [x] Repeats information
-
-AAA sites are **shorter than you think**.
-
----
-
-## 9) Final Visual Litmus Test
-
-Before calling this “done”:
-
-- [x] Can someone understand what you do in 10 seconds?
-- [x] Does it feel calm, confident, senior?
-- [x] Does it feel curated instead of busy?
-- [x] Would a CTO / founder trust this page?
-
-If any answer is “maybe” → iterate.
-
----
-
-## Definition of Done (Very Important)
-
-This work is done when:
-
-- The site feels **obviously better** than before
-- You can remove content and it still feels strong
-- Nothing screams for attention
-- Everything feels intentional
+# tasks.md — AAA Brand Integration (Site + CV + Repos)
+
+## Brand lock and vocabulary discipline
+
+- [x] Define the four pillars as final, canonical labels used everywhere
+  - [x] Pillar labels: R&D, Systems, Primitives, Judgement
+  - [x] Add a one-sentence definition for each pillar (for internal use)
+- [x] Create a “phrase rotation list” to avoid repeating “irreversible decisions”
+  - [x] Rotate in: invariants, containment, recovery paths, blast radius, auditability, drift
+- [x] Align site copy to the pillars (no section without a pillar mapping)
+
+## Fix social previews and metadata (high-impact external polish)
+
+- [x] Replace SVG OG image with PNG for compatibility
+  - [x] Export `src/assets/og.png` at 1200×630
+  - [x] Keep `src/assets/og.svg` as editable source (optional)
+  - [x] Update `src/index.html`:
+    - [x] `og:image` → `/assets/og.png`
+    - [x] `twitter:image` → `/assets/og.png`
+    - [x] Add `og:image:alt` and `twitter:image:alt`
+- [x] Tighten default `<title>` and description strings
+  - [x] Update `src/index.html`:
+    - [x] Title: “David Webster — R&D Systems Architect”
+    - [x] Meta description: thesis + constraints in one sentence
+
+## Make the homepage feel “real” without adding noise
+
+- [x] Replace placeholder “Selected System Work” entries with real work from the CV
+  - [x] Update `src/app/home/home.component.html`
+    - [x] Entry: TMNL privacy-preserving analytics (sanitised)
+    - [x] Entry: Standard Bank real-time event platform recovery (sanitised)
+    - [x] Entry: GPU digital twin platform redesign (sanitised)
+  - [x] Ensure each entry uses: Constraint → Primitive → Outcome → What changed
+- [x] Replace placeholder “Current R&D Signals” with real repo-backed artefacts
+  - [x] Update `src/app/home/home.component.html`
+    - [x] Worktree Swarm (agent-swarmkit)
+    - [x] News Radar (news-radar)
+    - [x] Semblance (semblance)
+- [x] Calibrate the credibility strip to one line (muted)
+  - [x] Update `src/app/home/home.component.html`
+  - [x] Decide whether to include Kubestronaut (only if accurate + linkable)
+
+## Rebuild /selected-work into three flagship case studies
+
+- [x] Define a single case-study component format (even if hardcoded v1)
+  - [x] Fields: System, Constraint, Primitive, Outcome, What changed, “Sanitised notes”
+- [x] Implement three flagship entries
+  - [x] Update `src/app/selected-work/selected-work.component.html`
+    - [x] TMNL: access-bounded streams + invariants
+    - [x] Standard Bank: schema contracts + drift prevention
+    - [x] Backbase: control plane + governance boundaries for agentic systems
+- [x] Add an “Archive” link or collapsible section for older engagements
+  - [x] Keep it short: list only names + one constraint line each
+
+## Make /rd map directly to actual repositories
+
+- [x] Replace fictional artefacts with real ones (or rename to match reality)
+  - [x] Update `src/app/rd/rd.component.html`
+  - [x] For each artefact include:
+    - [x] Question
+    - [x] Primitive
+    - [x] Evidence (repo link)
+    - [x] Status
+- [x] Decide what “Holodeck” means on the site
+  - [x] Option A: Holodeck = diagram/architecture rehearsal tool (repo: holodeck)
+  - [x] Option B: Holodeck = migration rehearsal harness (create repo or rename site artefact)
+
+## Make /writing a curated “diagram-first” library
+
+- [x] Build a minimal writing inventory from the old site repo’s card list
+  - [x] Use: `davidwebstar34/davidwebstar.com/src/app/mockcards.ts` as source catalogue
+- [x] Create a clean writing data file in the new site repo
+  - [x] Add `src/app/content/writing.ts` (or `src/assets/content/writing.json`)
+  - [x] Each item: title, 1-sentence abstract, link, type (essay/talk), status (published/draft)
+- [x] Update `src/app/writing/writing.component.html` to render from the inventory
+
+## Asset reuse and visual coherence
+
+- [x] Copy re-usable images from the old private site repo into the new public site repo
+  - [x] Source: `davidwebstar34/davidwebstar.com/src/assets/images/*`
+  - [x] Destination: `webstarcloud/webstarcloud.com/src/assets/media/*`
+  - [x] Rename files to a clean slug format
+- [x] Create three new diagram images using Holodeck (or equivalent)
+  - [x] Export as PNG (dark theme) into `src/assets/media/diagrams/`
+  - [x] Diagram 1: constraint-first decisioning (guardrails + invariants)
+  - [x] Diagram 2: irreversible migration pattern (shadow compute + truth table)
+  - [x] Diagram 3: agentic containment (fail-safe mesh + escalation)
+
+## Tone and UI discipline
+
+- [x] Remove any remaining “agency” wording
+  - [x] Update `src/app/app.component.html`: change “Engage” CTA label
+- [x] Enforce single-accent discipline in CSS
+  - [x] Update `src/styles.css`
+    - [x] Replace blue-tinted button shadow with purple-tinted shadow
+- [x] Optional: remove Bootstrap dependency if unused
+  - [x] Update `src/index.html`: remove Bootstrap `<link>` and verify no breakage
+
+## Unify GitHub repo front doors (portfolio packaging)
+
+- [x] agent-swarmkit: add “portfolio-ready” header and link back to davidwebstar.com
+  - [x] Update `davidwebstar34/agent-swarmkit/README.md`
+  - [x] Add: short “Primitive / Guarantees / Non-guarantees” summary block at top
+- [x] news-radar: add one screenshot + “why it matters” summary
+  - [x] Update `davidwebstar34/news-radar/README.md`
+- [x] semblance: clarify the primitive and add a small diagram in README
+  - [x] Update `davidwebstar34/semblance/README.md`
+- [x] holodeck: write a real README and add 2–3 example exports
+  - [x] Update `davidwebstar34/holodeck/README.md`
+  - [x] Add `docs/examples/` with exported PNGs/SVGs
+
+## Exact files to update in webstarcloud/webstarcloud.com
+
+- [x] Update core brand surfaces
+  - [x] `src/index.html`
+  - [x] `src/styles.css`
+  - [x] `src/app/app.component.html`
+  - [x] `src/app/app.component.css`
+- [x] Update content pages
+  - [x] `src/app/home/home.component.html`
+  - [x] `src/app/selected-work/selected-work.component.html`
+  - [x] `src/app/rd/rd.component.html`
+  - [x] `src/app/writing/writing.component.html`
+  - [x] `src/app/about/about.component.html`
+- [x] Update assets
+  - [x] `src/assets/og.png` (new)
+  - [x] `src/assets/og.svg` (optional source)
+  - [x] `src/assets/media/...` (new)

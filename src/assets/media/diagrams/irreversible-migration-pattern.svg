@@ -1,0 +1,52 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Irreversible migration pattern</title>
+  <desc id="desc">Legacy to target migration using shadow compute and truth table checks before cutover.</desc>
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0f14"/>
+      <stop offset="100%" stop-color="#162035"/>
+    </linearGradient>
+    <style>
+      .title { fill: #eef3ff; font: 700 44px 'Space Grotesk', sans-serif; }
+      .label { fill: #c6d3e5; font: 600 24px 'Space Grotesk', sans-serif; }
+      .note { fill: #8d9bb1; font: 500 18px 'IBM Plex Mono', monospace; }
+      .box { fill: #121d2f; stroke: #6f5bff; stroke-opacity: 0.6; stroke-width: 2; rx: 18; }
+      .box-soft { fill: #121d2f; stroke: #6f5bff; stroke-opacity: 0.35; stroke-width: 2; rx: 18; }
+      .line { stroke: #c6d3e5; stroke-width: 3; marker-end: url(#arrow2); }
+    </style>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c6d3e5"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg2)"/>
+  <text class="title" x="90" y="110">Irreversible Migration Pattern</text>
+  <text class="note" x="90" y="152">shadow compute + truth table before a one-way cutover</text>
+
+  <rect class="box" x="130" y="260" width="280" height="130"/>
+  <text class="label" x="185" y="336">Legacy System</text>
+
+  <rect class="box" x="500" y="210" width="320" height="130"/>
+  <text class="label" x="554" y="286">Shadow Compute</text>
+
+  <rect class="box" x="500" y="430" width="320" height="130"/>
+  <text class="label" x="566" y="506">Truth Table</text>
+
+  <rect class="box" x="920" y="260" width="260" height="130"/>
+  <text class="label" x="989" y="336">Cutover</text>
+
+  <rect class="box-soft" x="1240" y="260" width="260" height="130"/>
+  <text class="label" x="1292" y="336">Target System</text>
+
+  <rect class="box-soft" x="920" y="560" width="350" height="130"/>
+  <text class="label" x="970" y="636">Audit &amp; Reconciliation</text>
+
+  <line class="line" x1="410" y1="325" x2="500" y2="275"/>
+  <line class="line" x1="410" y1="325" x2="500" y2="495"/>
+  <line class="line" x1="820" y1="275" x2="920" y2="325"/>
+  <line class="line" x1="820" y1="495" x2="920" y2="325"/>
+  <line class="line" x1="1180" y1="325" x2="1240" y2="325"/>
+  <line class="line" x1="1050" y1="390" x2="1095" y2="560"/>
+
+  <text class="note" x="90" y="810">Design rule: never perform one-way transition without dual-path validation and evidence capture.</text>
+</svg>

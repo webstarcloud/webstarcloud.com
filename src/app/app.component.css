@@ -110,6 +110,10 @@
   color: var(--text-2);
 }
 
+.footer-meta .mono {
+  letter-spacing: 0.06em;
+}
+
 @media (max-width: 900px) {
   .header-inner {
     flex-direction: column;

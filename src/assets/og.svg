@@ -3,7 +3,7 @@
   <rect x="80" y="80" width="1040" height="470" rx="36" fill="#0F1622" stroke="#6F5BFF" stroke-opacity="0.4"/>
   <text x="140" y="220" fill="#EEF3FF" font-family="Space Grotesk, sans-serif" font-size="54" letter-spacing="2">DAVID WEBSTER</text>
   <text x="140" y="300" fill="#C6D3E5" font-family="Space Grotesk, sans-serif" font-size="32">R&amp;D-forward systems architect</text>
-  <text x="140" y="352" fill="#8D9BB1" font-family="IBM Plex Mono, monospace" font-size="20">Builder of primitives for irreversible decisions</text>
+  <text x="140" y="352" fill="#8D9BB1" font-family="IBM Plex Mono, monospace" font-size="20">Builder of constraint-first system primitives</text>
   <circle cx="980" cy="310" r="120" fill="#6F5BFF" fill-opacity="0.15"/>
   <circle cx="980" cy="310" r="80" fill="#6F5BFF" fill-opacity="0.3"/>
 </svg>

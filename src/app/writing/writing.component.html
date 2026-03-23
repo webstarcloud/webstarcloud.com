@@ -3,52 +3,65 @@
     <p class="eyebrow">Writing</p>
     <h1>Diagram-first architecture notes.</h1>
     <p class="lead">
-      Writing is a forcing function for clarity. Only pieces aligned to the core pillars live here; everything else is archived.
+      Writing is a forcing function for clarity. This inventory is curated from published work and organized for system
+      judgement, not volume.
     </p>
+    <p class="mono muted">Pillars: Judgement + Systems + Primitives</p>
 
     <div class="section">
+      <p class="mono muted">Pillars: Judgement + Systems</p>
       <div class="card">
-        <p class="mono muted">Diagram-first. Principle-driven. Tool-agnostic.</p>
+        <p class="mono muted">Diagram-first. Principle-driven. Source-linked.</p>
       </div>
     </div>
 
     <div class="section">
       <h2>Curated writing</h2>
+      <p class="mono muted">Pillars: Judgement + Systems + Primitives</p>
       <div class="card-grid">
-        <div class="card">
-          <p class="mono muted">Draft</p>
-          <h3>Rebuilds Without Rollback</h3>
-          <p class="muted">How to design migrations when the exit door is welded shut.</p>
-        </div>
-        <div class="card">
-          <p class="mono muted">Draft</p>
-          <h3>Secure Computation in the Real World</h3>
-          <p class="muted">Why privacy guarantees collapse when orchestration is an afterthought.</p>
-        </div>
-        <div class="card">
-          <p class="mono muted">Draft</p>
-          <h3>Agentic Systems Need Containment</h3>
-          <p class="muted">A practical argument for guardrails as a first-class primitive.</p>
-        </div>
+        <article class="card" *ngFor="let item of publishedItems">
+          <p class="mono muted">{{ item.status | titlecase }} · {{ item.type | titlecase }}</p>
+          <h3>{{ item.title }}</h3>
+          <p class="muted">{{ item.abstract }}</p>
+          <a class="mono writing-link" [href]="item.link" target="_blank" rel="noreferrer">Open source link</a>
+        </article>
       </div>
     </div>
 
-    <div class="section">
+    <div class="section" *ngIf="draftItems.length > 0">
+      <h2>Drafts</h2>
+      <p class="mono muted">Pillars: R&amp;D + Judgement</p>
+      <div class="card-grid">
+        <article class="card" *ngFor="let item of draftItems">
+          <p class="mono muted">{{ item.status | titlecase }} · {{ item.type | titlecase }}</p>
+          <h3>{{ item.title }}</h3>
+          <p class="muted">{{ item.abstract }}</p>
+          <a class="mono writing-link" [href]="item.link" target="_blank" rel="noreferrer">Open draft</a>
+        </article>
+      </div>
+    </div>
+
+    <div class="section diagrams">
       <h2>Architecture notes (diagram-first)</h2>
+      <p class="mono muted">Pillars: Systems + Primitives + Judgement</p>
       <div class="card-grid">
         <div class="card">
-          <pre class="diagram">[Signal Intake] → [Constraint Gate] → [Invariant Ledger]
-      ↘                               ↘
-    [Human Review]                [Fail-Safe Mesh]</pre>
+          <img src="/assets/media/diagrams/constraint-first-decisioning.png"
+            alt="Constraint-first decisioning diagram with guardrails and invariants.">
           <h3>Constraint-First Decisioning</h3>
-          <p class="muted">Principle: push constraints upstream so recovery is possible downstream.</p>
+          <p class="muted">Guardrails + invariants before execution keep drift and blast radius bounded.</p>
         </div>
         <div class="card">
-          <pre class="diagram">[Legacy System] ──▶ [Shadow Compute] ──▶ [Cutover]
-       │                     │
-       └──────────▶ [Truth Table] ◀──────────┘</pre>
+          <img src="/assets/media/diagrams/irreversible-migration-pattern.png"
+            alt="Irreversible migration pattern diagram with shadow compute and truth table validation.">
           <h3>Irreversible Migration Pattern</h3>
-          <p class="muted">Principle: dual-validated compute before a single irreversible move.</p>
+          <p class="muted">Shadow compute + truth table validation before any non-reversible cutover.</p>
+        </div>
+        <div class="card">
+          <img src="/assets/media/diagrams/agentic-containment-mesh.png"
+            alt="Agentic containment diagram with fail-safe mesh and escalation flow.">
+          <h3>Agentic Containment</h3>
+          <p class="muted">Fail-safe mesh and escalation routing prevent autonomous drift from crossing boundaries.</p>
         </div>
       </div>
     </div>

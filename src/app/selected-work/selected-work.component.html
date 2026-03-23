@@ -1,45 +1,57 @@
 <div class="page">
   <div class="shell">
     <p class="eyebrow">Selected System Work</p>
-    <h1>Credibility spine.</h1>
+    <h1>Flagship case studies.</h1>
     <p class="lead">
-      A subset of high-stakes systems where correctness, security, and irreversible decisions are the real constraints.
-      Details are intentionally architectural and sanitized.
+      A constrained subset of production systems where architectural judgement mattered more than volume.
+      Details are intentionally sanitized and focused on decisions.
     </p>
+    <p class="mono muted">Pillars: Systems + Primitives + Judgement</p>
 
     <div class="section">
+      <p class="mono muted">Pillars: Systems + Primitives + Judgement</p>
       <div class="card-grid">
         <div class="card">
-          <h3>Homomorphic Encryption Systems</h3>
-          <p class="muted">Problem framing: compute on sensitive data without exposing it at rest or in use.</p>
+          <h3>TMNL: access-bounded streams + invariants</h3>
           <div class="divider"></div>
-          <p><strong>Constraints</strong>: latency ceilings, cryptographic correctness, and provable auditability.</p>
-          <p><strong>Architectural insight</strong>: separate key orchestration from compute pipelines to contain blast radius.</p>
-          <p><strong>What this changed</strong>: treat privacy guarantees as product behavior, not a bolt-on layer.</p>
+          <p><strong>System</strong>: privacy-preserving analytics platform for mobility intelligence.</p>
+          <p><strong>Constraint</strong>: sensitive datasets could not be copied or broadened beyond access boundaries.</p>
+          <p><strong>Primitive</strong>: stream-level invariants with access-bounded contracts on transformation edges.</p>
+          <p><strong>Outcome</strong>: useful analytics with smaller blast radius and lower compliance friction.</p>
+          <p><strong>What changed</strong>: privacy shifted from policy interpretation to enforceable runtime behavior.</p>
+          <p><strong>Sanitised notes</strong>: architecture and sequencing are retained; client-specific internals are removed.</p>
         </div>
         <div class="card">
-          <h3>TMNL Platform Rebuild (World-First)</h3>
-          <p class="muted">Problem framing: rebuild a live platform with zero rollback tolerance.</p>
+          <h3>Standard Bank: schema contracts + drift prevention</h3>
           <div class="divider"></div>
-          <p><strong>Constraints</strong>: continuous service, hard deadlines, and irreversible data migration paths.</p>
-          <p><strong>Architectural insight</strong>: migration truth tables + parallel-validated compute to prevent silent drift.</p>
-          <p><strong>What this changed</strong>: always design for irreversible moves before a single line ships.</p>
+          <p><strong>System</strong>: real-time event platform recovery and resilience hardening.</p>
+          <p><strong>Constraint</strong>: strict recovery objectives under continuous transactional demand.</p>
+          <p><strong>Primitive</strong>: schema contracts and drift gates at stream ingress and handoff boundaries.</p>
+          <p><strong>Outcome</strong>: improved containment and faster restoration during failure windows.</p>
+          <p><strong>What changed</strong>: recovery paths became designed assets, not emergency improvisation.</p>
+          <p><strong>Sanitised notes</strong>: timings and internal service names are abstracted; decision patterns are preserved.</p>
         </div>
         <div class="card">
-          <h3>High-Stakes Production Controls</h3>
-          <p class="muted">Problem framing: guard critical workloads where downtime is a direct business event.</p>
+          <h3>Backbase: control plane + governance boundaries for agentic systems</h3>
           <div class="divider"></div>
-          <p><strong>Constraints</strong>: audit requirements, shared tenancy, and adversarial traffic patterns.</p>
-          <p><strong>Architectural insight</strong>: enforce invariant-led controls at ingress rather than post-facto analysis.</p>
-          <p><strong>What this changed</strong>: reliability becomes a policy surface, not just an SRE function.</p>
+          <p><strong>System</strong>: agentic workflow control plane for regulated financial product delivery.</p>
+          <p><strong>Constraint</strong>: autonomy needed strict governance boundaries, auditability, and escalation routes.</p>
+          <p><strong>Primitive</strong>: policy-gated control plane with explicit containment and handoff contracts.</p>
+          <p><strong>Outcome</strong>: safer experimentation with clearer ownership across platform and domain teams.</p>
+          <p><strong>What changed</strong>: governance moved upstream into orchestration primitives.</p>
+          <p><strong>Sanitised notes</strong>: implementation specifics are generalized while boundary design remains explicit.</p>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="card">
-        <p class="muted mono">No logos. No metrics. Only patterns and decisions that matter.</p>
-      </div>
+      <p class="mono muted">Pillars: Judgement + Systems</p>
+      <details class="card archive">
+        <summary>Archive (older engagements)</summary>
+        <p><strong>Schuberg Philis</strong> — constraint: enterprise cloud foundation needed repeatable day-one governance.</p>
+        <p><strong>AWS Community Programs</strong> — constraint: communicate deep architecture tradeoffs to broad audiences.</p>
+        <p><strong>Early platform migrations</strong> — constraint: change velocity outpaced available operational controls.</p>
+      </details>
     </div>
   </div>
 </div>

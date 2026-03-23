@@ -1,0 +1,55 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Constraint-first decisioning</title>
+  <desc id="desc">Guardrails and invariants evaluated before execution with recovery paths.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0f14"/>
+      <stop offset="100%" stop-color="#131b2a"/>
+    </linearGradient>
+    <style>
+      .title { fill: #eef3ff; font: 700 44px 'Space Grotesk', sans-serif; }
+      .label { fill: #c6d3e5; font: 600 24px 'Space Grotesk', sans-serif; }
+      .note { fill: #8d9bb1; font: 500 18px 'IBM Plex Mono', monospace; }
+      .box { fill: #111a2a; stroke: #6f5bff; stroke-opacity: 0.6; stroke-width: 2; rx: 18; }
+      .box-muted { fill: #111a2a; stroke: #6f5bff; stroke-opacity: 0.35; stroke-width: 2; rx: 18; }
+      .line { stroke: #c6d3e5; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c6d3e5"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text class="title" x="90" y="110">Constraint-First Decisioning</text>
+  <text class="note" x="90" y="152">guardrails + invariants before irreversible execution</text>
+
+  <rect class="box" x="120" y="250" width="240" height="120"/>
+  <text class="label" x="164" y="322">Signal Intake</text>
+
+  <rect class="box" x="430" y="250" width="270" height="120"/>
+  <text class="label" x="476" y="322">Constraint Gate</text>
+
+  <rect class="box" x="760" y="250" width="240" height="120"/>
+  <text class="label" x="815" y="322">Guardrails</text>
+
+  <rect class="box" x="1070" y="250" width="290" height="120"/>
+  <text class="label" x="1118" y="322">Invariant Check</text>
+
+  <rect class="box" x="760" y="520" width="240" height="120"/>
+  <text class="label" x="804" y="592">Execution</text>
+
+  <rect class="box-muted" x="1130" y="520" width="320" height="120"/>
+  <text class="label" x="1183" y="592">Recovery Paths</text>
+
+  <rect class="box-muted" x="360" y="520" width="300" height="120"/>
+  <text class="label" x="420" y="592">Human Escalation</text>
+
+  <line class="line" x1="360" y1="310" x2="430" y2="310"/>
+  <line class="line" x1="700" y1="310" x2="760" y2="310"/>
+  <line class="line" x1="1000" y1="310" x2="1070" y2="310"/>
+  <line class="line" x1="1215" y1="370" x2="880" y2="520"/>
+  <line class="line" x1="860" y1="370" x2="510" y2="520"/>
+  <line class="line" x1="1000" y1="580" x2="1130" y2="580"/>
+
+  <text class="note" x="90" y="810">Design rule: enforce constraints before state mutation; treat escalation as a first-class lane.</text>
+</svg>

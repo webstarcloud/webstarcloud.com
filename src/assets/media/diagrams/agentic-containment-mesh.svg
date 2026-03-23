@@ -1,0 +1,56 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Agentic containment mesh</title>
+  <desc id="desc">Fail-safe mesh and escalation architecture for agentic systems.</desc>
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0f15"/>
+      <stop offset="100%" stop-color="#1a2033"/>
+    </linearGradient>
+    <style>
+      .title { fill: #eef3ff; font: 700 44px 'Space Grotesk', sans-serif; }
+      .label { fill: #c6d3e5; font: 600 24px 'Space Grotesk', sans-serif; }
+      .note { fill: #8d9bb1; font: 500 18px 'IBM Plex Mono', monospace; }
+      .box { fill: #111a2a; stroke: #6f5bff; stroke-opacity: 0.6; stroke-width: 2; rx: 18; }
+      .box-soft { fill: #111a2a; stroke: #6f5bff; stroke-opacity: 0.35; stroke-width: 2; rx: 18; }
+      .line { stroke: #c6d3e5; stroke-width: 3; marker-end: url(#arrow3); }
+    </style>
+    <marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c6d3e5"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg3)"/>
+  <text class="title" x="90" y="110">Agentic Containment Mesh</text>
+  <text class="note" x="90" y="152">fail-safe mesh + escalation for bounded autonomy</text>
+
+  <rect class="box" x="160" y="260" width="260" height="120"/>
+  <text class="label" x="224" y="333">User Intent</text>
+
+  <rect class="box" x="500" y="260" width="260" height="120"/>
+  <text class="label" x="545" y="333">Agent Planner</text>
+
+  <rect class="box" x="840" y="200" width="300" height="120"/>
+  <text class="label" x="895" y="273">Policy Guardrails</text>
+
+  <rect class="box" x="840" y="360" width="300" height="120"/>
+  <text class="label" x="900" y="433">Tool Sandbox</text>
+
+  <rect class="box-soft" x="1240" y="200" width="260" height="120"/>
+  <text class="label" x="1290" y="273">Fail-safe Mesh</text>
+
+  <rect class="box-soft" x="1240" y="360" width="260" height="120"/>
+  <text class="label" x="1294" y="433">Escalation Hub</text>
+
+  <rect class="box-soft" x="840" y="560" width="340" height="120"/>
+  <text class="label" x="905" y="633">Auditability Ledger</text>
+
+  <line class="line" x1="420" y1="320" x2="500" y2="320"/>
+  <line class="line" x1="760" y1="320" x2="840" y2="260"/>
+  <line class="line" x1="760" y1="320" x2="840" y2="420"/>
+  <line class="line" x1="1140" y1="260" x2="1240" y2="260"/>
+  <line class="line" x1="1140" y1="420" x2="1240" y2="420"/>
+  <line class="line" x1="990" y1="480" x2="1010" y2="560"/>
+  <line class="line" x1="1370" y1="480" x2="1180" y2="620"/>
+
+  <text class="note" x="90" y="810">Design rule: keep autonomy inside explicit boundaries and route uncertainty to accountable humans.</text>
+</svg>

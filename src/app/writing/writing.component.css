@@ -7,6 +7,16 @@ h3 {
   margin-top: 12px;
 }
 
-pre.diagram {
-  margin: 0 0 12px;
+.writing-link {
+  display: inline-flex;
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+
+.diagrams img {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 12px;
+  background: rgba(5, 9, 15, 0.9);
 }
