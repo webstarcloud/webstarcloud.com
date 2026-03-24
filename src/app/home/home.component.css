@@ -3,46 +3,92 @@
     z-index: 2;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: space-between;
+    gap: 24px;
+    padding: 44px 16px 24px;
 }
 
-.container .nav-link {
-    text-decoration: none;
-    color: lime;;
+.home-animation {
+    width: 100%;
 }
 
-.nav-link:hover {
-    color: #fff !important;
-    background-color: lime;
+.home-caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    color: lime;
 }
 
-.a {
-    color: lime;;
-    text-decoration: none;
+.home-kicker {
+    margin: 0;
+    color: lime;
+    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
-div {
-    color: lime;;
+.home-summary {
+    margin: 0;
+    max-width: 42rem;
+    color: lime;
+    font-size: clamp(0.98rem, 1.8vw, 1.12rem);
+    line-height: 1.55;
+}
+
+.home-link-row {
+    margin: 0;
+}
+
+.home-link-inline {
+    color: #8ff7c7;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+}
+
+.home-link-inline:hover {
+    color: white;
 }
 
 .nav-link {
-    width: 300px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
-    color: #6f2da8;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: white !important;
+    background-color: lime;
+}
+
+.nav-link {
+    color: lime;
+    padding: 6px 12px;
 }
 
 .footer-links {
-    margin-top: 40px; /* Adds space above footer */
-    margin-bottom: 20px; /* Adds gap from bottom of page */
-  }
-  
-  .footer-links a {
-    color: lime;
-    margin: 0 12px;
-    text-decoration: none;
-  }
-  
-  .footer-links a:hover {
-    color: white;
-    background-color: lime;
-  }
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.footer-links a {
+    margin: 0 6px 10px;
+}
+
+@media (max-width: 600px) {
+    .container {
+        gap: 20px;
+        padding-top: 28px;
+    }
+
+    .home-kicker {
+        font-size: 1rem;
+        line-height: 1.35;
+    }
+}

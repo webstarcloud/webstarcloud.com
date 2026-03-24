@@ -1,50 +1,81 @@
-.form-control {
-    background-color: #6f2da8;; 
-    color: lime; 
-    border: 2px solid lime; 
-    padding: 8px 12px; 
-    width: 90%;
-  }
-  
-  .form-control::placeholder {
-    color: lime;
-  }
-
-  .canvas-wrapper {
+.particles-panel {
     display: flex;
-    justify-content: center; 
-    align-items: flex-start;  
-  }
-  
-  .renderer-container {
-    width: 800px;
-    height: 800px;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.canvas-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: min(800px, calc(100vw - 32px), calc(100vh - 220px));
+    height: min(800px, calc(100vw - 32px), calc(100vh - 220px));
+    margin: 0 auto;
+}
+
+.renderer-container {
+    width: 100%;
+    height: 100%;
     background: transparent;
     position: relative;
     z-index: 1;
-    margin-left: auto;
-    margin-right: auto;
     touch-action: auto !important;
-    pointer-events: none;          
-  }
+    pointer-events: none;
+}
 
-  .btn-success {
-    background-color: #6f2da8;;
+.question-panel {
+    width: min(640px, calc(100vw - 32px));
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    background-color: #6f2da8;
     color: lime;
-    border: none;
+    border: 2px solid lime;
+    padding: 10px 12px;
+}
+
+.form-control::placeholder {
+    color: lime;
+}
+
+.btn-success {
+    background-color: #6f2da8;
+    color: lime;
+    border: 2px solid lime;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
+    transition: background-color 0.3s ease, color 0.3s ease;
+    white-space: nowrap;
+}
 
-  .loading-overlay {
+.btn-success:hover:enabled {
+    background-color: lime;
+    color: black;
+}
+
+.response-copy {
+    color: lime;
+    margin: 10px 0 0;
+    min-height: 24px;
+}
+
+.loading-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,4 +84,37 @@
     font-size: 1.2em;
     z-index: 3;
     pointer-events: none;
-  }
+}
+
+@media (max-width: 600px) {
+    .canvas-wrapper {
+        width: min(520px, calc(100vw - 24px), calc(100vh - 250px));
+        height: min(520px, calc(100vw - 24px), calc(100vh - 250px));
+    }
+
+    .question-panel {
+        width: min(100%, calc(100vw - 24px));
+    }
+
+    .input-row {
+        flex-direction: column;
+    }
+
+    .btn-success {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px), (max-height: 760px) {
+    .canvas-wrapper {
+        width: min(320px, calc(100vw - 24px), calc(100vh - 290px));
+        height: min(320px, calc(100vw - 24px), calc(100vh - 290px));
+    }
+}
+
+@media (max-height: 620px) {
+    .canvas-wrapper {
+        width: min(260px, calc(100vw - 24px), calc(100vh - 220px));
+        height: min(260px, calc(100vw - 24px), calc(100vh - 220px));
+    }
+}

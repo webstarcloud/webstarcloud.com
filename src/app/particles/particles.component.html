@@ -1,24 +1,23 @@
-<div class="canvas-wrapper">
-    <div #rendererContainer class="renderer-container">
-        <!-- Three.js canvas will be injected here -->
+<div class="particles-panel">
+    <div class="canvas-wrapper">
+        <div #rendererContainer class="renderer-container">
+            <!-- Three.js canvas will be injected here -->
+        </div>
+
+        <div *ngIf="loading" class="loading-overlay">
+            <p>Loading Dave 2.0{{ loadingDots }}</p>
+        </div>
     </div>
-</div>
 
-<div *ngIf="loading" class="loading-overlay">
-    <p>Loading Dave 2.0{{ loadingDots }}</p>
-</div>
-
-
-<div class="d-flex justify-content-center" style="margin-top: 20px;">
-    <div class="text-center">
-        <div class="d-flex align-items-center justify-content-center gap-2">
-            <input class="form-control me-2" type="text" placeholder="Ask me a question" [(ngModel)]="question"
+    <div class="question-panel text-center">
+        <div class="input-row">
+            <input class="form-control" type="text" placeholder="Ask me a question" [(ngModel)]="question"
                 [disabled]="isDisabled" (keyup.enter)="askQuestion()">
             <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">
-                >>
+                Ask
             </button>
         </div>
-        <p style="color: lime; margin-top: 10px;">
+        <p class="response-copy">
             {{ displayedMessage }}{{ displayedDots }}
         </p>
     </div>

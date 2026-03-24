@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -9,10 +9,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   templateUrl: './particles.component.html',
   styleUrls: ['./particles.component.css']
 })
-export class ParticlesComponent implements AfterViewInit {
+export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
-  @ViewChild('rendererContainer') rendererContainer!: ElementRef;
-  renderer = new THREE.WebGLRenderer({ alpha: true });
+  @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   scene;
   camera;
   controls: any;
@@ -32,6 +32,8 @@ export class ParticlesComponent implements AfterViewInit {
   loading = true;
   loadingDots: string = '';
   loadingDotsIntervalId: any;
+  private readonly desktopModelPosition = new THREE.Vector3(80, 20, -20);
+  private readonly desktopScale = 10;
 
   constructor(private http: HttpClient) {
     this.scene = new THREE.Scene();
@@ -146,13 +148,12 @@ export class ParticlesComponent implements AfterViewInit {
     loader.load(
       '../../assets/me.obj',
       (object: any) => {
-        object.position.set(80, 20, -20);
         object.name = 'myObject';
-        object.scale.set(10, 10, 10); // Adjust as necessary
 
         object.rotation.z = THREE.MathUtils.degToRad(90);
         object.rotation.y = THREE.MathUtils.degToRad(-10);
         object.rotation.x = THREE.MathUtils.degToRad(-10);
+        this.applyResponsiveModelLayout(object);
 
         const vertexShader = `
           uniform float pointSize;
@@ -210,6 +211,7 @@ export class ParticlesComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.setRendererSize();
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
 
     // Set initial camera position
@@ -232,19 +234,60 @@ export class ParticlesComponent implements AfterViewInit {
     // Start animation
     this.animate();
 
-    window.addEventListener('resize', () => {
-      this.setRendererSize();
-    });
-
     // console.log('Camera initial position:', this.camera.position);
   }
 
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.setRendererSize();
+    this.applyResponsiveLayoutToSceneObject();
+  }
+
+  @HostListener('window:orientationchange')
+  onOrientationChange() {
+    window.setTimeout(() => {
+      this.setRendererSize();
+      this.applyResponsiveLayoutToSceneObject();
+    }, 60);
+  }
+
   setRendererSize() {
+    if (!this.rendererContainer?.nativeElement) {
+      return;
+    }
+
     const width = this.rendererContainer.nativeElement.clientWidth;
     const height = this.rendererContainer.nativeElement.clientHeight;
+    if (!width || !height) {
+      return;
+    }
+
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+  }
+
+  private applyResponsiveLayoutToSceneObject() {
+    const object = this.scene.getObjectByName('myObject');
+    if (object) {
+      this.applyResponsiveModelLayout(object);
+    }
+  }
+
+  private applyResponsiveModelLayout(object: THREE.Object3D) {
+    const containerWidth = this.rendererContainer?.nativeElement?.clientWidth || window.innerWidth;
+    const containerHeight = this.rendererContainer?.nativeElement?.clientHeight || window.innerHeight;
+    const fitRatio = Math.max(Math.min(containerWidth / 800, containerHeight / 800, 1), 0.34);
+    const positionRatio = Math.max(Math.min(fitRatio * 1.08, 1), 0.4);
+    const verticalRatio = Math.max(Math.min(fitRatio * 1.02, 1), 0.6);
+    const scaleRatio = Math.max(Math.min(fitRatio * 1.16, 1), 0.38);
+
+    object.position.set(
+      this.desktopModelPosition.x * positionRatio,
+      this.desktopModelPosition.y * verticalRatio,
+      this.desktopModelPosition.z
+    );
+    object.scale.setScalar(this.desktopScale * scaleRatio);
   }
 
   animate() {
@@ -413,6 +456,9 @@ export class ParticlesComponent implements AfterViewInit {
 
   ngOnDestroy() {
     this.active = false;
+    clearInterval(this.intervalId);
+    clearInterval(this.dotsIntervalId);
+    clearInterval(this.loadingDotsIntervalId);
     this.renderer.dispose();
 
     // Dispose of materials, geometry, and controls
@@ -423,6 +469,6 @@ export class ParticlesComponent implements AfterViewInit {
       }
     });
 
-    this.controls.dispose();
+    this.controls?.dispose();
   }
 }

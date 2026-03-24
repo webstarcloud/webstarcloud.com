@@ -1,8 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -40,7 +38,6 @@ import { HomomorphicComponent } from './homomorphic/homomorphic.component';
     FormsModule,
     BrowserModule,
     AppRoutingModule,
-    AmplifyAuthenticatorModule,
     BrowserAnimationsModule,
     HttpClientModule,
     CommonModule,
