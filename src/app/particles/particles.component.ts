@@ -32,7 +32,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   loading = true;
   loadingDots: string = '';
   loadingDotsIntervalId: any;
-  private readonly desktopModelPosition = new THREE.Vector3(80, 20, -20);
+  private readonly desktopModelPosition = new THREE.Vector3(80, 12, -20);
   private readonly desktopScale = 10;
 
   constructor(private http: HttpClient) {
@@ -195,6 +195,8 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
         });
 
         this.scene.add(object);
+        this.syncSceneLayout();
+        window.requestAnimationFrame(() => this.syncSceneLayout());
         this.loading = false;
         this.stopLoadingDotsAnimation();
       },
@@ -210,7 +212,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.setRendererSize();
+    this.syncSceneLayout();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
 
@@ -231,6 +233,8 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     // Disable controls during animation
     this.controls.enabled = false;
 
+    window.requestAnimationFrame(() => this.syncSceneLayout());
+
     // Start animation
     this.animate();
 
@@ -239,15 +243,13 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('window:resize')
   onWindowResize() {
-    this.setRendererSize();
-    this.applyResponsiveLayoutToSceneObject();
+    this.syncSceneLayout();
   }
 
   @HostListener('window:orientationchange')
   onOrientationChange() {
     window.setTimeout(() => {
-      this.setRendererSize();
-      this.applyResponsiveLayoutToSceneObject();
+      this.syncSceneLayout();
     }, 60);
   }
 
@@ -272,6 +274,11 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     if (object) {
       this.applyResponsiveModelLayout(object);
     }
+  }
+
+  private syncSceneLayout() {
+    this.setRendererSize();
+    this.applyResponsiveLayoutToSceneObject();
   }
 
   private applyResponsiveModelLayout(object: THREE.Object3D) {
