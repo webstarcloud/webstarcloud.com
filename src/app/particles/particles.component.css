@@ -37,13 +37,26 @@
     gap: 12px;
 }
 
+.form-control,
+.btn-success {
+    background: #341049;
+    border: 2px solid lime;
+}
+
+.form-control,
+.btn-success,
+.response-copy,
+.loading-overlay {
+    color: lime;
+    font-family: var(--accent-font);
+}
+
 .form-control {
     flex: 1 1 auto;
     min-width: 0;
-    background-color: #6f2da8;
-    color: lime;
-    border: 2px solid lime;
     padding: 10px 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
 }
 
 .form-control::placeholder {
@@ -51,11 +64,10 @@
 }
 
 .btn-success {
-    background-color: #6f2da8;
-    color: lime;
-    border: 2px solid lime;
     padding: 10px 20px;
     font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -68,9 +80,10 @@
 }
 
 .response-copy {
-    color: lime;
     margin: 10px 0 0;
     min-height: 24px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
 }
 
 .loading-overlay {
@@ -80,8 +93,9 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    color: lime;
     font-size: 1.2em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     z-index: 3;
     pointer-events: none;
 }

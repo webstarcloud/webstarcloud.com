@@ -7,6 +7,7 @@
     justify-content: space-between;
     gap: 24px;
     padding: 44px 16px 24px;
+    background: transparent;
 }
 
 .home-animation {
@@ -23,6 +24,7 @@
     margin: 0 auto;
     text-align: center;
     color: lime;
+    /* font-family: var(--accent-font); */
 }
 
 .home-kicker {
@@ -64,13 +66,16 @@
 }
 
 .nav-link:hover {
-    color: white !important;
+    color: #1b0826 !important;
     background-color: lime;
 }
 
 .nav-link {
     color: lime;
     padding: 6px 12px;
+    /* font-family: var(--accent-font); */
+    font-weight: 600;
+    letter-spacing: 0.03em;
 }
 
 .footer-links {
