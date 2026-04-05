@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -10,6 +11,17 @@ interface ModeTheme {
   accentA: number;
   accentB: number;
   keywords: string[];
+}
+
+interface ChatRequestProfile {
+  userPrompt: string;
+}
+
+interface AssemblePointCloud {
+  mesh: THREE.Mesh;
+  points: THREE.Points;
+  startPositions: Float32Array;
+  targetPositions: Float32Array;
 }
 
 @Component({
@@ -30,6 +42,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   active = true;
   question = '';
   isDisabled = false;
+  activeResponseMarkdown = '';
 
   public myMessage = 'Hello, this is Dave 2.0 - dwebster182@gmail.com';
   public displayedMessage = '';
@@ -39,7 +52,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   dotsIntervalId?: number;
   displayedDots = '';
 
-  loading = true;
+  loading = false;
   loadingDots = '';
   loadingDotsIntervalId?: number;
   private readonly desktopModelPosition = new THREE.Vector3(80, 12, -20);
@@ -73,11 +86,19 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   };
   private activeMode: ParticleMode = 'architecture';
   private shaderMaterial?: THREE.ShaderMaterial;
+  private shellMaterial?: THREE.ShaderMaterial;
+  private pointCloudMaterial?: THREE.PointsMaterial;
   private readonly currentAccentA = new THREE.Color();
   private readonly currentAccentB = new THREE.Color();
   private readonly targetAccentA = new THREE.Color();
   private readonly targetAccentB = new THREE.Color();
   private readonly colorTransitionFactor = 0.08;
+  private readonly shellScale = 1.085;
+  private readonly assembleDuration = 1700;
+  private readonly maxAssemblePointsPerMesh = 12000;
+  private assemblingAvatar = false;
+  private assembleStartTime = 0;
+  private assemblePointClouds: AssemblePointCloud[] = [];
 
   isRotatingUp = true;
   rotationUpDuration = 1000;
@@ -98,38 +119,50 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.scene.add(this.ambientLight, this.pointLight);
     this.setInitialSceneMode(this.activeMode);
 
-    this.loadOBJModel();
     this.startTyping(this.myMessage);
   }
 
-  getData(prompt: string) {
-    const body = { prompt };
+  getData(prompt: string, requestProfile: ChatRequestProfile) {
+    const body = {
+      question: requestProfile.userPrompt,
+      prompt
+    };
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'x-api-key': 'rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI'
     });
 
-    this.http.post('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe(response => {
-      this.stopDotsAnimation();
-      this.startTyping(response.toString());
-    }, error => {
-      this.stopDotsAnimation();
-      console.error(error);
-      this.startTyping('My brain hurts to much today');
+    this.http.post<unknown>('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe({
+      next: (response) => {
+        const message = this.getResponseText(response);
+        this.stopDotsAnimation();
+        this.completeAnswer(message);
+      },
+      error: (error) => {
+        const fallbackMessage = 'My brain hurts to much today';
+        this.stopDotsAnimation();
+        console.error(error);
+        this.completeAnswer(fallbackMessage);
+      }
     });
   }
 
-  askQuestion() {
+  async askQuestion() {
     const prompt = this.question.trim();
     if (!prompt) {
       return;
     }
 
+    const requestProfile: ChatRequestProfile = {
+      userPrompt: prompt
+    };
+
+    this.activeResponseMarkdown = '';
     this.setModeForPrompt(prompt);
     this.isDisabled = true;
     this.displayedMessage = 'Braining';
     this.startDotsAnimation();
-    this.getData(prompt);
+    this.getData(this.buildRequestPrompt(requestProfile), requestProfile);
   }
 
   startLoadingDotsAnimation() {
@@ -199,7 +232,53 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     }, this.speed);
   }
 
-  private setModeForPrompt(prompt: string) {
+  private buildRequestPrompt(requestProfile: ChatRequestProfile) {
+    return [
+      'You are Dave 2.0, a production-minded engineering voice.',
+      'Respond in concise markdown with short headings, short paragraphs, and flat bullet lists when useful.',
+      `User question: ${requestProfile.userPrompt}`
+    ].join('\n\n');
+  }
+
+  private getResponseText(response: unknown): string {
+    if (typeof response === 'string' && response.trim()) {
+      return response.trim();
+    }
+
+    if (!response || typeof response !== 'object') {
+      return 'No response returned.';
+    }
+
+    const record = response as Record<string, unknown>;
+    for (const key of ['answer', 'message', 'response', 'text']) {
+      const candidate = record[key];
+      if (typeof candidate === 'string' && candidate.trim()) {
+        return candidate.trim();
+      }
+    }
+
+    const body = record['body'];
+    if (typeof body === 'string' && body.trim()) {
+      try {
+        return this.getResponseText(JSON.parse(body));
+      } catch {
+        return body.trim();
+      }
+    }
+
+    if (body && typeof body === 'object') {
+      return this.getResponseText(body);
+    }
+
+    return JSON.stringify(response, null, 2);
+  }
+  private completeAnswer(message: string) {
+    this.activeResponseMarkdown = message;
+    this.displayedMessage = '';
+    this.isDisabled = false;
+  }
+
+  private detectModeFromPrompt(prompt: string) {
     const normalized = prompt.toLowerCase();
     let nextMode: ParticleMode = 'architecture';
     let bestScore = 0;
@@ -212,6 +291,11 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       }
     });
 
+    return nextMode;
+  }
+
+  private setModeForPrompt(prompt: string) {
+    const nextMode = this.detectModeFromPrompt(prompt);
     this.activeMode = nextMode;
     this.queueSceneModeTransition(nextMode);
   }
@@ -239,6 +323,16 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       this.shaderMaterial.uniforms['accentA'].value.copy(this.currentAccentA);
       this.shaderMaterial.uniforms['accentB'].value.copy(this.currentAccentB);
       this.shaderMaterial.uniforms['time'].value = this.frame;
+    }
+
+    if (this.shellMaterial) {
+      this.shellMaterial.uniforms['accentA'].value.copy(this.currentAccentA);
+      this.shellMaterial.uniforms['accentB'].value.copy(this.currentAccentB);
+      this.shellMaterial.uniforms['time'].value = this.frame;
+    }
+
+    if (this.pointCloudMaterial) {
+      this.pointCloudMaterial.color.copy(this.currentAccentA).lerp(this.currentAccentB, 0.45);
     }
   }
 
@@ -271,53 +365,41 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     return redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta;
   }
 
-  loadOBJModel = () => {
+  private scheduleModelLoad() {
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        if (this.active) {
+          this.loadAvatarModel();
+        }
+      }, 120);
+    });
+  }
+
+  loadAvatarModel = () => {
+    this.loading = true;
     this.startLoadingDotsAnimation();
-    const loader = new OBJLoader();
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('assets/draco/gltf/');
+    dracoLoader.setDecoderConfig({ type: 'wasm' });
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
     loader.load(
-      '../../assets/me.obj',
-      (object: THREE.Object3D) => {
-        object.name = 'myObject';
+      'assets/dave.glb',
+      (gltf) => {
+        const avatarRoot = new THREE.Group();
+        const coreObject = gltf.scene;
+        const shellObject = gltf.scene.clone(true);
 
-        object.rotation.z = THREE.MathUtils.degToRad(90);
-        object.rotation.y = THREE.MathUtils.degToRad(-10);
-        object.rotation.x = THREE.MathUtils.degToRad(-10);
-        this.applyResponsiveModelLayout(object);
+        avatarRoot.name = 'myObject';
+        avatarRoot.rotation.z = THREE.MathUtils.degToRad(90);
+        avatarRoot.rotation.y = THREE.MathUtils.degToRad(-10);
+        avatarRoot.rotation.x = THREE.MathUtils.degToRad(-10);
+        this.applyResponsiveModelLayout(avatarRoot);
 
-        const vertexShader = `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `;
+        this.shaderMaterial = this.createCoreMaterial();
+        this.shellMaterial = this.createShellMaterial();
 
-        const fragmentShader = `
-          uniform vec3 accentA;
-          uniform vec3 accentB;
-          uniform float time;
-          varying vec2 vUv;
-          void main() {
-            vec3 base = mix(accentA, accentB, clamp(vUv.y + 0.08 * sin(time + vUv.x * 6.2831), 0.0, 1.0));
-            float shimmer = 0.82 + 0.18 * sin(time * 1.5 + vUv.y * 5.0);
-            gl_FragColor = vec4(base * shimmer, 0.94);
-          }
-        `;
-
-        this.shaderMaterial = new THREE.ShaderMaterial({
-          vertexShader,
-          fragmentShader,
-          transparent: true,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-          uniforms: {
-            accentA: { value: new THREE.Color(this.modeThemes[this.activeMode].accentA) },
-            accentB: { value: new THREE.Color(this.modeThemes[this.activeMode].accentB) },
-            time: { value: 0 }
-          }
-        });
-
-        object.traverse((child: THREE.Object3D) => {
+        coreObject.traverse((child: THREE.Object3D) => {
           if (child instanceof THREE.Mesh) {
             child.material = this.shaderMaterial!;
 
@@ -325,21 +407,268 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
             const positionArray = positionAttribute.array as Float32Array;
             child.userData['originalPositions'] = new Float32Array(positionArray.length);
             child.userData['originalPositions'].set(positionArray);
+            child.renderOrder = 1;
           }
         });
 
-        this.scene.add(object);
+        shellObject.scale.setScalar(this.shellScale);
+        shellObject.name = 'myShellObject';
+        shellObject.visible = false;
+        shellObject.traverse((child: THREE.Object3D) => {
+          if (child instanceof THREE.Mesh) {
+            child.material = this.shellMaterial!;
+            child.userData['skipDeform'] = true;
+            child.renderOrder = 2;
+          }
+        });
+
+        avatarRoot.add(coreObject);
+        avatarRoot.add(shellObject);
+        this.createAssemblePointClouds(coreObject);
+        this.scene.add(avatarRoot);
         this.syncSceneLayout();
         window.requestAnimationFrame(() => this.syncSceneLayout());
         this.loading = false;
         this.stopLoadingDotsAnimation();
+        dracoLoader.dispose();
       },
       undefined,
       () => {
         this.loading = false;
         this.stopLoadingDotsAnimation();
+        dracoLoader.dispose();
       }
     );
+  }
+
+  private createCoreMaterial() {
+    const vertexShader = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const fragmentShader = `
+      uniform vec3 accentA;
+      uniform vec3 accentB;
+      uniform float time;
+      varying vec2 vUv;
+      void main() {
+        vec3 base = mix(accentA, accentB, clamp(vUv.y + 0.08 * sin(time + vUv.x * 6.2831), 0.0, 1.0));
+        float shimmer = 0.82 + 0.18 * sin(time * 1.5 + vUv.y * 5.0);
+        gl_FragColor = vec4(base * shimmer, 0.94);
+      }
+    `;
+
+    return new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        accentA: { value: new THREE.Color(this.modeThemes[this.activeMode].accentA) },
+        accentB: { value: new THREE.Color(this.modeThemes[this.activeMode].accentB) },
+        time: { value: 0 }
+      }
+    });
+  }
+
+  private createShellMaterial() {
+    const vertexShader = `
+      varying vec3 vNormal;
+      varying vec3 vViewPosition;
+      varying vec3 vLocalPosition;
+      void main() {
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vNormal = normalize(normalMatrix * normal);
+        vViewPosition = -mvPosition.xyz;
+        vLocalPosition = position;
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `;
+
+    const fragmentShader = `
+      uniform vec3 accentA;
+      uniform vec3 accentB;
+      uniform float time;
+      varying vec3 vNormal;
+      varying vec3 vViewPosition;
+      varying vec3 vLocalPosition;
+      void main() {
+        vec3 normal = normalize(vNormal);
+        vec3 viewDir = normalize(vViewPosition);
+        float fresnel = pow(1.0 - clamp(abs(dot(normal, viewDir)), 0.0, 1.0), 1.35);
+        float scan = 0.72 + 0.28 * sin(vLocalPosition.y * 10.0 + time * 2.6);
+        float pulse = 0.82 + 0.18 * sin(time * 1.8);
+        vec3 glow = mix(accentA, accentB, 0.5 + 0.5 * sin(time * 0.9 + vLocalPosition.y * 3.0));
+        vec3 highlight = mix(glow, vec3(0.92, 1.0, 1.0), 0.35 + fresnel * 0.35);
+        float alpha = clamp((0.12 + fresnel * 0.78) * scan * pulse, 0.0, 0.9);
+        gl_FragColor = vec4(highlight * (0.75 + fresnel * 1.2), alpha);
+      }
+    `;
+
+    return new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        accentA: { value: new THREE.Color(this.modeThemes[this.activeMode].accentA) },
+        accentB: { value: new THREE.Color(this.modeThemes[this.activeMode].accentB) },
+        time: { value: 0 }
+      }
+    });
+  }
+
+  private createAssemblePointClouds(coreObject: THREE.Object3D) {
+    this.pointCloudMaterial = new THREE.PointsMaterial({
+      size: 1.45,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.92,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+      color: this.currentAccentA.clone().lerp(this.currentAccentB, 0.45)
+    });
+
+    coreObject.traverse((child: THREE.Object3D) => {
+      if (!(child instanceof THREE.Mesh)) {
+        return;
+      }
+
+      const positionAttribute = child.geometry.getAttribute('position') as THREE.BufferAttribute | undefined;
+      if (!positionAttribute || positionAttribute.count === 0) {
+        return;
+      }
+
+      const normalAttribute = child.geometry.getAttribute('normal') as THREE.BufferAttribute | undefined;
+      const vertexStep = Math.max(1, Math.ceil(positionAttribute.count / this.maxAssemblePointsPerMesh));
+      const sampleCount = Math.ceil(positionAttribute.count / vertexStep);
+      const targetPositions = new Float32Array(sampleCount * 3);
+      const startPositions = new Float32Array(sampleCount * 3);
+      let writeIndex = 0;
+
+      for (let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex += vertexStep) {
+        const x = positionAttribute.getX(vertexIndex);
+        const y = positionAttribute.getY(vertexIndex);
+        const z = positionAttribute.getZ(vertexIndex);
+        const targetOffset = writeIndex * 3;
+
+        targetPositions[targetOffset] = x;
+        targetPositions[targetOffset + 1] = y;
+        targetPositions[targetOffset + 2] = z;
+
+        let directionX = Math.random() * 2 - 1;
+        let directionY = Math.random() * 2 - 1;
+        let directionZ = Math.random() * 2 - 1;
+
+        if (normalAttribute && vertexIndex < normalAttribute.count) {
+          directionX = normalAttribute.getX(vertexIndex);
+          directionY = normalAttribute.getY(vertexIndex);
+          directionZ = normalAttribute.getZ(vertexIndex);
+        }
+
+        const direction = new THREE.Vector3(directionX, directionY, directionZ);
+        if (direction.lengthSq() < 0.0001) {
+          direction.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+        }
+
+        direction.normalize();
+
+        const explodeDistance = 14 + Math.random() * 24;
+        const driftX = (Math.random() * 2 - 1) * 8;
+        const driftY = (Math.random() * 2 - 1) * 10;
+        const driftZ = (Math.random() * 2 - 1) * 8;
+
+        startPositions[targetOffset] = x + direction.x * explodeDistance + driftX;
+        startPositions[targetOffset + 1] = y + direction.y * explodeDistance + driftY;
+        startPositions[targetOffset + 2] = z + direction.z * explodeDistance + driftZ;
+        writeIndex += 1;
+      }
+
+      const pointsGeometry = new THREE.BufferGeometry();
+      pointsGeometry.setAttribute('position', new THREE.BufferAttribute(startPositions.slice(), 3));
+
+      const points = new THREE.Points(pointsGeometry, this.pointCloudMaterial!);
+      points.position.copy(child.position);
+      points.quaternion.copy(child.quaternion);
+      points.scale.copy(child.scale);
+      points.renderOrder = 3;
+      points.frustumCulled = false;
+      child.parent?.add(points);
+
+      child.visible = false;
+      this.assemblePointClouds.push({
+        mesh: child,
+        points,
+        startPositions,
+        targetPositions
+      });
+    });
+
+    if (this.assemblePointClouds.length > 0) {
+      this.assemblingAvatar = true;
+      this.assembleStartTime = performance.now();
+    } else {
+      this.pointCloudMaterial?.dispose();
+      this.pointCloudMaterial = undefined;
+    }
+  }
+
+  private updateAssemblePointClouds() {
+    if (!this.assemblingAvatar) {
+      return;
+    }
+
+    const elapsed = performance.now() - this.assembleStartTime;
+    const progress = Math.min(elapsed / this.assembleDuration, 1);
+    const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+    if (this.pointCloudMaterial) {
+      this.pointCloudMaterial.opacity = Math.max(0.08, 0.95 - easedProgress * 0.75);
+    }
+
+    this.assemblePointClouds.forEach((entry) => {
+      const positionAttribute = entry.points.geometry.getAttribute('position') as THREE.BufferAttribute;
+      const livePositions = positionAttribute.array as Float32Array;
+
+      for (let index = 0; index < livePositions.length; index += 1) {
+        const start = entry.startPositions[index];
+        const target = entry.targetPositions[index];
+        livePositions[index] = start + (target - start) * easedProgress;
+      }
+
+      positionAttribute.needsUpdate = true;
+    });
+
+    if (progress >= 1) {
+      this.finishAssemblePointClouds();
+    }
+  }
+
+  private finishAssemblePointClouds() {
+    this.assemblingAvatar = false;
+    this.assemblePointClouds.forEach((entry) => {
+      entry.mesh.visible = true;
+      entry.points.removeFromParent();
+      entry.points.geometry.dispose();
+    });
+
+    this.assemblePointClouds = [];
+    this.pointCloudMaterial?.dispose();
+    this.pointCloudMaterial = undefined;
+
+    const shellObject = this.scene.getObjectByName('myShellObject');
+    if (shellObject) {
+      shellObject.visible = true;
+    }
   }
 
   ngAfterViewInit() {
@@ -356,6 +685,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.controls.enabled = false;
 
     window.requestAnimationFrame(() => this.syncSceneLayout());
+    this.scheduleModelLoad();
     this.animate();
   }
 
@@ -428,8 +758,18 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       this.shaderMaterial.uniforms['time'].value = this.frame;
     }
 
+    if (this.shellMaterial) {
+      this.shellMaterial.uniforms['time'].value = this.frame;
+    }
+
+    this.updateAssemblePointClouds();
+
     this.scene.traverse((object: THREE.Object3D) => {
       if (object instanceof THREE.Mesh) {
+        if (object.userData['skipDeform'] || !object.visible) {
+          return;
+        }
+
         const positionAttribute = object.geometry.getAttribute('position');
         const positionArray = positionAttribute.array as Float32Array;
         const originalArray = object.userData['originalPositions'] as Float32Array | undefined;
@@ -561,6 +901,12 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       window.clearInterval(this.loadingDotsIntervalId);
     }
     this.renderer.dispose();
+    this.shaderMaterial?.dispose();
+    this.shellMaterial?.dispose();
+    this.pointCloudMaterial?.dispose();
+    this.assemblePointClouds.forEach((entry) => {
+      entry.points.geometry.dispose();
+    });
 
     this.scene.traverse((object: THREE.Object3D) => {
       if (object instanceof THREE.Mesh) {

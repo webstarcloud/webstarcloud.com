@@ -38,7 +38,8 @@
 }
 
 .form-control,
-.btn-success {
+.btn-success,
+.control-select {
     background: #341049;
     border: 2px solid lime;
 }

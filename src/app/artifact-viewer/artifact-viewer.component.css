@@ -1,0 +1,88 @@
+.artifact-shell {
+    margin-top: 18px;
+    text-align: left;
+    color: lime;
+}
+
+.artifact-card {
+    margin-top: 14px;
+}
+
+.artifact-card {
+    padding: 18px;
+    border: 1px solid rgba(165, 255, 0, 0.28);
+    border-radius: 20px;
+    background: rgba(27, 8, 38, 0.72);
+}
+
+.artifact-label {
+    margin: 0 0 10px;
+    color: #8ff7c7;
+    font: 600 0.78rem/1 var(--accent-font);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.artifact-markdown {
+    color: rgba(241, 255, 215, 0.92);
+}
+
+.artifact-markdown h2,
+.artifact-markdown h3,
+.artifact-markdown h4,
+.artifact-markdown h5 {
+    margin: 0 0 10px;
+    color: #8ff7c7;
+    font-family: var(--accent-font);
+    letter-spacing: 0.04em;
+}
+
+.artifact-markdown p,
+.artifact-markdown li {
+    margin: 0;
+    color: rgba(241, 255, 215, 0.92);
+    line-height: 1.6;
+}
+
+.artifact-markdown p + p,
+.artifact-markdown p + ul,
+.artifact-markdown ul + p,
+.artifact-markdown ul + ul,
+.artifact-markdown h2 + p,
+.artifact-markdown h3 + p,
+.artifact-markdown h4 + p,
+.artifact-markdown h5 + p {
+    margin-top: 12px;
+}
+
+.artifact-markdown ul {
+    margin: 12px 0 0;
+    padding-left: 18px;
+}
+
+.artifact-markdown li + li {
+    margin-top: 8px;
+}
+
+.artifact-markdown code,
+.artifact-markdown pre {
+    margin: 0;
+    font-family: var(--accent-font);
+}
+
+.artifact-markdown code {
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(165, 255, 0, 0.08);
+    color: #d8ff9f;
+}
+
+.artifact-markdown pre {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 14px;
+    overflow-x: auto;
+    background: rgba(11, 2, 19, 0.95);
+    color: #d8ff9f;
+    white-space: pre-wrap;
+}

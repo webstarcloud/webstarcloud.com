@@ -11,7 +11,8 @@
 
     <div class="question-panel text-center">
         <div class="input-row">
-            <input class="form-control" type="text" placeholder="Ask me a question" [(ngModel)]="question"
+            <input class="form-control" type="text" placeholder="Ask a question"
+                [(ngModel)]="question"
                 [disabled]="isDisabled" (keyup.enter)="askQuestion()">
             <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">
                 Ask
@@ -20,5 +21,6 @@
         <p class="response-copy">
             {{ displayedMessage }}{{ displayedDots }}
         </p>
+        <app-artifact-viewer [responseMarkdown]="activeResponseMarkdown"></app-artifact-viewer>
     </div>
 </div>

@@ -25,6 +25,11 @@
                 "glob": "**/*",
                 "input": "src/assets/",
                 "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/three/examples/jsm/libs/draco/gltf/",
+                "output": "/assets/draco/gltf/"
               }
             ],
             "styles": [

@@ -1,0 +1,6 @@
+<section class="artifact-shell" *ngIf="hasContent">
+    <article class="artifact-card" *ngIf="responseMarkdown">
+        <p class="artifact-label">Response</p>
+        <div class="artifact-markdown" [innerHTML]="responseHtml"></div>
+    </article>
+</section>
