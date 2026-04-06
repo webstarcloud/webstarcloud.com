@@ -13,9 +13,15 @@
         <div class="input-row">
             <input class="form-control" type="text" placeholder="Ask a question"
                 [(ngModel)]="question"
-                [disabled]="isDisabled" (keyup.enter)="askQuestion()">
-            <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled">
+                [disabled]="isDisabled || gateLocked" (keyup.enter)="askQuestion()">
+            <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled || gateLocked">
                 Ask
+            </button>
+        </div>
+        <div class="gate-panel" *ngIf="gateLocked">
+            <p class="gate-copy">Public mode gives one free answer. Sign in to unlock Dave&apos;s Brain and keep going.</p>
+            <button type="button" class="gate-button" (click)="startAuthFlow()">
+                Continue with Cognito
             </button>
         </div>
         <p class="response-copy">

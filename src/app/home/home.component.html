@@ -1,4 +1,12 @@
 <div class="container min-vh-100">
+    <div class="home-utility">
+        <button class="access-trigger" type="button" (click)="toggleAuthPanel()">
+            <ng-container *ngIf="authState$ | async as state">
+                {{ state.isAuthenticated ? 'Private Access' : 'Lab Access' }}
+            </ng-container>
+        </button>
+    </div>
+
     <section class="home-caption">
         <p class="home-kicker">R&amp;D Principle Architect | Lead Engineer</p>
         <!-- <p class="home-summary">
@@ -10,6 +18,11 @@
         <app-particles></app-particles>
     </section>
 
+    <section class="private-space" *ngIf="(authState$ | async)?.isAuthenticated">
+        <p class="private-space__kicker">Private Surfaces Unlocked</p>
+        <p class="private-space__copy">Reserved for second-brain views, drafts, and gated internal experiments.</p>
+    </section>
+
     <div class="row justify-content-md-center">
         <div class="footer-links text-center">
             <a class="nav-link d-inline" href="https://github.com/davidwebstar34" target="_blank" rel="noreferrer">GitHub</a>
@@ -17,4 +30,6 @@
             <a class="nav-link d-inline" href="https://x.com/WebstarDavid" target="_blank" rel="noreferrer">X</a>
         </div>
     </div>
+
+    <app-auth-panel [open]="authPanelOpen" (closed)="closeAuthPanel()"></app-auth-panel>
 </div>

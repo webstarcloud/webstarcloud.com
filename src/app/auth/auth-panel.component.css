@@ -1,0 +1,127 @@
+.auth-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 14;
+    background: rgba(15, 2, 26, 0.58);
+    backdrop-filter: blur(6px);
+}
+
+.auth-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: min(380px, 100vw);
+    height: 100vh;
+    padding: 28px 24px;
+    background: rgba(39, 9, 58, 0.96);
+    border-left: 1px solid rgba(156, 245, 108, 0.28);
+    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.35);
+    transform: translateX(100%);
+    transition: transform 0.28s ease;
+}
+
+.auth-panel--open {
+    transform: translateX(0);
+}
+
+.auth-close {
+    align-self: flex-end;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #b6f39c;
+    font: inherit;
+    cursor: pointer;
+}
+
+.auth-kicker {
+    margin: 0;
+    color: #86ffc7;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.auth-title {
+    margin: 0;
+    color: #fff4d7;
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    line-height: 1.1;
+}
+
+.auth-copy,
+.auth-status,
+.auth-error {
+    margin: 0;
+    line-height: 1.55;
+}
+
+.auth-copy,
+.auth-status {
+    color: #efe4ff;
+}
+
+.auth-error {
+    color: #ffc4d0;
+}
+
+.auth-form,
+.auth-state {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-benefits {
+    padding: 14px 16px;
+    border: 1px solid rgba(156, 245, 108, 0.18);
+    border-radius: 18px;
+    background: rgba(24, 5, 37, 0.48);
+}
+
+.auth-label {
+    color: #cdbde6;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.auth-list {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: #efe4ff;
+    line-height: 1.55;
+}
+
+.auth-submit {
+    margin-top: 8px;
+    padding: 12px 16px;
+    border: 1px solid rgba(156, 245, 108, 0.42);
+    border-radius: 999px;
+    background: rgba(58, 16, 87, 0.92);
+    color: #b6f39c;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+    background: #b6f39c;
+    color: #220733;
+}
+
+.auth-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .auth-panel {
+        padding: 24px 18px;
+    }
+}

@@ -4,6 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 
 type ParticleMode = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling';
 
@@ -31,6 +33,7 @@ interface AssemblePointCloud {
 })
 export class ParticlesComponent implements AfterViewInit, OnDestroy {
   @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
+  private readonly anonymousResponseKey = 'dave2-anonymous-response-used';
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   scene = new THREE.Scene();
@@ -43,6 +46,8 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   question = '';
   isDisabled = false;
   activeResponseMarkdown = '';
+  gateLocked = false;
+  isAuthenticated = false;
 
   public myMessage = 'Hello, this is Dave 2.0 - dwebster182@gmail.com';
   public displayedMessage = '';
@@ -110,14 +115,20 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   rotationStartTime = 0;
   originalRotation = 0;
   startRight = false;
+  private authSubscription?: Subscription;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private auth: AuthService) {
     this.scene.background = null;
     this.camera.position.set(0, 0, -1);
 
     this.pointLight.position.set(50, 50, 50);
     this.scene.add(this.ambientLight, this.pointLight);
     this.setInitialSceneMode(this.activeMode);
+    this.authSubscription = this.auth.state$.subscribe((state) => {
+      this.isAuthenticated = state.isAuthenticated;
+      this.updateGateState();
+    });
+    this.updateGateState();
 
     this.startTyping(this.myMessage);
   }
@@ -150,6 +161,12 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   async askQuestion() {
     const prompt = this.question.trim();
     if (!prompt) {
+      return;
+    }
+
+    if (this.gateLocked) {
+      this.activeResponseMarkdown = '';
+      this.displayedMessage = '';
       return;
     }
 
@@ -276,6 +293,34 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.activeResponseMarkdown = message;
     this.displayedMessage = '';
     this.isDisabled = false;
+    if (!this.isAuthenticated) {
+      this.markAnonymousResponseUsed();
+      this.updateGateState();
+    }
+  }
+
+  startAuthFlow() {
+    this.auth.signIn();
+  }
+
+  private updateGateState() {
+    this.gateLocked = !this.isAuthenticated && this.hasAnonymousResponseBeenUsed();
+  }
+
+  private hasAnonymousResponseBeenUsed() {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.localStorage.getItem(this.anonymousResponseKey) === '1';
+  }
+
+  private markAnonymousResponseUsed() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(this.anonymousResponseKey, '1');
   }
 
   private detectModeFromPrompt(prompt: string) {
@@ -894,6 +939,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     if (this.intervalId) {
       window.clearInterval(this.intervalId);
     }
+    this.authSubscription?.unsubscribe();
     if (this.dotsIntervalId) {
       window.clearInterval(this.dotsIntervalId);
     }
