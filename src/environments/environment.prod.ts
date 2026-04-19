@@ -1,5 +1,9 @@
 export const environment = {
   production: true,
+  api: {
+    baseUrl: 'https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test',
+    gatewayKey: 'rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI'
+  },
   auth: {
     enabled: true,
     authority: 'https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_7xPJnzHOb',

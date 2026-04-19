@@ -3,9 +3,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { environment } from '../../environments/environment';
 
 type ParticleMode = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling';
 
@@ -13,10 +14,6 @@ interface ModeTheme {
   accentA: number;
   accentB: number;
   keywords: string[];
-}
-
-interface ChatRequestProfile {
-  userPrompt: string;
 }
 
 interface AssemblePointCloud {
@@ -34,6 +31,8 @@ interface AssemblePointCloud {
 export class ParticlesComponent implements AfterViewInit, OnDestroy {
   @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
   private readonly anonymousResponseKey = 'dave2-anonymous-response-used';
+  private readonly apiBaseUrl = environment.api.baseUrl.trim();
+  private readonly apiGatewayKey = environment.api.gatewayKey.trim();
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   scene = new THREE.Scene();
@@ -133,24 +132,32 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.startTyping(this.myMessage);
   }
 
-  getData(prompt: string, requestProfile: ChatRequestProfile) {
+  getData(question: string) {
+    if (!this.apiBaseUrl) {
+      this.stopDotsAnimation();
+      this.completeAnswer('The brain endpoint is not configured.');
+      return;
+    }
+
     const body = {
-      question: requestProfile.userPrompt,
-      prompt
+      question
     };
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': 'rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI'
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
     });
 
-    this.http.post<unknown>('https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test', body, { headers }).subscribe({
+    if (this.apiGatewayKey) {
+      headers = headers.set('x-api-key', this.apiGatewayKey);
+    }
+
+    this.http.post(this.apiBaseUrl, body, { headers, responseType: 'text' }).subscribe({
       next: (response) => {
         const message = this.getResponseText(response);
         this.stopDotsAnimation();
         this.completeAnswer(message);
       },
       error: (error) => {
-        const fallbackMessage = 'My brain hurts to much today';
+        const fallbackMessage = this.getErrorText(error);
         this.stopDotsAnimation();
         console.error(error);
         this.completeAnswer(fallbackMessage);
@@ -170,16 +177,12 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const requestProfile: ChatRequestProfile = {
-      userPrompt: prompt
-    };
-
     this.activeResponseMarkdown = '';
     this.setModeForPrompt(prompt);
     this.isDisabled = true;
     this.displayedMessage = 'Braining';
     this.startDotsAnimation();
-    this.getData(this.buildRequestPrompt(requestProfile), requestProfile);
+    this.getData(prompt);
   }
 
   startLoadingDotsAnimation() {
@@ -249,17 +252,22 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     }, this.speed);
   }
 
-  private buildRequestPrompt(requestProfile: ChatRequestProfile) {
-    return [
-      'You are Dave 2.0, a production-minded engineering voice.',
-      'Respond in concise markdown with short headings, short paragraphs, and flat bullet lists when useful.',
-      `User question: ${requestProfile.userPrompt}`
-    ].join('\n\n');
-  }
-
   private getResponseText(response: unknown): string {
-    if (typeof response === 'string' && response.trim()) {
-      return response.trim();
+    if (typeof response === 'string') {
+      const trimmed = response.trim();
+      if (!trimmed) {
+        return 'No response returned.';
+      }
+
+      if (this.looksLikeJson(trimmed)) {
+        try {
+          return this.getResponseText(JSON.parse(trimmed));
+        } catch {
+          return trimmed;
+        }
+      }
+
+      return trimmed;
     }
 
     if (!response || typeof response !== 'object') {
@@ -289,6 +297,30 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
 
     return JSON.stringify(response, null, 2);
   }
+
+  private getErrorText(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = this.getResponseText(error.error);
+      if (backendMessage !== 'No response returned.') {
+        return backendMessage;
+      }
+
+      if (typeof error.message === 'string' && error.message.trim()) {
+        return error.message.trim();
+      }
+
+      if (error.status) {
+        return `Request failed with status ${error.status}.`;
+      }
+    }
+
+    return 'My brain hurts to much today';
+  }
+
+  private looksLikeJson(value: string): boolean {
+    return (value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'));
+  }
+
   private completeAnswer(message: string) {
     this.activeResponseMarkdown = message;
     this.displayedMessage = '';
