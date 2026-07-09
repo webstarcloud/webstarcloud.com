@@ -12,9 +12,10 @@ import { ArtifactViewerComponent } from './artifact-viewer/artifact-viewer.compo
 import { AuthPanelComponent } from './auth/auth-panel.component';
 import { AuthModule, LogLevel } from 'angular-auth-oidc-client';
 import { environment } from '../environments/environment';
+import { readPostLoginRoute } from './auth/auth-return';
 
 function buildRedirectUrl(path: string) {
-  const fallbackOrigin = 'https://davidwebstar.com';
+  const fallbackOrigin = 'https://webstarcloud.com';
   const origin = typeof window === 'undefined' ? fallbackOrigin : window.location.origin;
   if (!path || path === '/') {
     return origin;
@@ -37,7 +38,7 @@ const oidcConfig = {
   autoUserInfo: true,
   silentRenew: false,
   useRefreshToken: false,
-  postLoginRoute: '/',
+  postLoginRoute: readPostLoginRoute('/'),
   logLevel: LogLevel.None
 };
 

@@ -1,0 +1,49 @@
+<main class="labs-page">
+  <header class="labs-hero">
+    <a class="back-link" routerLink="/">WebstarCloud</a>
+    <p class="eyebrow">Labs</p>
+    <h1>Research, packages, and technical experiments.</h1>
+    <p class="lede">
+      Labs is where public research and practical tooling live before they become
+      venture surfaces or production products.
+    </p>
+  </header>
+
+  <section class="lab-grid" aria-label="Lab projects">
+    <article class="lab-card" *ngFor="let lab of labs">
+      <div class="lab-card__diagram" aria-hidden="true">
+        <ng-container [ngSwitch]="lab.icon">
+          <svg *ngSwitchCase="'input'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 14h14M6 24h10M6 34h16" />
+            <path d="M26 24h12M34 20l6 4-6 4" />
+            <path d="M50 13h32l-11 14v8h-10v-8z" />
+            <path d="M86 24h12M94 20l6 4-6 4" />
+            <path d="M110 24h16" />
+          </svg>
+          <svg *ngSwitchCase="'signal'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 34c9-18 18-18 27 0s18 18 27 0 18-18 27 0 18 18 35 0" />
+            <path d="M8 14h18M8 24h12" />
+            <circle cx="74" cy="24" r="6" />
+            <path d="M88 24h26M108 20l6 4-6 4" />
+          </svg>
+          <svg *ngSwitchCase="'platform'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="10" width="26" height="12" rx="2" />
+            <rect x="8" y="28" width="26" height="12" rx="2" />
+            <path d="M40 16h18M40 34h18M58 16v18" />
+            <rect x="66" y="12" width="24" height="24" rx="3" />
+            <path d="M96 24h24M114 20l6 4-6 4" />
+          </svg>
+        </ng-container>
+      </div>
+      <p class="lab-boundary">{{ lab.boundary }}</p>
+      <p class="lab-stage">{{ lab.stage }}</p>
+      <h2>{{ lab.name }}</h2>
+      <p>{{ lab.summary }}</p>
+      <a *ngIf="lab.route" class="lab-link" [routerLink]="lab.route">Open lab</a>
+      <span *ngIf="!lab.route" class="lab-hold">In development</span>
+    </article>
+  </section>
+</main>

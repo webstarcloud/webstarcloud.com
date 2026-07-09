@@ -1,26 +1,46 @@
 <div class="container min-vh-100">
     <div class="home-utility">
+        <nav class="home-nav" aria-label="WebstarCloud sections">
+            <a class="home-nav__link" routerLink="/ventures">Ventures</a>
+            <a class="home-nav__link" routerLink="/labs">Labs</a>
+        </nav>
         <button class="access-trigger" type="button" (click)="toggleAuthPanel()">
-            <ng-container *ngIf="authState$ | async as state">
-                {{ state.isAuthenticated ? 'Private Access' : 'Lab Access' }}
-            </ng-container>
+            Private Access
         </button>
     </div>
 
     <section class="home-caption">
-        <p class="home-kicker">R&amp;D Principle Architect | Lead Engineer</p>
+        <p class="home-kicker">Principal Architect | AI Platforms, Agents &amp; Trust at Scale</p>
         <!-- <p class="home-summary">
             Notes on agentic systems, architecture, tooling, and what actually survives contact with production.
         </p> -->
     </section>
 
     <section class="home-animation" aria-label="Interactive avatar">
-        <app-particles></app-particles>
+        <app-particles (requestAccess)="openAuthPanel()"></app-particles>
     </section>
 
     <section class="private-space" *ngIf="(authState$ | async)?.isAuthenticated">
         <p class="private-space__kicker">Private Surfaces Unlocked</p>
         <p class="private-space__copy">Reserved for second-brain views, drafts, and gated internal experiments.</p>
+    </section>
+
+    <section class="scale" aria-label="Built at scale">
+        <header class="scale-head">
+            <p class="scale-kicker">Built at scale</p>
+            <p class="scale-lede">A decade of production platforms for data-intensive, highly regulated environments &mdash; from startups to tier-1 banks.</p>
+        </header>
+
+        <div class="scale-grid">
+            <article class="scale-card" *ngFor="let p of platforms">
+                <p class="scale-card__context">{{ p.context }}</p>
+                <h3 class="scale-card__name">{{ p.name }}</h3>
+                <p class="scale-card__blurb">{{ p.blurb }}</p>
+                <p class="scale-card__metric">{{ p.metric }}</p>
+            </article>
+        </div>
+
+        <p class="scale-proof">10+ years &middot; startups to enterprise banks &middot; &ldquo;Champion of AWS&rdquo; &mdash; Werner Vogels &middot; keynote builds for two CEOs.</p>
     </section>
 
     <div class="row justify-content-md-center">

@@ -16,6 +16,16 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 > npx angular-cli-ghpages --dir=docs/
 
+## Ventures and SafeGit
+
+- `/ventures` lists investable product ideas.
+- `/ventures/safegit` is the public SafeGit venture page.
+- `/safegit` is the gated SafeGit workspace route.
+- `/labs` lists research and package experiments.
+- `/labs/llm-input-hardening` is the public LLM input hardening lab page.
+
+The SafeGit workspace uses the existing Cognito/OIDC integration. When an unauthenticated user opens `/safegit`, the app stores the intended return path in session storage, sends the user through Cognito, and returns them to `/safegit` after login.
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).

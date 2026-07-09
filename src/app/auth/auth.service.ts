@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { environment } from '../../environments/environment';
+import { storePostLoginRoute } from './auth-return';
 
 export interface AuthState {
   configured: boolean;
@@ -44,7 +45,7 @@ export class AuthService {
     return this.stateSubject.value;
   }
 
-  signIn() {
+  signIn(returnPath = '/') {
     if (!this.isConfigured()) {
       this.setState({
         configured: false,
@@ -54,6 +55,8 @@ export class AuthService {
       });
       return;
     }
+
+    storePostLoginRoute(returnPath);
 
     this.setState({
       loading: true,
@@ -113,7 +116,7 @@ export class AuthService {
   }
 
   private buildPostLogoutRedirectUrl() {
-    const fallbackOrigin = 'https://davidwebstar.com';
+    const fallbackOrigin = 'https://webstarcloud.com';
     const origin = typeof window === 'undefined' ? fallbackOrigin : window.location.origin;
     const path = this.authConfig.postLogoutRedirectPath;
 

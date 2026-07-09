@@ -1,0 +1,58 @@
+<main class="workspace-shell">
+  <header class="workspace-nav">
+    <a class="brand" routerLink="/ventures/safegit"><span>SG</span> SafeGit</a>
+    <div class="nav-actions" *ngIf="authState$ | async as state">
+      <span class="signed-in" *ngIf="state.email">{{ state.email }}</span>
+      <button type="button" (click)="signOut()">Sign out</button>
+    </div>
+  </header>
+
+  <section class="workspace-hero">
+    <div>
+      <p class="eyebrow">Private workspace</p>
+      <h1>Repository safety dashboard</h1>
+      <p>
+        This route stays inside the WebstarCloud Angular app, but uses SafeGit product styling
+        and Cognito-gated access for private previews.
+      </p>
+    </div>
+    <dl class="metric-grid">
+      <div *ngFor="let metric of metrics">
+        <dt>{{ metric.value }}</dt>
+        <dd>{{ metric.label }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="workspace-grid">
+    <article class="repo-panel">
+      <div class="panel-title">
+        <p class="eyebrow">Repositories</p>
+        <h2>Protection status</h2>
+      </div>
+      <div class="repo-table">
+        <div class="repo-row repo-row--head">
+          <span>Name</span>
+          <span>Branch</span>
+          <span>Status</span>
+          <span>Evidence</span>
+        </div>
+        <div class="repo-row" *ngFor="let repo of repositories">
+          <strong>{{ repo.name }}</strong>
+          <span>{{ repo.branch }}</span>
+          <span>{{ repo.status }}</span>
+          <span>{{ repo.evidence }}</span>
+        </div>
+      </div>
+    </article>
+
+    <aside class="command-panel">
+      <p class="eyebrow">Restore check</p>
+      <h2>Latest verification</h2>
+      <pre><code>$ safegit restore verify payments-api
+OK backup manifest resolved
+OK signed release evidence found
+OK restore rehearsal completed</code></pre>
+    </aside>
+  </section>
+</main>

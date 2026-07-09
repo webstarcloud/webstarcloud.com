@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, Output, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -30,6 +30,7 @@ interface AssemblePointCloud {
 })
 export class ParticlesComponent implements AfterViewInit, OnDestroy {
   @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
+  @Output() requestAccess = new EventEmitter<void>();
   private readonly anonymousResponseKey = 'dave2-anonymous-response-used';
   private readonly apiBaseUrl = environment.api.baseUrl.trim();
   private readonly apiGatewayKey = environment.api.gatewayKey.trim();
@@ -329,10 +330,6 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       this.markAnonymousResponseUsed();
       this.updateGateState();
     }
-  }
-
-  startAuthFlow() {
-    this.auth.signIn();
   }
 
   private updateGateState() {

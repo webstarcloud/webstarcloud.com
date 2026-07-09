@@ -1,0 +1,66 @@
+<main class="ventures-page">
+  <header class="ventures-hero">
+    <a class="back-link" routerLink="/">WebstarCloud</a>
+    <p class="eyebrow">Ventures</p>
+    <h1>Early-stage products being shaped into investable systems.</h1>
+    <p class="lede">
+      Public enough to understand the opportunity, private enough to protect the build.
+      Product access stays gated through the same Cognito path as the rest of the site.
+    </p>
+  </header>
+
+  <section class="venture-grid" aria-label="Venture projects">
+    <article class="venture-card" *ngFor="let venture of ventures">
+      <div class="venture-card__diagram" aria-hidden="true">
+        <ng-container [ngSwitch]="venture.icon">
+          <svg *ngSwitchCase="'recovery'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="16" width="20" height="16" rx="2" />
+            <path d="M30 24h12M38 20l6 4-6 4" />
+            <rect x="50" y="12" width="16" height="12" rx="2" />
+            <rect x="56" y="20" width="16" height="12" rx="2" />
+            <path d="M96 13a12 12 0 1 0 11 7" />
+            <path d="M107 11l1 9-9-1" />
+          </svg>
+          <svg *ngSwitchCase="'capability'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10" cy="14" r="3" />
+            <circle cx="10" cy="24" r="3" />
+            <circle cx="10" cy="34" r="3" />
+            <path d="M16 24h20M32 20l6 4-6 4" />
+            <path d="M58 10l14 5v10c0 9-7 13-14 16-7-3-14-7-14-16V15z" />
+            <path d="M52 24l4 4 8-9" />
+            <path d="M78 24h12M86 20l6 4-6 4" />
+            <path d="M104 15l3 3 6-7" />
+            <path d="M104 30l8 8M112 30l-8 8" />
+          </svg>
+          <svg *ngSwitchCase="'simulation'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="10" width="30" height="28" rx="3" />
+            <path d="M16 18h14M16 26h9" />
+            <path d="M44 24h16M56 20l6 4-6 4" />
+            <rect x="68" y="8" width="24" height="32" rx="3" />
+            <path d="M76 18h8M76 26h8" />
+            <path d="M98 24h16M110 20l6 4-6 4" />
+            <circle cx="124" cy="24" r="4" />
+          </svg>
+          <svg *ngSwitchCase="'trust'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 12l16 6v10c0 9-8 14-16 17C6 42 2 37 2 28V18z" />
+            <path d="M9 26l4 4 8-10" />
+            <path d="M40 24h16M52 20l6 4-6 4" />
+            <path d="M70 12h32v24H70z" />
+            <path d="M78 20h16M78 28h10" />
+            <path d="M108 24h18" />
+          </svg>
+        </ng-container>
+      </div>
+      <p class="venture-boundary">{{ venture.boundary }}</p>
+      <p class="venture-stage">{{ venture.stage }}</p>
+      <h2>{{ venture.name }}</h2>
+      <p>{{ venture.summary }}</p>
+      <a *ngIf="venture.route" class="venture-link" [routerLink]="venture.route">View venture</a>
+      <span *ngIf="!venture.route" class="venture-hold">In development</span>
+    </article>
+  </section>
+</main>

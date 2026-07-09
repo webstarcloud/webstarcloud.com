@@ -1,0 +1,142 @@
+<div class="safegit-page">
+  <header class="site-header">
+    <a class="brand" routerLink="/ventures/safegit" aria-label="SafeGit home">
+      <span class="brand-mark">SG</span>
+      <span>SafeGit</span>
+    </a>
+
+    <nav class="top-nav" aria-label="SafeGit sections">
+      <a routerLink="/ventures/safegit" fragment="workflow">Workflow</a>
+      <a routerLink="/ventures/safegit" fragment="security">Security</a>
+      <a routerLink="/ventures/safegit" fragment="downloads">Downloads</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="quiet-link" routerLink="/ventures">Ventures</a>
+      <button class="primary-action small" type="button" (click)="login()">Sign in</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="retro-grid-scene" aria-hidden="true">
+        <div class="retro-grid"></div>
+      </div>
+
+      <div class="hero-copy">
+        <p class="eyebrow">Sovereign Git hosting</p>
+        <h1 id="hero-title">Secure code review and release records for EU teams.</h1>
+        <p class="hero-text">
+          SafeGit gives sensitive repositories a controlled place to land, with push protection,
+          reviewer gates, and audit-ready release evidence built into the workflow.
+        </p>
+
+        <div class="hero-actions">
+          <a class="primary-action" routerLink="/safegit">Request access</a>
+          <button class="secondary-action" type="button" (click)="login()">Open workspace</button>
+        </div>
+
+        <dl class="metric-row" aria-label="SafeGit product highlights">
+          <div *ngFor="let metric of metrics">
+            <dt>{{ metric.value }}</dt>
+            <dd>{{ metric.label }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <aside class="repository-panel" aria-label="Repository protection preview">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Repository</span>
+            <strong>payments-api</strong>
+          </div>
+          <span class="status-pill">Protected</span>
+        </div>
+
+        <div class="scan-summary">
+          <span>Last push</span>
+          <strong>Clean</strong>
+          <span>Region</span>
+          <strong>eu-west-1</strong>
+          <span>Release pack</span>
+          <strong>Ready</strong>
+        </div>
+
+        <div class="branch-list" aria-label="Protected branches">
+          <div>
+            <span>main</span>
+            <strong>2 approvals</strong>
+          </div>
+          <div>
+            <span>release/2026.06</span>
+            <strong>signed commits</strong>
+          </div>
+          <div>
+            <span>hotfix/customer-data</span>
+            <strong>secret scan active</strong>
+          </div>
+        </div>
+
+        <pre aria-label="SafeGit command line preview"><code>$ safegit protect main
+OK secrets scan passed
+OK EU storage policy active
+OK release evidence ready</code></pre>
+      </aside>
+    </section>
+
+    <section class="proof-band" aria-label="SafeGit operating model">
+      <article *ngFor="let integration of integrations">
+        <img [src]="integration.imageUrl" [alt]="integration.imageAlt">
+        <div>
+          <h2>{{ integration.name }}</h2>
+          <p>{{ integration.description }}</p>
+        </div>
+      </article>
+    </section>
+
+    <section id="workflow" class="section-band">
+      <div class="section-heading">
+        <p class="eyebrow">Workflow</p>
+        <h2>Move sensitive code through four controlled steps.</h2>
+      </div>
+      <div class="workflow-grid">
+        <article *ngFor="let step of workflowSteps; let index = index">
+          <span>{{ index + 1 }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="security" class="section-band muted-band">
+      <div class="section-heading">
+        <p class="eyebrow">Security posture</p>
+        <h2>Useful controls without turning Git into a ticket queue.</h2>
+      </div>
+      <div class="control-grid">
+        <article *ngFor="let control of securityControls">
+          <h3>{{ control.title }}</h3>
+          <p>{{ control.description }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="downloads" class="section-band download-band">
+      <div class="section-heading">
+        <p class="eyebrow">Command line app</p>
+        <h2>Installers are being prepared for desktop and CI workflows.</h2>
+      </div>
+      <div class="platform-grid">
+        <article *ngFor="let platform of platforms">
+          <span>{{ platform.status }}</span>
+          <h3>{{ platform.name }}</h3>
+          <p>{{ platform.support }}</p>
+        </article>
+      </div>
+      <div class="final-cta">
+        <a class="primary-action" routerLink="/safegit">Join the beta</a>
+        <a class="quiet-link quiet-link--dark" routerLink="/ventures">Back to Ventures</a>
+      </div>
+    </section>
+  </main>
+</div>

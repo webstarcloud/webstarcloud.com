@@ -1,0 +1,61 @@
+<main class="llm-lab">
+  <header class="lab-nav">
+    <a class="brand" routerLink="/labs">Labs</a>
+    <nav aria-label="llm-input-hardening navigation">
+      <a routerLink="/">WebstarCloud</a>
+      <a routerLink="/ventures">Ventures</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Input boundary</p>
+      <h1>Deterministic text hardening before untrusted input reaches an LLM.</h1>
+      <p class="hero-text">
+        `llm-input-hardening` normalizes Unicode, removes invisible/control characters
+        that destabilize prompts, and emits structured reports for logging and enforcement.
+      </p>
+      <div class="hero-actions">
+        <a class="primary-action" href="https://pypi.org/project/llm-input-hardening/" target="_blank" rel="noreferrer">PyPI</a>
+        <a class="secondary-action" routerLink="/labs">Back to Labs</a>
+      </div>
+    </div>
+    <figure class="hero-figure">
+      <img src="assets/labs/input-hardening-flow.svg" alt="llm-input-hardening text integrity pipeline">
+    </figure>
+  </section>
+
+  <section class="section-band">
+    <div class="section-heading">
+      <p class="eyebrow">Scope</p>
+      <h2>Text integrity, not model intent.</h2>
+    </div>
+    <div class="scope-grid">
+      <article *ngFor="let item of scope">
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.copy }}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-band muted-band">
+    <div class="section-heading">
+      <p class="eyebrow">Policies</p>
+      <h2>Use stricter policies as text gets closer to tools.</h2>
+    </div>
+    <div class="policy-grid">
+      <article *ngFor="let policy of policies">
+        <span>{{ policy.name }}</span>
+        <p>{{ policy.use }}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-band visual-band">
+    <div class="section-heading">
+      <p class="eyebrow">Signals</p>
+      <h2>Make invisible and lookalike text properties visible.</h2>
+    </div>
+    <img src="assets/labs/homoglyph-default-ignorable-guide.svg" alt="Homoglyph and default-ignorable visual guide">
+  </section>
+</main>

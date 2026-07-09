@@ -19,9 +19,9 @@
             </button>
         </div>
         <div class="gate-panel" *ngIf="gateLocked">
-            <p class="gate-copy">Public mode gives one free answer. Sign in to unlock Dave&apos;s Brain and keep going.</p>
-            <button type="button" class="gate-button" (click)="startAuthFlow()">
-                Continue with Cognito
+            <p class="gate-copy">That was the one free answer. The deeper layer is invite-only &mdash; request access and I&apos;ll let people in a few at a time.</p>
+            <button type="button" class="gate-button" (click)="requestAccess.emit()">
+                Request access
             </button>
         </div>
         <p class="response-copy">
