@@ -1,4 +1,10 @@
-<div class="particles-panel">
+<div class="particles-panel"
+    [class.stage-home]="stageMode === 'home'"
+    [class.stage-ventures]="stageMode === 'ventures'"
+    [class.stage-labs]="stageMode === 'labs'"
+    [class.stage-safegit]="stageMode === 'safegit'"
+    [class.stage-lab-detail]="stageMode === 'lab-detail'"
+    [class.has-response]="activeResponseMarkdown">
     <div class="canvas-wrapper">
         <div #rendererContainer class="renderer-container">
             <!-- Three.js canvas will be injected here -->
@@ -9,24 +15,43 @@
         </div>
     </div>
 
-    <div class="question-panel text-center">
-        <div class="input-row">
-            <input class="form-control" type="text" placeholder="Ask a question"
+    <div class="question-panel text-center" *ngIf="stageMode === 'home' && !activeResponseMarkdown">
+        <div class="ask-dock" [class.ask-dock--gated]="gateLocked">
+          <div class="input-row" *ngIf="!gateLocked">
+            <label class="sr-only" for="dave-question">Ask Dave a question</label>
+            <input id="dave-question" class="form-control" type="text" placeholder="Ask Dave about systems, work, or ideas"
                 [(ngModel)]="question"
                 [disabled]="isDisabled || gateLocked" (keyup.enter)="askQuestion()">
-            <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled || gateLocked">
-                Ask
+            <button type="button" class="btn btn-success" (click)="askQuestion()" [disabled]="isDisabled || gateLocked"
+                aria-label="Send question" title="Send question">
+                <span aria-hidden="true">&#8593;</span>
             </button>
-        </div>
-        <div class="gate-panel" *ngIf="gateLocked">
-            <p class="gate-copy">That was the one free answer. The deeper layer is invite-only &mdash; request access and I&apos;ll let people in a few at a time.</p>
+          </div>
+          <div class="gate-panel" *ngIf="gateLocked">
+            <p class="gate-copy">Public preview complete. Private responses are available to invited collaborators.</p>
             <button type="button" class="gate-button" (click)="requestAccess.emit()">
-                Request access
+                Private access
+            </button>
+          </div>
+          <p class="response-copy" *ngIf="!gateLocked && (displayedMessage || displayedDots)" aria-live="polite">
+            {{ displayedMessage }}{{ displayedDots }}
+          </p>
+        </div>
+    </div>
+    <section class="chat-surface" *ngIf="activeResponseMarkdown" [class.is-closing]="responseClosing"
+        aria-label="Dave 2.0 response">
+        <div class="chat-surface__bar">
+            <div>
+                <span class="chat-surface__eyebrow">Dave 2.0</span>
+                <strong>Answer workspace</strong>
+            </div>
+            <button type="button" (click)="closeResponse()" aria-label="Close response" title="Close response">
+                <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <p class="response-copy">
-            {{ displayedMessage }}{{ displayedDots }}
-        </p>
-        <app-artifact-viewer [responseMarkdown]="activeResponseMarkdown"></app-artifact-viewer>
-    </div>
+        <div class="chat-surface__body">
+            <p class="chat-surface__question" *ngIf="question">{{ question }}</p>
+            <app-artifact-viewer [responseMarkdown]="activeResponseMarkdown"></app-artifact-viewer>
+        </div>
+    </section>
 </div>

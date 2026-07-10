@@ -1,28 +1,9 @@
 <div class="container min-vh-100">
-    <div class="home-utility">
-        <nav class="home-nav" aria-label="WebstarCloud sections">
-            <a class="home-nav__link" routerLink="/ventures">Ventures</a>
-            <a class="home-nav__link" routerLink="/labs">Labs</a>
-        </nav>
-        <button class="access-trigger" type="button" (click)="toggleAuthPanel()">
-            Private Access
-        </button>
-    </div>
-
     <section class="home-caption">
         <p class="home-kicker">Principal Architect | AI Platforms, Agents &amp; Trust at Scale</p>
         <!-- <p class="home-summary">
             Notes on agentic systems, architecture, tooling, and what actually survives contact with production.
         </p> -->
-    </section>
-
-    <section class="home-animation" aria-label="Interactive avatar">
-        <app-particles (requestAccess)="openAuthPanel()"></app-particles>
-    </section>
-
-    <section class="private-space" *ngIf="(authState$ | async)?.isAuthenticated">
-        <p class="private-space__kicker">Private Surfaces Unlocked</p>
-        <p class="private-space__copy">Reserved for second-brain views, drafts, and gated internal experiments.</p>
     </section>
 
     <section class="scale" aria-label="Built at scale">
@@ -50,6 +31,4 @@
             <a class="nav-link d-inline" href="https://x.com/WebstarDavid" target="_blank" rel="noreferrer">X</a>
         </div>
     </div>
-
-    <app-auth-panel [open]="authPanelOpen" (closed)="closeAuthPanel()"></app-auth-panel>
 </div>

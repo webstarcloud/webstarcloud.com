@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -9,6 +9,7 @@ import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 
 type ParticleMode = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling';
+export type StageMode = 'home' | 'ventures' | 'labs' | 'safegit' | 'lab-detail';
 
 interface ModeTheme {
   accentA: number;
@@ -21,16 +22,21 @@ interface AssemblePointCloud {
   points: THREE.Points;
   startPositions: Float32Array;
   targetPositions: Float32Array;
+  motionStartPositions: Float32Array;
 }
+
+type AvatarMotion = 'assembling' | 'bursting' | 'dispersed' | 'idle';
 
 @Component({
   selector: 'app-particles',
   templateUrl: './particles.component.html',
   styleUrls: ['./particles.component.css']
 })
-export class ParticlesComponent implements AfterViewInit, OnDestroy {
+export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
+  @Input() stageMode: StageMode = 'home';
   @Output() requestAccess = new EventEmitter<void>();
+  @Output() responseStateChange = new EventEmitter<boolean>();
   private readonly anonymousResponseKey = 'dave2-anonymous-response-used';
   private readonly apiBaseUrl = environment.api.baseUrl.trim();
   private readonly apiGatewayKey = environment.api.gatewayKey.trim();
@@ -46,10 +52,11 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   question = '';
   isDisabled = false;
   activeResponseMarkdown = '';
+  responseClosing = false;
   gateLocked = false;
   isAuthenticated = false;
 
-  public myMessage = 'Hello, this is Dave 2.0 - dwebster182@gmail.com';
+  public myMessage = 'Dave 2.0 // online';
   public displayedMessage = '';
   private readonly speed = 50;
   private intervalId?: number;
@@ -93,6 +100,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   private shaderMaterial?: THREE.ShaderMaterial;
   private shellMaterial?: THREE.ShaderMaterial;
   private pointCloudMaterial?: THREE.PointsMaterial;
+  private particleTexture?: THREE.CanvasTexture;
   private readonly currentAccentA = new THREE.Color();
   private readonly currentAccentB = new THREE.Color();
   private readonly targetAccentA = new THREE.Color();
@@ -100,9 +108,14 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   private readonly colorTransitionFactor = 0.08;
   private readonly shellScale = 1.085;
   private readonly assembleDuration = 1700;
+  private readonly reassembleDuration = 1050;
+  private readonly burstDuration = 820;
   private readonly maxAssemblePointsPerMesh = 12000;
-  private assemblingAvatar = false;
-  private assembleStartTime = 0;
+  private avatarMotion: AvatarMotion = 'idle';
+  private avatarMotionStartTime = 0;
+  private initialAssembly = true;
+  private responseOpen = false;
+  private responseCloseTimer?: number;
   private assemblePointClouds: AssemblePointCloud[] = [];
 
   isRotatingUp = true;
@@ -131,6 +144,27 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.updateGateState();
 
     this.startTyping(this.myMessage);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['stageMode']) {
+      const nextMode = this.getParticleModeForStage(this.stageMode);
+      this.activeMode = nextMode;
+      this.queueSceneModeTransition(nextMode);
+
+      if (!changes['stageMode'].firstChange && this.responseOpen) {
+        if (this.responseCloseTimer) {
+          window.clearTimeout(this.responseCloseTimer);
+          this.responseCloseTimer = undefined;
+        }
+        this.activeResponseMarkdown = '';
+        this.responseClosing = false;
+        this.responseOpen = false;
+        this.responseStateChange.emit(false);
+      }
+
+      this.applyAvatarTargetState();
+    }
   }
 
   getData(question: string) {
@@ -181,7 +215,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.activeResponseMarkdown = '';
     this.setModeForPrompt(prompt);
     this.isDisabled = true;
-    this.displayedMessage = 'Braining';
+    this.displayedMessage = 'Thinking';
     this.startDotsAnimation();
     this.getData(prompt);
   }
@@ -315,7 +349,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    return 'My brain hurts to much today';
+    return 'Dave 2.0 is unavailable right now. Please try again shortly.';
   }
 
   private looksLikeJson(value: string): boolean {
@@ -326,10 +360,35 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     this.activeResponseMarkdown = message;
     this.displayedMessage = '';
     this.isDisabled = false;
+    this.setResponseSurface(true);
     if (!this.isAuthenticated) {
       this.markAnonymousResponseUsed();
       this.updateGateState();
     }
+  }
+
+  closeResponse() {
+    if (this.responseClosing) {
+      return;
+    }
+
+    this.responseClosing = true;
+    this.responseCloseTimer = window.setTimeout(() => {
+      this.activeResponseMarkdown = '';
+      this.responseClosing = false;
+      this.responseCloseTimer = undefined;
+      this.setResponseSurface(false);
+    }, 280);
+  }
+
+  private setResponseSurface(open: boolean) {
+    if (this.responseOpen === open) {
+      return;
+    }
+
+    this.responseOpen = open;
+    this.responseStateChange.emit(open);
+    this.applyAvatarTargetState();
   }
 
   private updateGateState() {
@@ -372,6 +431,21 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     const nextMode = this.detectModeFromPrompt(prompt);
     this.activeMode = nextMode;
     this.queueSceneModeTransition(nextMode);
+  }
+
+  private getParticleModeForStage(stageMode: StageMode): ParticleMode {
+    switch (stageMode) {
+      case 'ventures':
+        return 'agentic';
+      case 'labs':
+        return 'tooling';
+      case 'safegit':
+        return 'resilience';
+      case 'lab-detail':
+        return 'architecture';
+      default:
+        return 'architecture';
+    }
   }
 
   private setInitialSceneMode(mode: ParticleMode) {
@@ -601,11 +675,14 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
   }
 
   private createAssemblePointClouds(coreObject: THREE.Object3D) {
+    this.particleTexture = this.createParticleTexture();
     this.pointCloudMaterial = new THREE.PointsMaterial({
-      size: 1.45,
+      size: 1.7,
       sizeAttenuation: true,
       transparent: true,
       opacity: 0.92,
+      map: this.particleTexture,
+      alphaTest: 0.02,
       depthWrite: false,
       depthTest: false,
       blending: THREE.AdditiveBlending,
@@ -683,39 +760,129 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
         mesh: child,
         points,
         startPositions,
-        targetPositions
+        targetPositions,
+        motionStartPositions: startPositions.slice()
       });
     });
 
     if (this.assemblePointClouds.length > 0) {
-      this.assemblingAvatar = true;
-      this.assembleStartTime = performance.now();
+      if (this.shouldShowAvatar()) {
+        this.avatarMotion = 'assembling';
+        this.avatarMotionStartTime = performance.now();
+      } else {
+        this.avatarMotion = 'dispersed';
+        this.pointCloudMaterial.opacity = 0.12;
+      }
     } else {
       this.pointCloudMaterial?.dispose();
       this.pointCloudMaterial = undefined;
     }
   }
 
-  private updateAssemblePointClouds() {
-    if (!this.assemblingAvatar) {
+  private createParticleTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      return undefined;
+    }
+
+    const glow = context.createRadialGradient(32, 32, 4, 32, 32, 31);
+    glow.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    glow.addColorStop(0.35, 'rgba(255, 255, 255, 0.92)');
+    glow.addColorStop(0.72, 'rgba(255, 255, 255, 0.34)');
+    glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    context.fillStyle = glow;
+    context.fillRect(0, 0, 64, 64);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  private applyAvatarTargetState() {
+    if (!this.assemblePointClouds.length) {
       return;
     }
 
-    const elapsed = performance.now() - this.assembleStartTime;
-    const progress = Math.min(elapsed / this.assembleDuration, 1);
-    const easedProgress = 1 - Math.pow(1 - progress, 3);
+    if (this.shouldShowAvatar()) {
+      if (this.avatarMotion !== 'idle' && this.avatarMotion !== 'assembling') {
+        this.beginAvatarMotion('assembling');
+      }
+      return;
+    }
 
-    if (this.pointCloudMaterial) {
-      this.pointCloudMaterial.opacity = Math.max(0.08, 0.95 - easedProgress * 0.75);
+    if (this.avatarMotion !== 'dispersed' && this.avatarMotion !== 'bursting') {
+      this.beginAvatarMotion('bursting');
+    }
+  }
+
+  private shouldShowAvatar() {
+    return this.stageMode === 'home' && !this.responseOpen;
+  }
+
+  private beginAvatarMotion(motion: 'assembling' | 'bursting') {
+    const shellObject = this.scene.getObjectByName('myShellObject');
+    if (shellObject) {
+      shellObject.visible = false;
     }
 
     this.assemblePointClouds.forEach((entry) => {
       const positionAttribute = entry.points.geometry.getAttribute('position') as THREE.BufferAttribute;
       const livePositions = positionAttribute.array as Float32Array;
 
+      if (this.avatarMotion === 'idle') {
+        livePositions.set(entry.targetPositions);
+      }
+
+      entry.motionStartPositions = livePositions.slice();
+      positionAttribute.needsUpdate = true;
+      entry.mesh.visible = false;
+      entry.points.visible = true;
+    });
+
+    this.avatarMotion = motion;
+    this.avatarMotionStartTime = performance.now();
+    this.initialAssembly = false;
+
+    if (this.pointCloudMaterial) {
+      this.pointCloudMaterial.opacity = 0.96;
+    }
+  }
+
+  private updateAvatarPointClouds() {
+    if (this.avatarMotion !== 'assembling' && this.avatarMotion !== 'bursting') {
+      if (this.avatarMotion === 'dispersed' && this.pointCloudMaterial) {
+        this.pointCloudMaterial.opacity = 0.11 + Math.sin(this.frame * 0.65) * 0.025;
+      }
+      return;
+    }
+
+    const duration = this.avatarMotion === 'bursting'
+      ? this.burstDuration
+      : (this.initialAssembly ? this.assembleDuration : this.reassembleDuration);
+    const elapsed = performance.now() - this.avatarMotionStartTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easedProgress = this.avatarMotion === 'bursting'
+      ? 1 - Math.pow(1 - progress, 4)
+      : 1 - Math.pow(1 - progress, 3);
+
+    if (this.pointCloudMaterial) {
+      this.pointCloudMaterial.opacity = this.avatarMotion === 'bursting'
+        ? Math.max(0.12, 0.96 - easedProgress * 0.84)
+        : Math.max(0.16, 0.96 - easedProgress * 0.76);
+    }
+
+    this.assemblePointClouds.forEach((entry) => {
+      const positionAttribute = entry.points.geometry.getAttribute('position') as THREE.BufferAttribute;
+      const livePositions = positionAttribute.array as Float32Array;
+      const destination = this.avatarMotion === 'bursting' ? entry.startPositions : entry.targetPositions;
+
       for (let index = 0; index < livePositions.length; index += 1) {
-        const start = entry.startPositions[index];
-        const target = entry.targetPositions[index];
+        const start = entry.motionStartPositions[index];
+        const target = destination[index];
         livePositions[index] = start + (target - start) * easedProgress;
       }
 
@@ -723,25 +890,32 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     });
 
     if (progress >= 1) {
-      this.finishAssemblePointClouds();
+      if (this.avatarMotion === 'bursting') {
+        this.finishAvatarBurst();
+      } else {
+        this.finishAssemblePointClouds();
+      }
     }
   }
 
   private finishAssemblePointClouds() {
-    this.assemblingAvatar = false;
+    this.avatarMotion = 'idle';
+    this.initialAssembly = false;
     this.assemblePointClouds.forEach((entry) => {
       entry.mesh.visible = true;
-      entry.points.removeFromParent();
-      entry.points.geometry.dispose();
+      entry.points.visible = false;
     });
-
-    this.assemblePointClouds = [];
-    this.pointCloudMaterial?.dispose();
-    this.pointCloudMaterial = undefined;
 
     const shellObject = this.scene.getObjectByName('myShellObject');
     if (shellObject) {
       shellObject.visible = true;
+    }
+  }
+
+  private finishAvatarBurst() {
+    this.avatarMotion = 'dispersed';
+    if (this.pointCloudMaterial) {
+      this.pointCloudMaterial.opacity = 0.12;
     }
   }
 
@@ -836,7 +1010,7 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
       this.shellMaterial.uniforms['time'].value = this.frame;
     }
 
-    this.updateAssemblePointClouds();
+    this.updateAvatarPointClouds();
 
     this.scene.traverse((object: THREE.Object3D) => {
       if (object instanceof THREE.Mesh) {
@@ -975,10 +1149,14 @@ export class ParticlesComponent implements AfterViewInit, OnDestroy {
     if (this.loadingDotsIntervalId) {
       window.clearInterval(this.loadingDotsIntervalId);
     }
+    if (this.responseCloseTimer) {
+      window.clearTimeout(this.responseCloseTimer);
+    }
     this.renderer.dispose();
     this.shaderMaterial?.dispose();
     this.shellMaterial?.dispose();
     this.pointCloudMaterial?.dispose();
+    this.particleTexture?.dispose();
     this.assemblePointClouds.forEach((entry) => {
       entry.points.geometry.dispose();
     });

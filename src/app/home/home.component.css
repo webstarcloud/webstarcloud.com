@@ -4,67 +4,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 24px;
-    padding: 44px 16px 24px;
+    padding: 0 16px 24px;
     background: transparent;
-}
-
-.home-utility {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.home-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.home-nav__link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 38px;
-    padding: 0 12px;
-    border: 1px solid rgba(156, 245, 108, 0.18);
-    border-radius: 999px;
-    color: #c8ffae;
-    background: rgba(34, 8, 50, 0.38);
-    font: 700 0.78rem/1 var(--accent-font);
-    letter-spacing: 0.08em;
-    text-decoration: none;
-    text-transform: uppercase;
-}
-
-.home-nav__link:hover {
-    color: #220733;
-    background: #b6f39c;
-}
-
-.access-trigger {
-    padding: 10px 16px;
-    border: 1px solid rgba(156, 245, 108, 0.34);
-    border-radius: 999px;
-    background: rgba(47, 12, 70, 0.88);
-    color: #b6f39c;
-    font: inherit;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.access-trigger:hover {
-    color: #220733;
-    background: #b6f39c;
-}
-
-.home-animation {
-    width: 100%;
-    margin-top: 8px;
 }
 
 .home-caption {
@@ -137,34 +80,6 @@
 
 .footer-links a {
     margin: 0 6px 10px;
-}
-
-.private-space {
-    width: min(100%, 720px);
-    padding: 18px 20px;
-    border: 1px solid rgba(156, 245, 108, 0.24);
-    border-radius: 22px;
-    background: rgba(34, 8, 50, 0.42);
-    text-align: center;
-}
-
-.private-space__kicker,
-.private-space__copy {
-    margin: 0;
-}
-
-.private-space__kicker {
-    color: #86ffc7;
-    font-size: 0.86rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-}
-
-.private-space__copy {
-    margin-top: 8px;
-    color: #efe4ff;
-    line-height: 1.5;
 }
 
 /* ---------- Built at scale ---------- */
@@ -269,16 +184,6 @@
     .container {
         gap: 20px;
         padding-top: 28px;
-    }
-
-    .home-utility {
-        align-items: stretch;
-        flex-direction: column-reverse;
-    }
-
-    .access-trigger,
-    .home-nav__link {
-        justify-content: center;
     }
 
     .home-kicker {

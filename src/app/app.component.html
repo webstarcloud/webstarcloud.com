@@ -1,1 +1,32 @@
-  <router-outlet #routerOutlet="outlet"></router-outlet>
+<div class="stage-shell" [ngClass]="'stage-shell--' + stageMode" [class.stage-shell--response]="responseOpen">
+  <header class="stage-nav">
+    <a class="stage-brand" routerLink="/" aria-label="WebstarCloud home">
+      <span class="stage-brand__mark">W</span>
+      <span class="stage-brand__copy">
+        <strong>WebstarCloud</strong>
+        <small>David Webster</small>
+      </span>
+    </a>
+
+    <nav class="stage-links" aria-label="WebstarCloud sections">
+      <a routerLink="/ventures" routerLinkActive="is-active"><span>01</span> Ventures</a>
+      <a routerLink="/labs" routerLinkActive="is-active"><span>02</span> Labs</a>
+    </nav>
+
+    <button class="stage-access" type="button" (click)="openAuthPanel()">
+      Private<span class="stage-access__suffix"> access</span>
+    </button>
+  </header>
+
+  <section class="stage-avatar" aria-label="Interactive WebstarCloud console">
+    <app-particles [stageMode]="stageMode" (requestAccess)="openAuthPanel()"
+      (responseStateChange)="setResponseOpen($event)"></app-particles>
+  </section>
+
+  <main class="stage-surface" [class.stage-surface--home]="isHomeStage"
+    [class.stage-surface--obscured]="responseOpen" [attr.data-stage]="stageMode">
+    <router-outlet #routerOutlet="outlet"></router-outlet>
+  </main>
+
+  <app-auth-panel [open]="authPanelOpen" (closed)="closeAuthPanel()"></app-auth-panel>
+</div>

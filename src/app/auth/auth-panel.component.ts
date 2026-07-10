@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -18,12 +18,18 @@ export class AuthPanelComponent {
   requesterEmail = '';
   requesterNote = '';
   requestSent = false;
-  ownerSignInVisible = false;
 
   constructor(public auth: AuthService) {}
 
   closePanel() {
     this.closed.emit();
+  }
+
+  @HostListener('document:keydown.escape')
+  closeOnEscape() {
+    if (this.open) {
+      this.closePanel();
+    }
   }
 
   requestAccess() {
@@ -51,12 +57,7 @@ export class AuthPanelComponent {
     this.requestSent = true;
   }
 
-  revealOwnerSignIn() {
-    this.ownerSignInVisible = true;
-  }
-
-  // Owner-only entrance: the existing Google/OIDC sign-in.
-  submitCredentials() {
+  signIn() {
     this.auth.signIn('/');
   }
 

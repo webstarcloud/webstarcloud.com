@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 
 interface Platform {
   name: string;
@@ -14,9 +13,6 @@ interface Platform {
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  authPanelOpen = false;
-  readonly authState$ = this.auth.state$;
-
   // Built at scale — the production track record (credibility layer). Source: cv.pdf.
   readonly platforms: Platform[] = [
     {
@@ -56,18 +52,4 @@ export class HomeComponent {
       metric: 'Full on-prem migration <6 months'
     }
   ];
-
-  constructor(public auth: AuthService) {}
-
-  toggleAuthPanel() {
-    this.authPanelOpen = !this.authPanelOpen;
-  }
-
-  openAuthPanel() {
-    this.authPanelOpen = true;
-  }
-
-  closeAuthPanel() {
-    this.authPanelOpen = false;
-  }
 }

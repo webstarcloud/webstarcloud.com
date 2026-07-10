@@ -1,6 +1,10 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 
 import { ParticlesComponent } from './particles.component';
+import { AuthService } from '../auth/auth.service';
 
 describe('ParticlesComponent', () => {
   let component: ParticlesComponent;
@@ -8,7 +12,24 @@ describe('ParticlesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ParticlesComponent ]
+      declarations: [ ParticlesComponent ],
+      imports: [HttpClientTestingModule],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: {
+            state$: of({
+              configured: true,
+              loading: false,
+              isAuthenticated: false,
+              email: null,
+              statusMessage: null,
+              errorMessage: null
+            })
+          }
+        }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
     .compileComponents();
 

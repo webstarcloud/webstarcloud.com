@@ -16,7 +16,7 @@ interface VentureCard {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './ventures.component.html',
-  styleUrl: './ventures.component.css'
+  styleUrls: ['../project-index.css', './ventures.component.css']
 })
 export class VenturesComponent {
   readonly ventures: VentureCard[] = [

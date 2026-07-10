@@ -1,6 +1,6 @@
 # David Webster
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.0.2.
+This project uses [Angular CLI](https://github.com/angular/angular-cli) 17.
 
 ## Development server
 
@@ -25,6 +25,10 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 - `/labs/llm-input-hardening` is the public LLM input hardening lab page.
 
 The SafeGit workspace uses the existing Cognito/OIDC integration. When an unauthenticated user opens `/safegit`, the app stores the intended return path in session storage, sends the user through Cognito, and returns them to `/safegit` after login.
+
+## Interactive stage
+
+The Three.js avatar is the persistent home state. Opening Labs, Ventures, or a chat answer disperses the retained avatar point cloud before revealing the selected workspace. Returning home reassembles those particles into the avatar. The chat dock is intentionally scoped to the home stage so it cannot obscure portfolio or product workspaces. Keep route content inside the root stage shell so navigation and chat continue to share that transition lifecycle.
 
 ## Running unit tests
 

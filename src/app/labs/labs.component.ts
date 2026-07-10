@@ -16,7 +16,7 @@ interface LabCard {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './labs.component.html',
-  styleUrl: './labs.component.css'
+  styleUrls: ['../project-index.css', './labs.component.css']
 })
 export class LabsComponent {
   readonly labs: LabCard[] = [

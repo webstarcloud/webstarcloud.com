@@ -1,38 +1,43 @@
 <div class="auth-backdrop" *ngIf="open" (click)="closePanel()"></div>
 
-<aside class="auth-panel" [class.auth-panel--open]="open" [attr.aria-hidden]="!open">
-    <button class="auth-close" type="button" (click)="closePanel()" aria-label="Close panel">Close</button>
-
+<aside class="auth-panel" [class.auth-panel--open]="open" [attr.aria-hidden]="!open"
+    role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <ng-container *ngIf="authState$ | async as state">
-        <p class="auth-kicker">Private access</p>
-        <h2 class="auth-title">Request access</h2>
+        <header class="auth-header">
+            <div>
+                <p class="auth-kicker">WebstarCloud access</p>
+                <h2 id="auth-title" class="auth-title">
+                    {{ state.isAuthenticated ? 'Private workspace' : 'Request an invitation' }}
+                </h2>
+            </div>
+            <button class="auth-close" type="button" (click)="closePanel()"
+                aria-label="Close private access" title="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </header>
 
-        <!-- Approved / owner is signed in -->
         <div class="auth-state auth-state--signed-in" *ngIf="state.isAuthenticated">
             <p class="auth-copy">
                 Signed in<span *ngIf="state.email"> as <strong>{{ state.email }}</strong></span>.
+                Private project surfaces are available.
             </p>
-            <p class="auth-copy">Private surfaces are open.</p>
-            <button class="auth-submit" type="button" (click)="signOut()" [disabled]="state.loading">
+            <button class="auth-submit auth-submit--quiet" type="button" (click)="signOut()" [disabled]="state.loading">
                 {{ state.loading ? 'Signing out...' : 'Sign out' }}
             </button>
         </div>
 
         <ng-container *ngIf="!state.isAuthenticated">
-            <!-- Request sent confirmation -->
             <div class="auth-state" *ngIf="requestSent">
-                <p class="auth-copy">Your request is on its way.</p>
+                <p class="auth-copy">Your request is ready to send.</p>
                 <p class="auth-copy auth-copy--muted">
-                    If your mail app didn&apos;t open, email
+                    If your mail app did not open, email
                     <a class="auth-inline-link" [href]="'mailto:' + ownerEmail">{{ ownerEmail }}</a> directly.
-                    I read every request and let people in a few at a time.
                 </p>
             </div>
 
-            <!-- Request form -->
             <form class="auth-form" *ngIf="!requestSent" (ngSubmit)="requestAccess()" novalidate>
-                <p class="auth-copy">
-                    Private project access is invite-only. Tell me who you are and what you&apos;d like to explore.
+                <p class="auth-copy auth-copy--intro">
+                    Private previews are shared selectively. Introduce yourself and the project you want to explore.
                 </p>
 
                 <label class="auth-field">
@@ -48,24 +53,25 @@
                 </label>
 
                 <label class="auth-field">
-                    <span class="auth-label">What draws you in? <span class="auth-optional">(optional)</span></span>
+                    <span class="auth-label">Project or interest <span class="auth-optional">Optional</span></span>
                     <textarea class="auth-input auth-textarea" name="note" rows="3" [(ngModel)]="requesterNote"
-                        placeholder="A line about what you'd like to see"></textarea>
+                        placeholder="What would you like to explore?"></textarea>
                 </label>
 
                 <button class="auth-submit" type="submit"
                     [disabled]="!requesterName.trim() || !requesterEmail.trim()">
-                    Request access
+                    Send request
                 </button>
             </form>
 
-            <!-- Discreet owner sign-in -->
-            <div class="auth-owner">
-                <button *ngIf="!ownerSignInVisible" type="button" class="auth-owner__toggle"
-                    (click)="revealOwnerSignIn()">Owner?</button>
-                <button *ngIf="ownerSignInVisible" type="button" class="auth-owner__signin"
-                    (click)="submitCredentials()" [disabled]="state.loading || !state.configured">
-                    {{ state.loading ? 'Redirecting...' : 'Sign in with Google' }}
+            <div class="auth-signin">
+                <div>
+                    <strong>Already invited?</strong>
+                    <span>Continue through the secure sign-in.</span>
+                </div>
+                <button type="button" class="auth-signin__button" (click)="signIn()"
+                    [disabled]="state.loading || !state.configured">
+                    {{ state.loading ? 'Redirecting...' : 'Sign in' }}
                 </button>
             </div>
         </ng-container>

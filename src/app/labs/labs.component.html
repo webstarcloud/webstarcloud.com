@@ -1,17 +1,35 @@
-<main class="labs-page">
-  <header class="labs-hero">
-    <a class="back-link" routerLink="/">WebstarCloud</a>
-    <p class="eyebrow">Labs</p>
-    <h1>Research, packages, and technical experiments.</h1>
-    <p class="lede">
-      Labs is where public research and practical tooling live before they become
-      venture surfaces or production products.
-    </p>
+<main class="project-index">
+  <header class="project-index__header">
+    <div>
+      <p class="project-index__eyebrow">Labs / Applied research</p>
+      <h1>Small experiments with production consequences.</h1>
+      <p class="project-index__lede">
+        Open packages, technical probes, and practical research. Labs stays public where sharing the
+        engineering is useful, and becomes a venture only when a distinct product emerges.
+      </p>
+    </div>
+
+    <dl class="project-index__meta" aria-label="Labs portfolio summary">
+      <div>
+        <dt>{{ labs.length | number:'2.0-0' }}</dt>
+        <dd>Active labs</dd>
+      </div>
+      <div>
+        <dt>01</dt>
+        <dd>Public package</dd>
+      </div>
+    </dl>
   </header>
 
-  <section class="lab-grid" aria-label="Lab projects">
-    <article class="lab-card" *ngFor="let lab of labs">
-      <div class="lab-card__diagram" aria-hidden="true">
+  <section class="project-grid" aria-label="Lab projects">
+    <article class="project-card" *ngFor="let lab of labs; let index = index"
+      [style.animation-delay.ms]="430 + index * 90" [attr.aria-labelledby]="'lab-' + index">
+      <div class="project-card__top">
+        <span class="project-card__index">0{{ index + 1 }}</span>
+        <span class="project-card__status">{{ lab.stage }}</span>
+      </div>
+
+      <div class="project-card__diagram" aria-hidden="true">
         <ng-container [ngSwitch]="lab.icon">
           <svg *ngSwitchCase="'input'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -38,12 +56,17 @@
           </svg>
         </ng-container>
       </div>
-      <p class="lab-boundary">{{ lab.boundary }}</p>
-      <p class="lab-stage">{{ lab.stage }}</p>
-      <h2>{{ lab.name }}</h2>
-      <p>{{ lab.summary }}</p>
-      <a *ngIf="lab.route" class="lab-link" [routerLink]="lab.route">Open lab</a>
-      <span *ngIf="!lab.route" class="lab-hold">In development</span>
+
+      <p class="project-card__boundary">{{ lab.boundary }}</p>
+      <h2 [id]="'lab-' + index">{{ lab.name }}</h2>
+      <p class="project-card__summary">{{ lab.summary }}</p>
+
+      <footer class="project-card__footer">
+        <a *ngIf="lab.route" class="project-card__link" [routerLink]="lab.route">
+          Open lab <span aria-hidden="true">&#8594;</span>
+        </a>
+        <span *ngIf="!lab.route" class="project-card__hold">In development</span>
+      </footer>
     </article>
   </section>
 </main>

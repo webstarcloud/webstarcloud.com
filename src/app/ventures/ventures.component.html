@@ -1,17 +1,35 @@
-<main class="ventures-page">
-  <header class="ventures-hero">
-    <a class="back-link" routerLink="/">WebstarCloud</a>
-    <p class="eyebrow">Ventures</p>
-    <h1>Early-stage products being shaped into investable systems.</h1>
-    <p class="lede">
-      Public enough to understand the opportunity, private enough to protect the build.
-      Product access stays gated through the same Cognito path as the rest of the site.
-    </p>
+<main class="project-index">
+  <header class="project-index__header">
+    <div>
+      <p class="project-index__eyebrow">Ventures / Product portfolio</p>
+      <h1>Products built around hard operational problems.</h1>
+      <p class="project-index__lede">
+        Each venture exposes the problem, product boundary, and current stage. Implementation details
+        and working product access remain private where the work needs protection.
+      </p>
+    </div>
+
+    <dl class="project-index__meta" aria-label="Venture portfolio summary">
+      <div>
+        <dt>{{ ventures.length | number:'2.0-0' }}</dt>
+        <dd>Products</dd>
+      </div>
+      <div>
+        <dt>01</dt>
+        <dd>Private preview</dd>
+      </div>
+    </dl>
   </header>
 
-  <section class="venture-grid" aria-label="Venture projects">
-    <article class="venture-card" *ngFor="let venture of ventures">
-      <div class="venture-card__diagram" aria-hidden="true">
+  <section class="project-grid" aria-label="Venture projects">
+    <article class="project-card" *ngFor="let venture of ventures; let index = index"
+      [style.animation-delay.ms]="430 + index * 90" [attr.aria-labelledby]="'venture-' + index">
+      <div class="project-card__top">
+        <span class="project-card__index">0{{ index + 1 }}</span>
+        <span class="project-card__status">{{ venture.stage }}</span>
+      </div>
+
+      <div class="project-card__diagram" aria-hidden="true">
         <ng-container [ngSwitch]="venture.icon">
           <svg *ngSwitchCase="'recovery'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -55,12 +73,17 @@
           </svg>
         </ng-container>
       </div>
-      <p class="venture-boundary">{{ venture.boundary }}</p>
-      <p class="venture-stage">{{ venture.stage }}</p>
-      <h2>{{ venture.name }}</h2>
-      <p>{{ venture.summary }}</p>
-      <a *ngIf="venture.route" class="venture-link" [routerLink]="venture.route">View venture</a>
-      <span *ngIf="!venture.route" class="venture-hold">In development</span>
+
+      <p class="project-card__boundary">{{ venture.boundary }}</p>
+      <h2 [id]="'venture-' + index">{{ venture.name }}</h2>
+      <p class="project-card__summary">{{ venture.summary }}</p>
+
+      <footer class="project-card__footer">
+        <a *ngIf="venture.route" class="project-card__link" [routerLink]="venture.route">
+          Explore venture <span aria-hidden="true">&#8594;</span>
+        </a>
+        <span *ngIf="!venture.route" class="project-card__hold">In development</span>
+      </footer>
     </article>
   </section>
 </main>
