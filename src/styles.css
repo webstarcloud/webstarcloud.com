@@ -1,16 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
 :root {
     --accent-font: "Space Grotesk", "Segoe UI", sans-serif;
+    color-scheme: dark;
 }
 
-html, body { height: 100%; }
+html, body {
+    min-height: 100%;
+    background-color: #070a0d;
+}
+
 body {
     margin: 0;
     font-family: Roboto, "Helvetica Neue", sans-serif;
-    background:
-        radial-gradient(circle at 50% 0%, rgba(170, 84, 255, 0.28), transparent 38%),
-        linear-gradient(180deg, #341049 0%, #1b0826 58%, #120518 100%);
-    background-color: #1b0826;
+    background: #070a0d;
 }
 body, html {
     margin: 0;

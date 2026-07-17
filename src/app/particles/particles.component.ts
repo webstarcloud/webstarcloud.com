@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
-import { ASCII_PORTRAIT } from './ascii-portrait';
+import { ASCII_PORTRAIT_FRAMES, ASCII_PORTRAIT_SEQUENCE } from './ascii-portrait';
 
 type AsciiMood = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling';
 export type StageMode = 'home' | 'ventures' | 'labs' | 'anchorkeep' | 'greenlight' | 'lab-detail';
@@ -21,12 +21,13 @@ const moodKeywords: Readonly<Record<AsciiMood, readonly string[]>> = {
   templateUrl: './particles.component.html',
   styleUrls: ['./particles.component.css']
 })
-export class ParticlesComponent implements OnChanges, OnDestroy {
+export class ParticlesComponent implements OnChanges, OnInit, OnDestroy {
   @Input() stageMode: StageMode = 'home';
   @Output() requestAccess = new EventEmitter<void>();
   @Output() responseStateChange = new EventEmitter<boolean>();
 
-  readonly asciiPortrait = ASCII_PORTRAIT;
+  readonly asciiFrames = ASCII_PORTRAIT_FRAMES;
+  activeAsciiPortrait = ASCII_PORTRAIT_FRAMES[0];
   asciiMood: AsciiMood = 'architecture';
   question = '';
   isDisabled = false;
@@ -46,6 +47,8 @@ export class ParticlesComponent implements OnChanges, OnDestroy {
   private responseOpen = false;
   private responseCloseTimer?: number;
   private authSubscription?: Subscription;
+  private asciiAnimationId?: number;
+  private asciiSequencePosition = 0;
 
   constructor(private readonly http: HttpClient, private readonly auth: AuthService) {
     this.authSubscription = this.auth.state$.subscribe((state) => {
@@ -54,6 +57,10 @@ export class ParticlesComponent implements OnChanges, OnDestroy {
     });
     this.updateGateState();
     this.startTyping('Dave 2.0 // online');
+  }
+
+  ngOnInit(): void {
+    this.startAsciiAnimation();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -117,7 +124,25 @@ export class ParticlesComponent implements OnChanges, OnDestroy {
     if (this.responseCloseTimer) {
       window.clearTimeout(this.responseCloseTimer);
     }
+    if (this.asciiAnimationId) {
+      window.clearInterval(this.asciiAnimationId);
+    }
     this.authSubscription?.unsubscribe();
+  }
+
+  private startAsciiAnimation(): void {
+    const reducedMotion = typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      return;
+    }
+
+    this.asciiAnimationId = window.setInterval(() => {
+      this.asciiSequencePosition = (this.asciiSequencePosition + 1) % ASCII_PORTRAIT_SEQUENCE.length;
+      const frameIndex = ASCII_PORTRAIT_SEQUENCE[this.asciiSequencePosition];
+      this.activeAsciiPortrait = this.asciiFrames[frameIndex];
+    }, 180);
   }
 
   private getData(question: string): void {

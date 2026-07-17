@@ -10,8 +10,11 @@
         <div class="ascii-avatar" [attr.data-mood]="asciiMood" role="img"
             aria-label="Animated ASCII portrait of David Webster">
             <div class="ascii-frame" aria-hidden="true">
-                <pre class="ascii-art" [textContent]="asciiPortrait"></pre>
-                <span class="ascii-scanline"></span>
+                <div class="ascii-volume">
+                    <pre class="ascii-art ascii-art--back" [textContent]="asciiFrames[0]"></pre>
+                    <pre class="ascii-art ascii-art--middle" [textContent]="asciiFrames[0]"></pre>
+                    <pre class="ascii-art ascii-art--front" [textContent]="activeAsciiPortrait"></pre>
+                </div>
             </div>
             <div class="ascii-status" aria-hidden="true">
                 <span>DAVID_WEBSTER</span>
