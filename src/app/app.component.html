@@ -1,14 +1,13 @@
 <div class="stage-shell" [ngClass]="'stage-shell--' + stageMode" [class.stage-shell--response]="responseOpen">
   <header class="stage-nav">
-    <a class="stage-brand" routerLink="/" aria-label="WebstarCloud home">
-      <span class="stage-brand__mark">W</span>
+    <a class="stage-brand" routerLink="/" aria-label="David Webster home">
+      <span class="stage-brand__mark" aria-hidden="true"></span>
       <span class="stage-brand__copy">
-        <strong>WebstarCloud</strong>
-        <small>David Webster</small>
+        <strong>David Webster</strong>
       </span>
     </a>
 
-    <nav class="stage-links" aria-label="WebstarCloud sections">
+    <nav class="stage-links" aria-label="David Webster sections">
       <a routerLink="/ventures" routerLinkActive="is-active"><span>01</span> Ventures</a>
       <a routerLink="/labs" routerLinkActive="is-active"><span>02</span> Labs</a>
     </nav>
@@ -18,7 +17,7 @@
     </button>
   </header>
 
-  <section class="stage-avatar" aria-label="Interactive WebstarCloud console">
+  <section class="stage-avatar" aria-label="Interactive David Webster console">
     <app-particles [stageMode]="stageMode" (requestAccess)="openAuthPanel()"
       (responseStateChange)="setResponseOpen($event)"></app-particles>
   </section>

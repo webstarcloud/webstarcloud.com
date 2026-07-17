@@ -7,19 +7,51 @@ interface Platform {
   metric: string;
 }
 
+interface SelectedWork {
+  readonly name: string;
+  readonly type: string;
+  readonly summary: string;
+  readonly route: string;
+  readonly tone: 'lead' | 'private' | 'public';
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
+  readonly selectedWork: readonly SelectedWork[] = [
+    {
+      name: 'AnchorKeep',
+      type: 'Lead venture',
+      summary: 'Git origin, CI evidence, and verified recovery without a Git server.',
+      route: '/ventures/anchorkeep',
+      tone: 'lead'
+    },
+    {
+      name: 'Greenlight',
+      type: 'Working POC',
+      summary: 'Govern consequential AI and human actions before execution.',
+      route: '/greenlight',
+      tone: 'private'
+    },
+    {
+      name: 'llm-input-hardening',
+      type: 'Public package',
+      summary: 'Deterministic Unicode-aware hardening at the model input boundary.',
+      route: '/labs/llm-input-hardening',
+      tone: 'public'
+    }
+  ];
+
   // Built at scale — the production track record (credibility layer). Source: cv.pdf.
   readonly platforms: Platform[] = [
     {
       name: 'TMNL',
       context: 'Multi-bank · regulated',
-      blurb: 'Privacy-preserving analytics across national banks — PETs (MPC, homomorphic encryption, federated learning), SOC2 Type II.',
-      metric: '−$1.5M infra cost'
+      blurb: 'World-first privacy-preserving analytics across all Dutch national banks — PETs (MPC, homomorphic encryption, federated learning), SOC2 Type II.',
+      metric: '−$3M infra cost (saved $1.5M)'
     },
     {
       name: 'Backbase',

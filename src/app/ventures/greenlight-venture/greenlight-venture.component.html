@@ -1,0 +1,129 @@
+<main class="greenlight-page">
+  <section class="greenlight-intro" aria-labelledby="greenlight-title">
+    <div class="greenlight-intro__copy">
+      <p class="greenlight-eyebrow">Trust boundary / Working POC</p>
+      <h1 id="greenlight-title">Govern the action before it executes.</h1>
+      <p>
+        Greenlight is a managed decision layer for consequential AI and human actions.
+        It returns allow, deny, or approval-required decisions and preserves the evidence behind each outcome.
+      </p>
+      <div class="greenlight-actions">
+        <a href="#decision-demo">Run the decision flow</a>
+        <a class="greenlight-actions__quiet" routerLink="/ventures">All ventures</a>
+      </div>
+    </div>
+
+    <dl class="greenlight-proof" aria-label="Greenlight implementation proof">
+      <div *ngFor="let proof of productProof">
+        <dt>{{ proof.value }}</dt>
+        <dd>{{ proof.label }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section id="decision-demo" class="decision-tool" aria-labelledby="decision-tool-title">
+    <header class="decision-tool__header">
+      <div class="greenlight-brand">
+        <span>GL</span>
+        <div>
+          <strong id="decision-tool-title">Greenlight decision console</strong>
+          <small>Browser simulation of the working four-eyes policy</small>
+        </div>
+      </div>
+      <button type="button" class="reset-button" (click)="resetRun()" aria-label="Start a new decision run" title="New run">
+        <span aria-hidden="true">&#8635;</span>
+      </button>
+    </header>
+
+    <div class="decision-tool__body">
+      <section class="intent-pane" aria-label="Action intent">
+        <p class="pane-label">Action intent</p>
+        <dl class="intent-list">
+          <div>
+            <dt>Resource</dt>
+            <dd>{{ resource }}</dd>
+          </div>
+          <div>
+            <dt>Action</dt>
+            <dd>approve</dd>
+          </div>
+          <div>
+            <dt>Policy</dt>
+            <dd>four_eyes_v1</dd>
+          </div>
+        </dl>
+
+        <p class="pane-label pane-label--actors">Act as</p>
+        <div class="actor-switcher" role="group" aria-label="Select demo actor">
+          <button *ngFor="let actor of actors; trackBy: trackActor" type="button"
+            [class.is-active]="currentActorId === actor.id" [attr.aria-pressed]="currentActorId === actor.id"
+            (click)="selectActor(actor.id)">
+            <strong>{{ actor.name }}</strong>
+            <span>{{ actor.role }}</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="decision-pane" [attr.data-decision]="decision.decision">
+        <div>
+          <p class="pane-label">Current decision</p>
+          <strong class="decision-value" aria-live="polite">{{ decision.decision }}</strong>
+          <p class="decision-reason">{{ decision.reason }}</p>
+        </div>
+
+        <div class="approval-progress" aria-label="Approval progress">
+          <span [class.is-complete]="approvalCount >= 1"></span>
+          <span [class.is-complete]="approvalCount >= 2"></span>
+          <strong>{{ approvalCount }} / 2 independent approvals</strong>
+        </div>
+
+        <div class="decision-actions">
+          <button type="button" class="decision-actions__primary" (click)="runPrimaryAction()"
+            [disabled]="!canUsePrimaryAction">
+            {{ primaryLabel }}
+          </button>
+          <button type="button" class="decision-actions__secondary" (click)="reject()" [disabled]="!canReject">
+            Reject
+          </button>
+        </div>
+      </section>
+
+      <aside class="audit-pane" aria-label="Decision audit trail">
+        <div class="audit-pane__heading">
+          <p class="pane-label">Evidence stream</p>
+          <span>Live</span>
+        </div>
+        <ol>
+          <li *ngFor="let event of auditEvents; trackBy: trackAudit" [attr.data-tone]="event.tone">
+            <span></span>
+            <p>{{ event.label }}</p>
+          </li>
+        </ol>
+      </aside>
+    </div>
+  </section>
+
+  <section class="greenlight-evidence" aria-labelledby="greenlight-evidence-title">
+    <header>
+      <p class="greenlight-eyebrow">Built, not just pitched</p>
+      <h2 id="greenlight-evidence-title">The trust boundary already exists.</h2>
+    </header>
+    <div class="evidence-rows">
+      <article>
+        <span>01</span>
+        <h3>Decision contract</h3>
+        <p>Stable outcomes for allow, deny, approval-required, pending, and executed actions.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Operational controls</h3>
+        <p>Idempotency, tenant isolation, signed webhooks, API keys, bearer identity, and audit export.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Integration surface</h3>
+        <p>HTTP API plus JavaScript and React wrappers for actions in any product or agent workflow.</p>
+      </article>
+    </div>
+  </section>
+</main>

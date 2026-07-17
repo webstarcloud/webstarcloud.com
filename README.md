@@ -14,17 +14,27 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-> npx angular-cli-ghpages --dir=docs/
+Run `npm run build:docs` to create the production build, synchronize it into `docs/`,
+preserve the GitHub Pages control files, and refresh the Angular route fallback.
 
-## Ventures and SafeGit
+## Ventures and Labs
 
-- `/ventures` lists investable product ideas.
-- `/ventures/safegit` is the public SafeGit venture page.
-- `/safegit` is the gated SafeGit workspace route.
+- `/` includes a one-click Selected Work rail for AnchorKeep, Greenlight, and `llm-input-hardening`.
+- `/ventures` lists the venture portfolio with working products first.
+- `/ventures/anchorkeep` is the lead venture and public AnchorKeep product cockpit, including interactive push, CI, failure, and recovery flows.
+- `/greenlight` includes an interactive four-eyes decision simulation.
+- `/anchorkeep` is the gated AnchorKeep workspace route.
 - `/labs` lists research and package experiments.
-- `/labs/llm-input-hardening` is the public LLM input hardening lab page.
+- `/labs/llm-input-hardening` is an interactive browser preview of the package policies and stable reason codes.
 
-The SafeGit workspace uses the existing Cognito/OIDC integration. When an unauthenticated user opens `/safegit`, the app stores the intended return path in session storage, sends the user through Cognito, and returns them to `/safegit` after login.
+The AnchorKeep workspace uses the existing Cognito/OIDC integration. When an unauthenticated user opens `/anchorkeep`, the app stores the intended return path in session storage, sends the user through Cognito, and returns them to `/anchorkeep` after login. The old `/safegit` routes redirect to the new URLs.
+
+### AnchorKeep public demo
+
+After deployment, the distributable route is `https://webstarcloud.com/ventures/anchorkeep`.
+The public demo runs entirely in the visitor's browser: it models the real AnchorKeep v1 bucket keys, compare-and-swap ref update, push marker, AnchorKeep Pipe status transitions, terminal run invariant, and verified restore path. It never requests AWS credentials or claims to write to live infrastructure.
+
+Use the success and failure scenarios to show that CI status and recoverability are separate guarantees. The authenticated `/anchorkeep` route remains the place for a future live owner-bucket connection.
 
 ## Interactive stage
 

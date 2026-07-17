@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { SafegitWorkspaceComponent } from './safegit-workspace/safegit-workspace.component';
+import { AnchorKeepWorkspaceComponent } from './anchorkeep-workspace/anchorkeep-workspace.component';
 import { authGuard } from './auth/auth.guard';
-import { SafegitVentureComponent } from './ventures/safegit-venture/safegit-venture.component';
+import { AnchorKeepVentureComponent } from './ventures/anchorkeep-venture/anchorkeep-venture.component';
 import { VenturesComponent } from './ventures/ventures.component';
 import { LabsComponent } from './labs/labs.component';
 import { LlmInputLabComponent } from './labs/llm-input-lab/llm-input-lab.component';
+import { GreenlightVentureComponent } from './ventures/greenlight-venture/greenlight-venture.component';
 
 const routes: Routes = [
   {
@@ -18,8 +19,22 @@ const routes: Routes = [
     component: VenturesComponent
   },
   {
+    path: 'ventures/anchorkeep',
+    component: AnchorKeepVentureComponent
+  },
+  {
     path: 'ventures/safegit',
-    component: SafegitVentureComponent
+    redirectTo: 'ventures/anchorkeep',
+    pathMatch: 'full'
+  },
+  {
+    path: 'ventures/greenlight',
+    redirectTo: 'greenlight',
+    pathMatch: 'full'
+  },
+  {
+    path: 'greenlight',
+    component: GreenlightVentureComponent
   },
   {
     path: 'labs',
@@ -30,9 +45,14 @@ const routes: Routes = [
     component: LlmInputLabComponent
   },
   {
-    path: 'safegit',
-    component: SafegitWorkspaceComponent,
+    path: 'anchorkeep',
+    component: AnchorKeepWorkspaceComponent,
     canActivate: [authGuard]
+  },
+  {
+    path: 'safegit',
+    redirectTo: 'anchorkeep',
+    pathMatch: 'full'
   },
   {
     path: '**',

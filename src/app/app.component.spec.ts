@@ -32,7 +32,10 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.stage-brand')?.textContent).toContain('WebstarCloud');
+    const brand = compiled.querySelector('.stage-brand');
+    expect(brand?.textContent).toContain('David Webster');
+    expect(brand?.textContent).not.toContain('WebstarCloud');
+    expect(brand?.querySelector('.stage-brand__mark')).not.toBeNull();
   });
 
   it('tracks whether the answer workspace is open', () => {

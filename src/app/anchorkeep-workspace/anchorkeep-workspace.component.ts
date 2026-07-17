@@ -16,13 +16,13 @@ interface RepositoryRow {
 }
 
 @Component({
-  selector: 'app-safegit-workspace',
+  selector: 'app-anchorkeep-workspace',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './safegit-workspace.component.html',
-  styleUrl: './safegit-workspace.component.css'
+  templateUrl: './anchorkeep-workspace.component.html',
+  styleUrl: './anchorkeep-workspace.component.css'
 })
-export class SafegitWorkspaceComponent {
+export class AnchorKeepWorkspaceComponent {
   readonly authState$ = this.auth.state$;
 
   readonly metrics: WorkspaceMetric[] = [

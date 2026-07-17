@@ -6,6 +6,25 @@
         </p> -->
     </section>
 
+    <section class="selected-work" aria-labelledby="selected-work-title">
+        <header class="selected-work__header">
+            <p id="selected-work-title">Selected work</p>
+            <span>Trust at the boundaries of real systems</span>
+        </header>
+        <nav class="selected-work__list" aria-label="Selected projects">
+            <a *ngFor="let work of selectedWork; let index = index" [routerLink]="work.route"
+                [attr.data-tone]="work.tone">
+                <span class="selected-work__index">0{{ index + 1 }}</span>
+                <span class="selected-work__copy">
+                    <small>{{ work.type }}</small>
+                    <strong>{{ work.name }}</strong>
+                    <span>{{ work.summary }}</span>
+                </span>
+                <span class="selected-work__arrow" aria-hidden="true">&#8594;</span>
+            </a>
+        </nav>
+    </section>
+
     <section class="scale" aria-label="Built at scale">
         <header class="scale-head">
             <p class="scale-kicker">Built at scale</p>
@@ -21,7 +40,7 @@
             </article>
         </div>
 
-        <p class="scale-proof">10+ years &middot; startups to enterprise banks &middot; &ldquo;Champion of AWS&rdquo; &mdash; Werner Vogels &middot; keynote builds for two CEOs.</p>
+        <p class="scale-proof">12+ years &middot; startups to enterprise banks &middot; &ldquo;Champion of AWS&rdquo; &mdash; Werner Vogels &middot; keynote builds for multiple CEOs.</p>
     </section>
 
     <div class="row justify-content-md-center">

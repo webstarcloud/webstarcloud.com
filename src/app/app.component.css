@@ -54,26 +54,17 @@
     place-items: center;
     width: 36px;
     height: 36px;
-    border: 1px solid rgba(168, 255, 122, 0.62);
-    border-radius: 6px;
-    color: #07100b;
-    background: #a8ff7a;
-    font: 800 0.92rem/1 var(--accent-font);
+    border-radius: 7px;
+    background: url("/assets/favicon.ico") center / contain no-repeat;
 }
 
 .stage-brand__copy {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    align-items: center;
 }
 
 .stage-brand__copy strong {
     font: 700 0.86rem/1 var(--accent-font);
-}
-
-.stage-brand__copy small {
-    color: rgba(238, 247, 240, 0.5);
-    font: 500 0.68rem/1 var(--accent-font);
 }
 
 .stage-links {
@@ -147,7 +138,8 @@
 
 .stage-shell--ventures .stage-avatar,
 .stage-shell--labs .stage-avatar,
-.stage-shell--safegit .stage-avatar,
+.stage-shell--anchorkeep .stage-avatar,
+.stage-shell--greenlight .stage-avatar,
 .stage-shell--lab-detail .stage-avatar {
     position: fixed;
     inset: 0;
@@ -181,7 +173,7 @@
     pointer-events: none;
 }
 
-.stage-shell--safegit .stage-surface,
+.stage-shell--anchorkeep .stage-surface,
 .stage-shell--lab-detail .stage-surface {
     box-sizing: border-box;
     padding-bottom: 90px;
@@ -207,10 +199,6 @@
     .stage-nav {
         gap: 8px;
         padding-inline: 10px;
-    }
-
-    .stage-brand__copy small {
-        display: none;
     }
 
     .stage-brand__copy strong {

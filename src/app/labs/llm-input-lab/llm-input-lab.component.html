@@ -1,61 +1,125 @@
-<main class="llm-lab">
-  <header class="lab-nav">
-    <a class="brand" routerLink="/labs">Labs</a>
-    <nav aria-label="llm-input-hardening navigation">
-      <a routerLink="/">WebstarCloud</a>
-      <a routerLink="/ventures">Ventures</a>
-    </nav>
-  </header>
-
-  <section class="hero">
-    <div class="hero-copy">
-      <p class="eyebrow">Input boundary</p>
-      <h1>Deterministic text hardening before untrusted input reaches an LLM.</h1>
-      <p class="hero-text">
-        `llm-input-hardening` normalizes Unicode, removes invisible/control characters
-        that destabilize prompts, and emits structured reports for logging and enforcement.
-      </p>
-      <div class="hero-actions">
-        <a class="primary-action" href="https://pypi.org/project/llm-input-hardening/" target="_blank" rel="noreferrer">PyPI</a>
-        <a class="secondary-action" routerLink="/labs">Back to Labs</a>
+<main class="input-lab-page">
+  <header class="lab-product-bar">
+    <div class="lab-brand">
+      <span>IH</span>
+      <div>
+        <strong>llm-input-hardening</strong>
+        <small>Deterministic text integrity</small>
       </div>
     </div>
-    <figure class="hero-figure">
-      <img src="assets/labs/input-hardening-flow.svg" alt="llm-input-hardening text integrity pipeline">
-    </figure>
+    <div class="lab-product-actions">
+      <a routerLink="/labs">Labs</a>
+      <a class="pypi-link" href="https://pypi.org/project/llm-input-hardening/" target="_blank" rel="noreferrer">PyPI</a>
+    </div>
+  </header>
+
+  <section class="lab-intro" aria-labelledby="input-hardening-title">
+    <div>
+      <p class="lab-eyebrow">Input boundary / Public package</p>
+      <h1 id="input-hardening-title">Make hostile text visible before it reaches the model.</h1>
+      <p>
+        Normalize Unicode, remove destabilizing controls and invisibles, and emit a structured report
+        before untrusted text reaches prompts, tools, or code generation.
+      </p>
+    </div>
+    <dl class="lab-facts">
+      <div><dt>Deterministic</dt><dd>No model call</dd></div>
+      <div><dt>Versioned</dt><dd>Stable report schema</dd></div>
+      <div><dt>Rust + Python</dt><dd>Production package</dd></div>
+    </dl>
   </section>
 
-  <section class="section-band">
-    <div class="section-heading">
-      <p class="eyebrow">Scope</p>
-      <h2>Text integrity, not model intent.</h2>
+  <section class="hardening-tool" aria-labelledby="hardening-tool-title">
+    <header class="hardening-tool__header">
+      <div>
+        <p class="lab-eyebrow">Interactive browser preview</p>
+        <h2 id="hardening-tool-title">Inspect the text boundary</h2>
+      </div>
+      <div class="sample-switcher" aria-label="Load hostile text sample">
+        <button *ngFor="let sample of samples; trackBy: trackSample" type="button" (click)="loadSample(sample)">
+          {{ sample.label }}
+        </button>
+      </div>
+    </header>
+
+    <div class="policy-bar" role="group" aria-label="Hardening policy">
+      <button *ngFor="let item of policies; trackBy: trackPolicy" type="button"
+        [class.is-active]="policy === item.name" [attr.aria-pressed]="policy === item.name"
+        (click)="setPolicy(item.name)">
+        <strong>{{ item.label }}</strong>
+        <span>{{ item.use }}</span>
+      </button>
     </div>
-    <div class="scope-grid">
-      <article *ngFor="let item of scope">
-        <h3>{{ item.title }}</h3>
-        <p>{{ item.copy }}</p>
+
+    <div class="hardening-workspace">
+      <label class="text-pane text-pane--input">
+        <span class="pane-heading"><strong>Untrusted input</strong><small>{{ inputText.length }} characters</small></span>
+        <textarea [ngModel]="inputText" (ngModelChange)="updateInput($event)" spellcheck="false"
+          aria-label="Untrusted input text"></textarea>
+      </label>
+
+      <section class="text-pane text-pane--output" aria-label="Sanitized output">
+        <span class="pane-heading">
+          <strong>Sanitized output</strong>
+          <small [class.is-changed]="result.changed">{{ result.changed ? 'Changed' : 'Unchanged' }}</small>
+        </span>
+        <pre>{{ result.output }}</pre>
+      </section>
+
+      <aside class="signal-pane" aria-label="Hardening signals">
+        <div class="signal-summary">
+          <p class="lab-eyebrow">Structured report</p>
+          <strong>{{ result.removedTotal }}</strong>
+          <span>removals · {{ result.normalization }}</span>
+        </div>
+
+        <div class="signal-list" *ngIf="result.removed.length || result.flagged.length; else cleanInput">
+          <div *ngFor="let signal of result.removed" data-kind="removed">
+            <code>{{ signal.code }}</code>
+            <span>{{ signal.label }}</span>
+            <strong>&times;{{ signal.count }}</strong>
+          </div>
+          <div *ngFor="let signal of result.flagged" data-kind="flagged">
+            <code>{{ signal.code }}</code>
+            <span>{{ signal.label }}</span>
+            <strong>&times;{{ signal.count }}</strong>
+          </div>
+        </div>
+
+        <ng-template #cleanInput>
+          <p class="clean-input">No configured signals detected.</p>
+        </ng-template>
+      </aside>
+    </div>
+
+    <details class="report-detail">
+      <summary>View report JSON</summary>
+      <pre><code>{{ result.reportJson }}</code></pre>
+    </details>
+
+    <footer class="preview-note">
+      Browser preview of core policy behavior. Use the Rust/Python package as the production authority.
+    </footer>
+  </section>
+
+  <section class="lab-evidence" aria-labelledby="lab-evidence-title">
+    <header>
+      <p class="lab-eyebrow">Security boundary</p>
+      <h2 id="lab-evidence-title">Text integrity, not model intent.</h2>
+    </header>
+    <div class="lab-evidence__rows">
+      <article>
+        <span>01</span><h3>Detect what humans cannot see</h3>
+        <p>Bidi controls, zero-width characters, default ignorables, mixed scripts, and encoded payload shapes.</p>
+      </article>
+      <article>
+        <span>02</span><h3>Choose policy by consequence</h3>
+        <p>Preserve chat semantics, harden execution arguments, and retain source formatting where code needs it.</p>
+      </article>
+      <article>
+        <span>03</span><h3>Keep other guardrails</h3>
+        <p>This complements tool allowlists, authorization, sandboxing, prompt defenses, and output validation.</p>
       </article>
     </div>
-  </section>
-
-  <section class="section-band muted-band">
-    <div class="section-heading">
-      <p class="eyebrow">Policies</p>
-      <h2>Use stricter policies as text gets closer to tools.</h2>
-    </div>
-    <div class="policy-grid">
-      <article *ngFor="let policy of policies">
-        <span>{{ policy.name }}</span>
-        <p>{{ policy.use }}</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="section-band visual-band">
-    <div class="section-heading">
-      <p class="eyebrow">Signals</p>
-      <h2>Make invisible and lookalike text properties visible.</h2>
-    </div>
-    <img src="assets/labs/homoglyph-default-ignorable-guide.svg" alt="Homoglyph and default-ignorable visual guide">
   </section>
 </main>

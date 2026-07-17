@@ -1,0 +1,132 @@
+<main class="anchorkeep-product">
+  <section class="anchorkeep-intro" aria-labelledby="anchorkeep-title">
+    <div>
+      <p class="anchorkeep-eyebrow">Lead venture / Public interactive demo</p>
+      <h1 id="anchorkeep-title">Your code, anchored beyond the Git server.</h1>
+      <p>
+        AnchorKeep keeps code, branch state, build evidence, and restore verification in object storage you control.
+        Developers still use ordinary push, fetch, pull, and clone workflows.
+      </p>
+    </div>
+  </section>
+
+  <section class="anchorkeep-cockpit" aria-labelledby="cockpit-title">
+    <header class="cockpit-header">
+      <div>
+        <p class="anchorkeep-eyebrow">Try the v1 object contract</p>
+        <h2 id="cockpit-title">AnchorKeep Core + Pipe demo</h2>
+        <small>Contract-accurate browser simulation · no AWS credentials or bucket writes</small>
+      </div>
+    </header>
+
+    <div class="cockpit-tabs" role="tablist" aria-label="AnchorKeep preview views">
+      <button type="button" role="tab" [attr.aria-selected]="activeView === 'activity'"
+        [class.is-active]="activeView === 'activity'" (click)="setView('activity')">Push + CI</button>
+      <button type="button" role="tab" [attr.aria-selected]="activeView === 'recovery'"
+        [class.is-active]="activeView === 'recovery'" (click)="setView('recovery')">Recovery proof</button>
+    </div>
+
+    <div class="cockpit-body">
+      <aside class="repository-rail" aria-label="Demo repositories">
+        <p class="pane-label">Repositories</p>
+        <button *ngFor="let repository of repositories; trackBy: trackRepository" type="button"
+          [class.is-active]="selectedRepositoryId === repository.id" (click)="selectRepository(repository.id)">
+          <span>{{ repository.name.slice(0, 2).toUpperCase() }}</span>
+          <div>
+            <strong>{{ repository.name }}</strong>
+            <small>{{ repository.branch }} · {{ repositoryStatus(repository) }}</small>
+          </div>
+        </button>
+      </aside>
+
+      <section class="cockpit-content">
+        <header class="repository-heading">
+          <div>
+            <p class="pane-label">{{ selectedRepository.storage }}</p>
+            <h3>{{ selectedRepository.name }}</h3>
+          </div>
+          <code>{{ selectedRepository.sha }}</code>
+        </header>
+
+        <div *ngIf="activeView === 'activity'" class="activity-view">
+          <div class="demo-controls">
+            <div class="scenario-switch" role="group" aria-label="Pipeline outcome">
+              <span>Pipeline result</span>
+              <button type="button" [class.is-active]="selectedOutcome === 'success'"
+                [disabled]="isRunning" (click)="setOutcome('success')">Pass</button>
+              <button type="button" [class.is-active]="selectedOutcome === 'failed'"
+                [disabled]="isRunning" (click)="setOutcome('failed')">Fail</button>
+            </div>
+            <div class="demo-actions">
+              <button type="button" class="reset-action" [disabled]="currentStage === 0" (click)="resetDemo()">Reset</button>
+              <button type="button" class="run-action" [disabled]="isRunning" (click)="runDemo()">
+                {{ isRunning ? 'Running…' : (isTerminal ? 'Run again' : 'Run safe push') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="activity-grid">
+            <ol class="push-timeline">
+              <li *ngFor="let event of activity; trackBy: trackEvent" [attr.data-state]="event.state">
+                <span></span>
+                <div>
+                  <strong>{{ event.title }}</strong>
+                  <p>{{ event.detail }}</p>
+                  <code>{{ event.meta }}</code>
+                </div>
+              </li>
+            </ol>
+
+            <aside class="contract-inspector" aria-label="AnchorKeep contract object">
+              <header>
+                <span>{{ contractObjectLabel }}</span>
+                <code>{{ contractObjectKey }}</code>
+              </header>
+              <pre>{{ contractJson }}</pre>
+            </aside>
+          </div>
+
+          <section class="demo-terminal" aria-labelledby="demo-terminal-title">
+            <header>
+              <div>
+                <span id="demo-terminal-title">Protocol trace</span>
+                <small>Simulated output from the real AnchorKeep Core → Pipe flow</small>
+              </div>
+              <strong [attr.data-state]="runState">{{ runState }}</strong>
+            </header>
+            <pre aria-live="polite">{{ terminalOutput }}</pre>
+          </section>
+        </div>
+
+        <div *ngIf="activeView === 'recovery'" class="recovery-view">
+          <div class="verification-summary" [attr.data-state]="recoveryState">
+            <span class="verification-mark">{{ recoveryState === 'verified' ? '✓' : '↻' }}</span>
+            <div>
+              <p class="pane-label">Recovery proof</p>
+              <strong *ngIf="recoveryState === 'idle'">Stored commit ready to verify</strong>
+              <strong *ngIf="recoveryState === 'running'">Re-hashing the recovered repository</strong>
+              <strong *ngIf="recoveryState === 'verified'">Repository recovered and verified</strong>
+              <span>Recovery remains independent of whether the CI command passed.</span>
+            </div>
+            <button type="button" class="verify-action" [disabled]="!isTerminal || recoveryState === 'running'"
+              (click)="verifyRecovery()">
+              {{ recoveryState === 'verified' ? 'Verify again' : 'Verify recovery' }}
+            </button>
+          </div>
+          <dl class="verification-list">
+            <div *ngFor="let check of recoveryChecks; trackBy: trackRecoveryCheck" [attr.data-state]="check.state">
+              <dt>{{ check.label }}</dt><dd>{{ check.detail }}</dd>
+            </div>
+            <div [attr.data-state]="recoveryState === 'verified' ? 'complete' : 'pending'">
+              <dt>Recovery target</dt><dd>Fresh local clone</dd>
+            </div>
+          </dl>
+          <p *ngIf="!isTerminal" class="recovery-hint">Run the safe push first to create a durable commit to recover.</p>
+          <pre aria-live="polite"><code>{{ recoveryOutput }}</code></pre>
+        </div>
+
+      </section>
+    </div>
+  </section>
+
+</main>

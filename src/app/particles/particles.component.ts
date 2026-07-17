@@ -9,7 +9,7 @@ import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 
 type ParticleMode = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling';
-export type StageMode = 'home' | 'ventures' | 'labs' | 'safegit' | 'lab-detail';
+export type StageMode = 'home' | 'ventures' | 'labs' | 'anchorkeep' | 'greenlight' | 'lab-detail';
 
 interface ModeTheme {
   accentA: number;
@@ -41,7 +41,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly apiBaseUrl = environment.api.baseUrl.trim();
   private readonly apiGatewayKey = environment.api.gatewayKey.trim();
 
-  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
+  renderer?: THREE.WebGLRenderer;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(55, 1, 0.1, 2000);
   controls?: OrbitControls;
@@ -439,8 +439,10 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
         return 'agentic';
       case 'labs':
         return 'tooling';
-      case 'safegit':
+      case 'anchorkeep':
         return 'resilience';
+      case 'greenlight':
+        return 'agentic';
       case 'lab-detail':
         return 'architecture';
       default:
@@ -920,6 +922,13 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngAfterViewInit() {
+    try {
+      this.renderer = this.createRenderer();
+    } catch (error) {
+      console.warn('The interactive avatar is unavailable because WebGL could not be initialized.', error);
+      return;
+    }
+
     this.syncSceneLayout();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
@@ -937,6 +946,10 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.animate();
   }
 
+  private createRenderer() {
+    return new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
+  }
+
   @HostListener('window:resize')
   onWindowResize() {
     this.syncSceneLayout();
@@ -950,7 +963,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   setRendererSize() {
-    if (!this.rendererContainer?.nativeElement) {
+    if (!this.renderer || !this.rendererContainer?.nativeElement) {
       return;
     }
 
@@ -994,7 +1007,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   animate() {
-    if (!this.active) {
+    if (!this.active || !this.renderer) {
       return;
     }
 
@@ -1152,7 +1165,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this.responseCloseTimer) {
       window.clearTimeout(this.responseCloseTimer);
     }
-    this.renderer.dispose();
+    this.renderer?.dispose();
     this.shaderMaterial?.dispose();
     this.shellMaterial?.dispose();
     this.pointCloudMaterial?.dispose();

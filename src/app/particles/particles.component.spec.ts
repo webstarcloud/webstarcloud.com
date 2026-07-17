@@ -35,10 +35,15 @@ describe('ParticlesComponent', () => {
 
     fixture = TestBed.createComponent(ParticlesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('creates when WebGL is unavailable', () => {
+    spyOn(component as any, 'createRenderer').and.throwError('WebGL unavailable');
+    const warning = spyOn(console, 'warn');
+
+    fixture.detectChanges();
+
     expect(component).toBeTruthy();
+    expect(warning).toHaveBeenCalled();
   });
 });

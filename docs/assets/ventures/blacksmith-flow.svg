@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
+  <title id="title">Blacksmith agent exposure pipeline</title>
+  <desc id="desc">Blacksmith scans an OpenAPI spec, gates risky operations, then generates an agent-safe SDK, MCP server, and CI report.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-30%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#05070a" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10Z" fill="#fb7a3c"/>
+    </marker>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#202632"/>
+      <stop offset="1" stop-color="#11161f"/>
+    </linearGradient>
+    <linearGradient id="forge" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffb36c"/>
+      <stop offset="0.52" stop-color="#fb7a3c"/>
+      <stop offset="1" stop-color="#b94318"/>
+    </linearGradient>
+    <style>
+      .bg { fill: #0c0e12; }
+      .panel { fill: url(#panel); stroke: #29313f; stroke-width: 2; }
+      .soft { fill: #141a23; stroke: #26303d; stroke-width: 2; }
+      .title { fill: #e9ecf1; font: 700 26px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 4px; }
+      .label { fill: #939cab; font: 500 20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .small { fill: #939cab; font: 500 16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .ok { fill: #37d399; }
+      .warn { fill: #f4b740; }
+      .fail { fill: #f2685f; }
+      .ember { fill: #fb7a3c; }
+      .line { fill: none; stroke: #fb7a3c; stroke-width: 3; stroke-dasharray: 11 13; marker-end: url(#arrow); }
+      .ok-stroke { stroke: #37d399; }
+      .warn-stroke { stroke: #f4b740; }
+      .fail-stroke { stroke: #f2685f; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="520" rx="28"/>
+  <text class="title ember" x="78" y="72">OPENAPI - LIVE</text>
+  <text class="title ok" x="652" y="72">SCAN - GATE</text>
+  <text class="title ember" x="1232" y="72">AGENT - SAFE</text>
+
+  <g filter="url(#shadow)">
+    <rect class="panel" x="58" y="110" width="500" height="70" rx="18"/>
+    <text class="label" x="98" y="153">GET /payments</text>
+    <circle class="ok" cx="520" cy="145" r="8"/>
+
+    <rect class="panel" x="58" y="198" width="500" height="70" rx="18"/>
+    <text class="label" x="98" y="241">POST /accounts</text>
+    <circle class="warn" cx="520" cy="233" r="8"/>
+
+    <rect class="panel" x="58" y="286" width="500" height="70" rx="18"/>
+    <text class="label" x="98" y="329">POST /refunds</text>
+    <circle class="fail" cx="520" cy="321" r="8"/>
+
+    <rect class="panel" x="58" y="374" width="500" height="70" rx="18"/>
+    <text class="label" x="98" y="417">DELETE /admin/users</text>
+    <circle class="fail" cx="520" cy="409" r="8"/>
+  </g>
+
+  <path class="line" d="M575 145 C650 145 650 210 720 230"/>
+  <path class="line" d="M575 233 C645 233 660 245 720 252"/>
+  <path class="line" d="M575 321 C650 321 655 290 720 274"/>
+  <path class="line" d="M575 409 C655 396 660 330 720 298"/>
+
+  <g filter="url(#shadow)">
+    <circle cx="800" cy="260" r="118" fill="#121922" stroke="#26303d" stroke-width="2"/>
+    <circle cx="800" cy="260" r="88" fill="url(#forge)"/>
+    <path d="M735 278h130l-22 40h-86Z" fill="#32151c" opacity="0.9"/>
+    <path d="M766 224h86c8 0 14 6 14 14v22c0 8-6 14-14 14h-86c-8 0-14-6-14-14v-22c0-8 6-14 14-14Z" fill="#11161f"/>
+    <path d="M778 252h62" stroke="#37d399" stroke-width="8" stroke-linecap="round"/>
+    <path d="M720 184 760 144 782 166 742 206Z" fill="#cfd6df"/>
+    <path d="M760 144 782 166 796 152 774 130Z" fill="#fb7a3c"/>
+    <text class="title" x="720" y="424">BLACKSMITH</text>
+    <text class="small" x="690" y="458">CLASSIFY - BLOCK - GENERATE</text>
+  </g>
+
+  <path class="line" d="M900 260 C1000 260 1020 168 1110 150"/>
+  <path class="line" d="M900 260 C1000 260 1020 260 1110 260"/>
+  <path class="line" d="M900 260 C1000 260 1020 356 1110 374"/>
+
+  <g filter="url(#shadow)">
+    <rect class="soft ok-stroke" x="1128" y="104" width="410" height="92" rx="18"/>
+    <text class="label" x="1162" y="144">agent-safe SDK</text>
+    <text class="small ok" x="1162" y="172">listPayments() - runQuery()</text>
+
+    <rect class="soft ok-stroke" x="1128" y="218" width="410" height="92" rx="18"/>
+    <text class="label" x="1162" y="258">safe MCP server</text>
+    <text class="small ok" x="1162" y="286">2 tools exposed - 4 ops blocked</text>
+
+    <rect class="soft fail-stroke" x="1128" y="332" width="410" height="92" rx="18"/>
+    <text class="label" x="1162" y="372">CI exposure report</text>
+    <text class="small fail" x="1162" y="400">merge blocked until reviewed</text>
+  </g>
+
+  <g>
+    <circle class="ok" cx="90" cy="482" r="8"/>
+    <text class="small" x="108" y="488">allowed read or reviewed low-risk write</text>
+    <circle class="warn" cx="478" cy="482" r="8"/>
+    <text class="small" x="496" y="488">needs review</text>
+    <circle class="fail" cx="688" cy="482" r="8"/>
+    <text class="small" x="706" y="488">blocked from agents</text>
+  </g>
+</svg>

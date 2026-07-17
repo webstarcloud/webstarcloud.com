@@ -48,8 +48,17 @@ export class AppComponent implements OnDestroy {
   private getStageMode(url: string): StageMode {
     const path = url.split('?')[0].split('#')[0];
 
-    if (path.startsWith('/ventures/safegit') || path.startsWith('/safegit')) {
-      return 'safegit';
+    if (
+      path.startsWith('/ventures/anchorkeep') ||
+      path.startsWith('/anchorkeep') ||
+      path.startsWith('/ventures/safegit') ||
+      path.startsWith('/safegit')
+    ) {
+      return 'anchorkeep';
+    }
+
+    if (path.startsWith('/greenlight') || path.startsWith('/ventures/greenlight')) {
+      return 'greenlight';
     }
 
     if (path.startsWith('/ventures')) {

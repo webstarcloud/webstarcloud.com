@@ -21,12 +21,20 @@ interface VentureCard {
 export class VenturesComponent {
   readonly ventures: VentureCard[] = [
     {
-      name: 'SafeGit',
+      name: 'AnchorKeep',
       boundary: 'Recovery boundary',
-      stage: 'Private preview',
-      summary: 'A controlled Git safety layer for sensitive repositories, release evidence, and recovery-critical workflows.',
+      stage: 'Lead venture',
+      summary: 'A local-first Git origin, CI trail, and verified recovery path on object storage you control.',
       icon: 'recovery',
-      route: '/ventures/safegit'
+      route: '/ventures/anchorkeep'
+    },
+    {
+      name: 'Greenlight',
+      boundary: 'Trust boundary',
+      stage: 'Working POC',
+      summary: 'A managed decision layer that governs consequential AI and human actions before execution.',
+      icon: 'trust',
+      route: '/greenlight'
     },
     {
       name: 'Blacksmith',
@@ -41,13 +49,6 @@ export class VenturesComponent {
       stage: 'Exploration',
       summary: 'Controlled environments for testing agents, workflows, and decision systems before they touch production.',
       icon: 'simulation'
-    },
-    {
-      name: 'Greenlight',
-      boundary: 'Trust boundary',
-      stage: 'Exploration',
-      summary: 'A managed trust layer for governing AI and human actions before they are allowed to execute.',
-      icon: 'trust'
     }
   ];
 }
