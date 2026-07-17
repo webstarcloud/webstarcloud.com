@@ -93,74 +93,32 @@
     color: rgba(238, 247, 240, 0.78);
 }
 
-.auth-copy--intro {
-    padding-bottom: 4px;
-}
-
-.auth-copy--muted {
-    color: rgba(238, 247, 240, 0.56);
-    font-size: 0.88rem;
-}
-
 .auth-error {
     color: #ff9eaf;
 }
 
-.auth-form,
 .auth-state {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.auth-field {
+.auth-contact {
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid rgba(110, 231, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(110, 231, 255, 0.04);
 }
 
-.auth-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    color: rgba(238, 247, 240, 0.82);
-    font: 600 0.78rem/1 var(--accent-font);
-}
-
-.auth-optional {
-    color: rgba(238, 247, 240, 0.38);
-    font-size: 0.66rem;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.auth-input {
-    width: 100%;
-    min-height: 48px;
-    padding: 11px 13px;
-    box-sizing: border-box;
-    border: 1px solid rgba(238, 247, 240, 0.16);
-    border-radius: 7px;
-    outline: 0;
-    color: #f7fbf8;
-    background: rgba(255, 255, 255, 0.035);
-    font: 500 0.92rem/1.4 var(--accent-font);
-    transition: border-color 180ms ease, background-color 180ms ease;
-}
-
-.auth-input::placeholder {
-    color: rgba(238, 247, 240, 0.34);
-}
-
-.auth-input:focus {
-    border-color: rgba(110, 231, 255, 0.7);
-    background: rgba(110, 231, 255, 0.05);
-}
-
-.auth-textarea {
-    min-height: 92px;
-    resize: vertical;
+.auth-email {
+    width: fit-content;
+    color: #a8ff7a;
+    font: 700 clamp(0.94rem, 3.8vw, 1.12rem)/1.3 var(--accent-font);
+    overflow-wrap: anywhere;
+    text-underline-offset: 0.22em;
 }
 
 .auth-submit,
@@ -198,11 +156,6 @@
 .auth-signin__button:disabled {
     cursor: not-allowed;
     opacity: 0.42;
-}
-
-.auth-inline-link {
-    color: #6ee7ff;
-    text-underline-offset: 0.16em;
 }
 
 .auth-signin {
@@ -256,7 +209,6 @@
 @media (prefers-reduced-motion: reduce) {
     .auth-panel,
     .auth-close,
-    .auth-input,
     .auth-submit,
     .auth-signin__button {
         transition: none;

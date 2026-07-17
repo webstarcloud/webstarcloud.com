@@ -21,7 +21,6 @@
     "@angular/router": "^17.0.8",
     "angular-auth-oidc-client": "^17.1.0",
     "rxjs": "~7.5.0",
-    "three": "^0.154.0",
     "tslib": "^2.6.2",
     "zone.js": "^0.14.2"
   },
@@ -30,7 +29,6 @@
     "@angular/cli": "~17.0.8",
     "@angular/compiler-cli": "^17.0.8",
     "@types/jasmine": "~4.0.0",
-    "@types/three": "^0.153.0",
     "jasmine-core": "~4.1.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",

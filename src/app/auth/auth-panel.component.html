@@ -7,7 +7,7 @@
             <div>
                 <p class="auth-kicker">WebstarCloud access</p>
                 <h2 id="auth-title" class="auth-title">
-                    {{ state.isAuthenticated ? 'Private workspace' : 'Request an invitation' }}
+                    {{ state.isAuthenticated ? 'Private workspace' : 'Contact David' }}
                 </h2>
             </div>
             <button class="auth-close" type="button" (click)="closePanel()"
@@ -27,46 +27,16 @@
         </div>
 
         <ng-container *ngIf="!state.isAuthenticated">
-            <div class="auth-state" *ngIf="requestSent">
-                <p class="auth-copy">Your request is ready to send.</p>
-                <p class="auth-copy auth-copy--muted">
-                    If your mail app did not open, email
-                    <a class="auth-inline-link" [href]="'mailto:' + ownerEmail">{{ ownerEmail }}</a> directly.
+            <div class="auth-contact">
+                <p class="auth-copy">
+                    Invitation requests are not automated yet. Email me directly if you would like to discuss access.
                 </p>
+                <a class="auth-email" [href]="'mailto:' + ownerEmail">{{ ownerEmail }}</a>
             </div>
-
-            <form class="auth-form" *ngIf="!requestSent" (ngSubmit)="requestAccess()" novalidate>
-                <p class="auth-copy auth-copy--intro">
-                    Private previews are shared selectively. Introduce yourself and the project you want to explore.
-                </p>
-
-                <label class="auth-field">
-                    <span class="auth-label">Name</span>
-                    <input class="auth-input" type="text" name="name" [(ngModel)]="requesterName"
-                        placeholder="Your name" autocomplete="name" required>
-                </label>
-
-                <label class="auth-field">
-                    <span class="auth-label">Email</span>
-                    <input class="auth-input" type="email" name="email" [(ngModel)]="requesterEmail"
-                        placeholder="you@example.com" autocomplete="email" required>
-                </label>
-
-                <label class="auth-field">
-                    <span class="auth-label">Project or interest <span class="auth-optional">Optional</span></span>
-                    <textarea class="auth-input auth-textarea" name="note" rows="3" [(ngModel)]="requesterNote"
-                        placeholder="What would you like to explore?"></textarea>
-                </label>
-
-                <button class="auth-submit" type="submit"
-                    [disabled]="!requesterName.trim() || !requesterEmail.trim()">
-                    Send request
-                </button>
-            </form>
 
             <div class="auth-signin">
                 <div>
-                    <strong>Already invited?</strong>
+                    <strong>Already have access?</strong>
                     <span>Continue through the secure sign-in.</span>
                 </div>
                 <button type="button" class="auth-signin__button" (click)="signIn()"

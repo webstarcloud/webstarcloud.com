@@ -6,13 +6,17 @@
     [class.stage-greenlight]="stageMode === 'greenlight'"
     [class.stage-lab-detail]="stageMode === 'lab-detail'"
     [class.has-response]="activeResponseMarkdown">
-    <div class="canvas-wrapper">
-        <div #rendererContainer class="renderer-container">
-            <!-- Three.js canvas will be injected here -->
-        </div>
-
-        <div *ngIf="loading" class="loading-overlay">
-            <p>Loading Dave 2.0{{ loadingDots }}</p>
+    <div class="ascii-wrapper">
+        <div class="ascii-avatar" [attr.data-mood]="asciiMood" role="img"
+            aria-label="Animated ASCII portrait of David Webster">
+            <div class="ascii-frame" aria-hidden="true">
+                <pre class="ascii-art" [textContent]="asciiPortrait"></pre>
+                <span class="ascii-scanline"></span>
+            </div>
+            <div class="ascii-status" aria-hidden="true">
+                <span>DAVID_WEBSTER</span>
+                <span>ASCII / 01</span>
+            </div>
         </div>
     </div>
 
@@ -29,9 +33,9 @@
             </button>
           </div>
           <div class="gate-panel" *ngIf="gateLocked">
-            <p class="gate-copy">Public preview complete. Private responses are available to invited collaborators.</p>
+            <p class="gate-copy">Public preview complete. Contact David directly to discuss private access.</p>
             <button type="button" class="gate-button" (click)="requestAccess.emit()">
-                Private access
+                Contact David
             </button>
           </div>
           <p class="response-copy" *ngIf="!gateLocked && (displayedMessage || displayedDots)" aria-live="polite">

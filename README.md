@@ -38,7 +38,7 @@ Use the success and failure scenarios to show that CI status and recoverability 
 
 ## Interactive stage
 
-The Three.js avatar is the persistent home state. Opening Labs, Ventures, or a chat answer disperses the retained avatar point cloud before revealing the selected workspace. Returning home reassembles those particles into the avatar. The chat dock is intentionally scoped to the home stage so it cannot obscure portfolio or product workspaces. Keep route content inside the root stage shell so navigation and chat continue to share that transition lifecycle.
+The CSS-animated ASCII portrait is the persistent home state. Its palette responds to the active workspace and question context without loading a 3D model or running a WebGL render loop. The chat dock remains scoped to the home stage so it cannot obscure portfolio or product workspaces.
 
 ## Running unit tests
 

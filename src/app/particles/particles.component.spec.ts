@@ -37,13 +37,13 @@ describe('ParticlesComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('creates when WebGL is unavailable', () => {
-    spyOn(component as any, 'createRenderer').and.throwError('WebGL unavailable');
-    const warning = spyOn(console, 'warn');
-
+  it('renders the lightweight ASCII portrait without a canvas', () => {
     fixture.detectChanges();
 
     expect(component).toBeTruthy();
-    expect(warning).toHaveBeenCalled();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('.ascii-art')?.textContent).toBe(component.asciiPortrait);
+    expect(component.asciiPortrait.split('\n')).toHaveSize(40);
+    expect(element.querySelector('canvas')).toBeNull();
   });
 });
