@@ -19,15 +19,19 @@ preserve the GitHub Pages control files, and refresh the Angular route fallback.
 
 ## Ventures and Labs
 
-- `/` includes a one-click Selected Work rail for AnchorKeep, Greenlight, and `llm-input-hardening`.
+- `/` leads with David's AI Systems Builder proposition, verified production outcomes, CV/contact actions,
+  and an AI-first Selected Work rail for `llm-input-hardening`, Agent API Hardening / Blacksmith, and Greenlight. Production work
+  and hands-on R&D are labelled separately.
 - `/ventures` lists the venture portfolio with working products first.
-- `/ventures/anchorkeep` is the lead venture and public AnchorKeep product cockpit, including interactive push, CI, failure, and recovery flows.
+- `/ventures/anchorkeep` is the public AnchorKeep product cockpit, including interactive push, CI, failure, and recovery flows.
 - `/greenlight` includes an interactive four-eyes decision simulation.
 - `/anchorkeep` is the gated AnchorKeep workspace route.
 - `/labs` lists research and package experiments.
 - `/labs/llm-input-hardening` is an interactive browser preview of the package policies and stable reason codes.
 
 The AnchorKeep workspace uses the existing Cognito/OIDC integration. When an unauthenticated user opens `/anchorkeep`, the app stores the intended return path in session storage, sends the user through Cognito, and returns them to `/anchorkeep` after login. The old `/safegit` routes redirect to the new URLs.
+
+The public CV action expects `src/assets/David-Webster-AI-Systems-Builder.pdf` so the Angular asset build publishes one stable URL. The source of truth is `career/cv/current/David-Webster-AI-Systems-Builder.pdf` at the workspace root.
 
 ### AnchorKeep public demo
 

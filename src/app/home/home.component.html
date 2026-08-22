@@ -1,15 +1,8 @@
 <div class="container min-vh-100">
-    <section class="home-caption">
-        <p class="home-kicker">Principal Architect | AI Platforms, Agents &amp; Trust at Scale</p>
-        <!-- <p class="home-summary">
-            Notes on agentic systems, architecture, tooling, and what actually survives contact with production.
-        </p> -->
-    </section>
-
     <section class="selected-work" aria-labelledby="selected-work-title">
         <header class="selected-work__header">
             <p id="selected-work-title">Selected work</p>
-            <span>Trust at the boundaries of real systems</span>
+            <span>AI systems and the infrastructure that makes them dependable</span>
         </header>
         <nav class="selected-work__list" aria-label="Selected projects">
             <a *ngFor="let work of selectedWork; let index = index" [routerLink]="work.route"
@@ -25,22 +18,22 @@
         </nav>
     </section>
 
-    <section class="scale" aria-label="Built at scale">
+    <section class="scale" aria-label="Production systems and research work">
         <header class="scale-head">
-            <p class="scale-kicker">Built at scale</p>
-            <p class="scale-lede">A decade of production platforms for data-intensive, highly regulated environments &mdash; from startups to tier-1 banks.</p>
+            <p class="scale-kicker">Production proof + R&amp;D</p>
+            <p class="scale-lede">From 0&rarr;1 builds to systems people rely on. Production work and technical exploration are labelled separately.</p>
         </header>
 
         <div class="scale-grid">
-            <article class="scale-card" *ngFor="let p of platforms">
-                <p class="scale-card__context">{{ p.context }}</p>
+            <article class="scale-card" *ngFor="let p of platforms" [attr.data-kind]="p.kind">
+                <p class="scale-card__context">{{ p.kind }} &middot; {{ p.context }}</p>
                 <h3 class="scale-card__name">{{ p.name }}</h3>
                 <p class="scale-card__blurb">{{ p.blurb }}</p>
                 <p class="scale-card__metric">{{ p.metric }}</p>
             </article>
         </div>
 
-        <p class="scale-proof">12+ years &middot; startups to enterprise banks &middot; &ldquo;Champion of AWS&rdquo; &mdash; Werner Vogels &middot; keynote builds for multiple CEOs.</p>
+        <p class="scale-proof">12+ years &middot; startup-speed builds &middot; production banking systems &middot; hands-on ML and GPU research &middot; critical-path code through delivery.</p>
     </section>
 
     <div class="row justify-content-md-center">

@@ -1,13 +1,13 @@
 import { VenturesComponent } from './ventures.component';
 
 describe('VenturesComponent', () => {
-  it('presents AnchorKeep as the lead venture', () => {
+  it('presents Agent API Hardening as the working preview', () => {
     const component = new VenturesComponent();
 
     expect(component.ventures[0]).toEqual(jasmine.objectContaining({
-      name: 'AnchorKeep',
-      stage: 'Lead venture',
-      route: '/ventures/anchorkeep'
+      name: 'Agent API Hardening / Blacksmith',
+      stage: 'Working preview',
+      boundary: 'Capability boundary'
     }));
   });
 });

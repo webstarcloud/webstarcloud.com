@@ -244,6 +244,19 @@
     transform: translateY(-2px);
 }
 
+.scale-card[data-kind="R&D"] {
+    border-color: rgba(110, 231, 255, 0.24);
+    background: rgba(10, 22, 27, 0.72);
+}
+
+.scale-card[data-kind="R&D"]:hover {
+    border-color: rgba(110, 231, 255, 0.5);
+}
+
+.scale-card[data-kind="R&D"] .scale-card__metric {
+    color: #6ee7ff;
+}
+
 .scale-card__context {
     margin: 0;
     color: #6ee7ff;

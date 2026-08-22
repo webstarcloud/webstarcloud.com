@@ -154,6 +154,15 @@
     pointer-events: auto;
 }
 
+.particles-panel.stage-home .ascii-wrapper {
+    width: min(520px, 100%, calc(100vh - 210px));
+    height: min(520px, calc(100vw - 32px), calc(100vh - 210px));
+}
+
+.particles-panel.stage-home .question-panel {
+    width: min(700px, 100%);
+}
+
 .ask-dock {
     padding: 6px;
     border: 1px solid rgba(157, 255, 113, 0.28);

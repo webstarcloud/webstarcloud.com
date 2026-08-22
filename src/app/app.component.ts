@@ -9,7 +9,7 @@ import { StageMode } from './particles/particles.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnDestroy {
-  title = 'David Webster';
+  readonly title = 'David Webster | AI Systems Builder';
   authPanelOpen = false;
   responseOpen = false;
   stageMode: StageMode = 'home';

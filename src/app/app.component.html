@@ -8,18 +8,45 @@
     </a>
 
     <nav class="stage-links" aria-label="David Webster sections">
-      <a routerLink="/ventures" routerLinkActive="is-active"><span>01</span> Ventures</a>
-      <a routerLink="/labs" routerLinkActive="is-active"><span>02</span> Labs</a>
+      <a routerLink="/ventures" routerLinkActive="is-active">AI Systems</a>
+      <a routerLink="/labs" routerLinkActive="is-active">Labs</a>
+      <a href="/assets/David-Webster-AI-Systems-Builder.pdf" target="_blank" rel="noreferrer">CV</a>
     </nav>
 
-    <button class="stage-access" type="button" (click)="openAuthPanel()">
-      Private<span class="stage-access__suffix"> access</span>
-    </button>
+    <div class="stage-actions">
+      <a class="stage-contact" href="mailto:dwebster182@gmail.com">Contact</a>
+      <button class="stage-access" type="button" (click)="openAuthPanel()" aria-label="Open private access">
+        Access
+      </button>
+    </div>
   </header>
 
-  <section class="stage-avatar" aria-label="Interactive David Webster console">
-    <app-particles [stageMode]="stageMode" (requestAccess)="openAuthPanel()"
-      (responseStateChange)="setResponseOpen($event)"></app-particles>
+  <section class="home-stage">
+    <section *ngIf="isHomeStage" class="professional-hero" aria-labelledby="professional-hero-title">
+      <p class="professional-hero__eyebrow">AI systems builder · agent infrastructure · applied ML</p>
+      <h1 id="professional-hero-title">I build production AI systems that can act&mdash;and remain under control.</h1>
+      <p class="professional-hero__lede">
+        I take AI systems from model and prototype through critical-path code, control and data planes,
+        and production delivery&mdash;with shipped work, working previews, and R&amp;D clearly labelled.
+      </p>
+
+      <dl class="professional-proof" aria-label="Selected career outcomes">
+        <div><dt>5,000</dt><dd>ML records processed in 30 minutes</dd></div>
+        <div><dt>40,000</dt><dd>Artefacts audited across 300 systems</dd></div>
+        <div><dt>$1.5M</dt><dd>Documented savings</dd></div>
+      </dl>
+
+      <div class="professional-actions">
+        <a class="professional-actions__primary" routerLink="/ventures">View AI systems</a>
+        <a href="/assets/David-Webster-AI-Systems-Builder.pdf" target="_blank" rel="noreferrer">Download CV</a>
+        <a href="mailto:dwebster182@gmail.com">Work together</a>
+      </div>
+    </section>
+
+    <section class="stage-avatar" aria-label="Interactive David Webster console">
+      <app-particles [stageMode]="stageMode" (requestAccess)="openAuthPanel()"
+        (responseStateChange)="setResponseOpen($event)"></app-particles>
+    </section>
   </section>
 
   <main class="stage-surface" [class.stage-surface--home]="isHomeStage"

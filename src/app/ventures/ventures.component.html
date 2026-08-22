@@ -1,27 +1,27 @@
 <main class="project-index">
   <header class="project-index__header">
     <div>
-      <p class="project-index__eyebrow">Ventures / Product portfolio</p>
-      <h1>Products built around hard operational problems.</h1>
+      <p class="project-index__eyebrow">AI systems / Product portfolio</p>
+      <h1>Production systems built around hard operational problems.</h1>
       <p class="project-index__lede">
-        Each venture exposes the problem, product boundary, and current stage. Implementation details
+        Each system exposes the problem, product boundary, and current stage. Implementation details
         and working product access remain private where the work needs protection.
       </p>
     </div>
 
-    <dl class="project-index__meta" aria-label="Venture portfolio summary">
+    <dl class="project-index__meta" aria-label="AI systems portfolio summary">
       <div>
         <dt>{{ ventures.length | number:'2.0-0' }}</dt>
         <dd>Products</dd>
       </div>
       <div>
-        <dt>02</dt>
+        <dt>03</dt>
         <dd>Working systems</dd>
       </div>
     </dl>
   </header>
 
-  <section class="project-grid" aria-label="Venture projects">
+  <section class="project-grid" aria-label="AI systems projects">
     <article class="project-card" *ngFor="let venture of ventures; let index = index"
       [style.animation-delay.ms]="430 + index * 90" [attr.aria-labelledby]="'venture-' + index">
       <div class="project-card__top">
@@ -80,7 +80,7 @@
 
       <footer class="project-card__footer">
         <a *ngIf="venture.route" class="project-card__link" [routerLink]="venture.route">
-          Explore venture <span aria-hidden="true">&#8594;</span>
+          Explore system <span aria-hidden="true">&#8594;</span>
         </a>
         <span *ngIf="!venture.route" class="project-card__hold">In development</span>
       </footer>

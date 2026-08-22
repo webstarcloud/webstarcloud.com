@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 
 interface Platform {
-  name: string;
-  context: string;
-  blurb: string;
-  metric: string;
+  readonly name: string;
+  readonly kind: 'Production' | 'R&D';
+  readonly context: string;
+  readonly blurb: string;
+  readonly metric: string;
 }
 
 interface SelectedWork {
@@ -23,65 +24,78 @@ interface SelectedWork {
 export class HomeComponent {
   readonly selectedWork: readonly SelectedWork[] = [
     {
-      name: 'AnchorKeep',
-      type: 'Lead venture',
-      summary: 'Git origin, CI evidence, and verified recovery without a Git server.',
-      route: '/ventures/anchorkeep',
+      name: 'llm-input-hardening',
+      type: 'AI security · Public package',
+      summary: 'Deterministic Unicode-aware hardening at the model input boundary.',
+      route: '/labs/llm-input-hardening',
+      tone: 'public'
+    },
+    {
+      name: 'Agent API Hardening / Blacksmith',
+      type: 'Agent infrastructure · Working preview',
+      summary: 'Least-capability SDK and MCP surfaces generated from real OpenAPI contracts.',
+      route: '/ventures',
       tone: 'lead'
     },
     {
       name: 'Greenlight',
-      type: 'Working POC',
+      type: 'Agent governance · Working POC',
       summary: 'Govern consequential AI and human actions before execution.',
       route: '/greenlight',
       tone: 'private'
-    },
-    {
-      name: 'llm-input-hardening',
-      type: 'Public package',
-      summary: 'Deterministic Unicode-aware hardening at the model input boundary.',
-      route: '/labs/llm-input-hardening',
-      tone: 'public'
     }
   ];
 
-  // Built at scale — the production track record (credibility layer). Source: cv.pdf.
+  // Claim wording and maturity are tracked in career/claims.md.
   readonly platforms: Platform[] = [
     {
-      name: 'TMNL',
-      context: 'Multi-bank · regulated',
-      blurb: 'World-first privacy-preserving analytics across all Dutch national banks — PETs (MPC, homomorphic encryption, federated learning), SOC2 Type II.',
-      metric: '−$3M infra cost (saved $1.5M)'
-    },
-    {
       name: 'Backbase',
-      context: 'Agentic platform · current',
-      blurb: 'A unified control plane for AI capabilities — agent governance and safe delivery inside regulated financial products.',
-      metric: 'Agents, governed at scale'
+      kind: 'Production',
+      context: 'Agent infrastructure · current',
+      blurb: 'Building the agentic platform across application and infrastructure layers, including APIs behind its control and data planes.',
+      metric: 'One agentic use case live'
     },
     {
-      name: 'InvestSure',
-      context: 'Insurtech · solo build',
-      blurb: "The world's fastest event-driven claims platform, fully serverless on AWS — live in under two months.",
-      metric: '<10s claims · <$500/mo'
+      name: 'Absa — ML Brand Audit',
+      kind: 'Production',
+      context: 'Applied ML · technical delivery',
+      blurb: 'Built the AWS process engine and trained TensorFlow models for logo and text detection across a large rebrand audit.',
+      metric: '5,000 records/30 min · 40,000 artefacts/300 systems'
+    },
+    {
+      name: 'Paycode',
+      kind: 'Production',
+      context: 'Identity & payments · hands-on',
+      blurb: 'Built and shipped Java web services and C++ biometric backends for identity, remittance, KYC and AML deployments.',
+      metric: 'Live customer systems · 4 countries'
+    },
+    {
+      name: 'TMNL',
+      kind: 'Production',
+      context: 'Multi-bank data & ML platform',
+      blurb: 'Architected secure analytics across five Dutch banks, with privacy boundaries and MLOps that contributed to its SOC 2 Type II environment.',
+      metric: '$1.5M documented savings'
     },
     {
       name: 'Standard Bank',
-      context: 'Tier-1 bank',
-      blurb: 'Customer data + ML platform unifying the experience across mobile and web; demoed directly to the CEO.',
-      metric: '19M+ clients'
+      kind: 'Production',
+      context: 'Personalisation · recovery build',
+      blurb: 'Took over a failing ML platform and delivered its personalisation backend for a bank with more than 19 million customers.',
+      metric: 'Delivered in 3 months'
     },
     {
-      name: 'ABSA — Brand-as-a-Service',
-      context: 'Pan-African bank',
-      blurb: 'Real-time ML pipelines on Kafka + Kubernetes for cross-channel personalization and brand governance.',
-      metric: 'Billions of events/day · 12 countries'
+      name: 'InvestSure',
+      kind: 'Production',
+      context: 'Insurtech · 0→1 solo build',
+      blurb: 'An event-driven claims platform built fully serverless on AWS — live in under two months.',
+      metric: '<10s claims · <$500/mo'
     },
     {
-      name: 'LeasePlan',
-      context: 'Global fleet · migration',
-      blurb: 'Global cloud platform with automated migration factories and reusable Terraform / Kubernetes patterns.',
-      metric: 'Full on-prem migration <6 months'
+      name: 'GPU & model systems',
+      kind: 'R&D',
+      context: 'Hands-on exploration',
+      blurb: 'Worked with AWS P5/H100, ParallelCluster and Slurm; trained CNN, LSTM and NLP models with TensorFlow and PyTorch.',
+      metric: 'R&D · not presented as production'
     }
   ];
 }

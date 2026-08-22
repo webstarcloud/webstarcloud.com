@@ -21,12 +21,11 @@ interface VentureCard {
 export class VenturesComponent {
   readonly ventures: VentureCard[] = [
     {
-      name: 'AnchorKeep',
-      boundary: 'Recovery boundary',
-      stage: 'Lead venture',
-      summary: 'A local-first Git origin, CI trail, and verified recovery path on object storage you control.',
-      icon: 'recovery',
-      route: '/ventures/anchorkeep'
+      name: 'Agent API Hardening / Blacksmith',
+      boundary: 'Capability boundary',
+      stage: 'Working preview',
+      summary: 'Agent-safe SDK and MCP generation from OpenAPI specs, with dangerous operations gated out by construction.',
+      icon: 'capability'
     },
     {
       name: 'Greenlight',
@@ -37,11 +36,12 @@ export class VenturesComponent {
       route: '/greenlight'
     },
     {
-      name: 'Blacksmith',
-      boundary: 'Capability boundary',
-      stage: 'Venture shaping',
-      summary: 'Agent-safe SDK and MCP generation from OpenAPI specs, with dangerous operations gated out by construction.',
-      icon: 'capability'
+      name: 'AnchorKeep',
+      boundary: 'Recovery boundary',
+      stage: 'Interactive demo',
+      summary: 'A local-first Git origin, CI trail, and verified recovery path on object storage you control.',
+      icon: 'recovery',
+      route: '/ventures/anchorkeep'
     },
     {
       name: 'Holodeck',

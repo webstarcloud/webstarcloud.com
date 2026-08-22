@@ -22,10 +22,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'David Webster'`, () => {
+  it('should expose the professional site title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('David Webster');
+    expect(app.title).toEqual('David Webster | AI Systems Builder');
   });
 
   it('should render the stage shell', () => {
@@ -36,6 +36,25 @@ describe('AppComponent', () => {
     expect(brand?.textContent).toContain('David Webster');
     expect(brand?.textContent).not.toContain('WebstarCloud');
     expect(brand?.querySelector('.stage-brand__mark')).not.toBeNull();
+  });
+
+  it('renders the recruiter-focused proposition and actions on the home stage', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe(
+      'I build production AI systems that can act—and remain under control.'
+    );
+    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('5,000');
+    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('40,000');
+    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('$1.5M');
+    expect(compiled.textContent).not.toContain('Customers served');
+    expect(compiled.textContent).not.toContain('Billions');
+    expect(compiled.querySelectorAll<HTMLAnchorElement>('a[href$="David-Webster-AI-Systems-Builder.pdf"]')
+      .length).toBe(2);
+    expect(compiled.querySelector<HTMLAnchorElement>('a[href="mailto:dwebster182@gmail.com"]'))
+      .not.toBeNull();
   });
 
   it('tracks whether the answer workspace is open', () => {
