@@ -116,7 +116,7 @@ export class AuthService {
   }
 
   private buildPostLogoutRedirectUrl() {
-    const fallbackOrigin = 'https://webstarcloud.com';
+    const fallbackOrigin = 'https://davidwebstar.com';
     const origin = typeof window === 'undefined' ? fallbackOrigin : window.location.origin;
     const path = this.authConfig.postLogoutRedirectPath;
 

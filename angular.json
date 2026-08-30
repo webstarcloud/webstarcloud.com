@@ -23,8 +23,7 @@
               {
                 "glob": "**/*",
                 "input": "src/assets/",
-                "output": "/assets/",
-                "ignore": ["dave.glb"]
+                "output": "/assets/"
               }
             ],
             "styles": [

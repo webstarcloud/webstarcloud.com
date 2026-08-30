@@ -51,8 +51,8 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('.professional-proof')?.textContent).toContain('$1.5M');
     expect(compiled.textContent).not.toContain('Customers served');
     expect(compiled.textContent).not.toContain('Billions');
-    expect(compiled.querySelectorAll<HTMLAnchorElement>('a[href$="David-Webster-AI-Systems-Builder.pdf"]')
-      .length).toBe(2);
+    expect(compiled.querySelectorAll<HTMLAnchorElement>('a[href$=".pdf"]').length).toBe(0);
+    expect(compiled.textContent).not.toContain('CV');
     expect(compiled.querySelector<HTMLAnchorElement>('a[href="mailto:dwebster182@gmail.com"]'))
       .not.toBeNull();
   });

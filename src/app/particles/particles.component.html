@@ -6,20 +6,13 @@
     [class.stage-greenlight]="stageMode === 'greenlight'"
     [class.stage-lab-detail]="stageMode === 'lab-detail'"
     [class.has-response]="activeResponseMarkdown">
-    <div class="ascii-wrapper">
-        <div class="ascii-avatar" [attr.data-mood]="asciiMood" role="img"
-            aria-label="Animated ASCII portrait of David Webster">
-            <div class="ascii-frame" aria-hidden="true">
-                <div class="ascii-volume">
-                    <pre class="ascii-art ascii-art--back" [textContent]="asciiFrames[0]"></pre>
-                    <pre class="ascii-art ascii-art--middle" [textContent]="asciiFrames[0]"></pre>
-                    <pre class="ascii-art ascii-art--front" [textContent]="activeAsciiPortrait"></pre>
-                </div>
-            </div>
-            <div class="ascii-status" aria-hidden="true">
-                <span>DAVID_WEBSTER</span>
-                <span>ASCII / 01</span>
-            </div>
+    <div class="canvas-wrapper">
+        <div #rendererContainer class="renderer-container">
+            <!-- Three.js canvas will be injected here -->
+        </div>
+
+        <div *ngIf="loading" class="loading-overlay">
+            <p>Loading Dave 2.0{{ loadingDots }}</p>
         </div>
     </div>
 

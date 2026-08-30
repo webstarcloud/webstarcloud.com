@@ -75,5 +75,7 @@ describe('HomeComponent', () => {
       blurb: jasmine.stringContaining('AWS P5/H100'),
       metric: 'R&D · not presented as production'
     }));
+    expect(research?.blurb).toContain('autoencoders');
+    expect(research?.blurb).toContain('deepfakes');
   });
 });

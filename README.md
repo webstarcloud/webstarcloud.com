@@ -17,9 +17,21 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 Run `npm run build:docs` to create the production build, synchronize it into `docs/`,
 preserve the GitHub Pages control files, and refresh the Angular route fallback.
 
+To build, commit, and push the complete site update to GitHub Pages, run:
+
+```bash
+./deploy.sh "Deploy: describe the change"
+```
+
+The deploy script accepts `--yes` to skip its confirmation prompt. It only runs from
+`main`, validates the GitHub repository and `davidwebstar.com` CNAME, rejects a stale
+or diverged branch, stages all current changes for review, and uses a normal (non-force)
+push to `origin/main`. Cancelling leaves the reviewed changes staged but makes no commit
+or push. GitHub Pages publishes the committed `docs/` directory asynchronously.
+
 ## Ventures and Labs
 
-- `/` leads with David's AI Systems Builder proposition, verified production outcomes, CV/contact actions,
+- `/` leads with David's AI Systems Builder proposition, verified production outcomes, contact actions,
   and an AI-first Selected Work rail for `llm-input-hardening`, Agent API Hardening / Blacksmith, and Greenlight. Production work
   and hands-on R&D are labelled separately.
 - `/ventures` lists the venture portfolio with working products first.
@@ -31,18 +43,16 @@ preserve the GitHub Pages control files, and refresh the Angular route fallback.
 
 The AnchorKeep workspace uses the existing Cognito/OIDC integration. When an unauthenticated user opens `/anchorkeep`, the app stores the intended return path in session storage, sends the user through Cognito, and returns them to `/anchorkeep` after login. The old `/safegit` routes redirect to the new URLs.
 
-The public CV action expects `src/assets/David-Webster-AI-Systems-Builder.pdf` so the Angular asset build publishes one stable URL. The source of truth is `career/cv/current/David-Webster-AI-Systems-Builder.pdf` at the workspace root.
-
 ### AnchorKeep public demo
 
-After deployment, the distributable route is `https://webstarcloud.com/ventures/anchorkeep`.
+After deployment, the distributable route is `https://davidwebstar.com/ventures/anchorkeep`.
 The public demo runs entirely in the visitor's browser: it models the real AnchorKeep v1 bucket keys, compare-and-swap ref update, push marker, AnchorKeep Pipe status transitions, terminal run invariant, and verified restore path. It never requests AWS credentials or claims to write to live infrastructure.
 
 Use the success and failure scenarios to show that CI status and recoverability are separate guarantees. The authenticated `/anchorkeep` route remains the place for a future live owner-bucket connection.
 
 ## Interactive stage
 
-The multi-frame ASCII portrait is the persistent home state. Its detailed character frames, blink, head movement, and palette respond without loading a 3D model or running a WebGL render loop. The chat dock remains scoped to the home stage so it cannot obscure portfolio or product workspaces.
+The original Three.js hologram is the persistent home state. Its retained `dave.glb` model uses the original framing, additive glow shell, particle assembly, subtle deformation, and idle rotation. Opening Labs, Ventures, or a chat answer disperses the avatar before revealing the selected workspace; returning home reassembles it. The chat dock remains scoped to the home stage so it cannot obscure portfolio or product workspaces.
 
 ## Running unit tests
 

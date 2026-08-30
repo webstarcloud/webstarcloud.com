@@ -94,7 +94,7 @@ export class HomeComponent {
       name: 'GPU & model systems',
       kind: 'R&D',
       context: 'Hands-on exploration',
-      blurb: 'Worked with AWS P5/H100, ParallelCluster and Slurm; trained CNN, LSTM and NLP models with TensorFlow and PyTorch.',
+      blurb: 'Worked with AWS P5/H100, ParallelCluster and Slurm; trained CNN, LSTM and NLP models with TensorFlow and PyTorch; built Lab271 prototypes with autoencoders and deepfakes.',
       metric: 'R&D · not presented as production'
     }
   ];

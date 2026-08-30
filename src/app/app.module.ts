@@ -15,7 +15,7 @@ import { environment } from '../environments/environment';
 import { readPostLoginRoute } from './auth/auth-return';
 
 function buildRedirectUrl(path: string) {
-  const fallbackOrigin = 'https://webstarcloud.com';
+  const fallbackOrigin = 'https://davidwebstar.com';
   const origin = typeof window === 'undefined' ? fallbackOrigin : window.location.origin;
   if (!path || path === '/') {
     return origin;
