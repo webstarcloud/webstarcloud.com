@@ -2,6 +2,9 @@
 
 This project uses [Angular CLI](https://github.com/angular/angular-cli) 17.
 
+The repository keeps its historical `webstarcloud.com` name. The canonical live
+domain is `davidwebstar.com`.
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
@@ -15,7 +18,10 @@ Run `ng generate component component-name` to generate a new component. You can 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
 Run `npm run build:docs` to create the production build, synchronize it into `docs/`,
-preserve the GitHub Pages control files, and refresh the Angular route fallback.
+preserve the GitHub Pages control files, and create an `index.html` shell for every
+Angular route. Those route shells let direct links return HTTP 200 on GitHub Pages;
+unknown paths continue to use `404.html`. Add new routes to `SPA_ROUTES` in
+`scripts/build-docs.sh` so the deployment keeps this guarantee.
 
 To build, commit, and push the complete site update to GitHub Pages, run:
 
