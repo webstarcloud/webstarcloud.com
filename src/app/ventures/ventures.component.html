@@ -29,7 +29,7 @@
         <span class="project-card__status">{{ venture.stage }}</span>
       </div>
 
-      <div class="project-card__diagram" aria-hidden="true">
+      <div class="project-card__diagram" [class.project-card__diagram--tour]="venture.icon === 'trust'" aria-hidden="true">
         <ng-container [ngSwitch]="venture.icon">
           <svg *ngSwitchCase="'recovery'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -62,15 +62,10 @@
             <path d="M98 24h16M110 20l6 4-6 4" />
             <circle cx="124" cy="24" r="4" />
           </svg>
-          <svg *ngSwitchCase="'trust'" viewBox="0 0 132 48" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 12l16 6v10c0 9-8 14-16 17C6 42 2 37 2 28V18z" />
-            <path d="M9 26l4 4 8-10" />
-            <path d="M40 24h16M52 20l6 4-6 4" />
-            <path d="M70 12h32v24H70z" />
-            <path d="M78 20h16M78 28h10" />
-            <path d="M108 24h18" />
-          </svg>
+          <div *ngSwitchCase="'trust'" class="tour-thumbnail">
+            <span class="tour-thumbnail__play">&#9654;</span>
+            <div><strong>People decide.<br>Products continue.</strong><span>INTERACTIVE TOUR <i>00:25</i></span></div>
+          </div>
         </ng-container>
       </div>
 
@@ -80,7 +75,7 @@
 
       <footer class="project-card__footer">
         <a *ngIf="venture.route" class="project-card__link" [routerLink]="venture.route">
-          Explore system <span aria-hidden="true">&#8594;</span>
+          {{ venture.linkLabel || 'Explore system' }} <span aria-hidden="true">&#8594;</span>
         </a>
         <span *ngIf="!venture.route" class="project-card__hold">In development</span>
       </footer>

@@ -1,0 +1,258 @@
+<section class="walkthrough" aria-label="Greenlight interactive product walkthrough">
+  <header class="player-header">
+    <div class="wordmark">
+      <span class="brand-mark" aria-hidden="true">g<span>.</span></span
+      ><strong>greenlight</strong><span class="header-slash">/</span><span>product tour</span>
+    </div>
+    <span class="preview-label"><i aria-hidden="true"></i> Interactive preview</span>
+  </header>
+
+  <div class="identity-bar">
+    <span class="identity-label">Choose your setup</span>
+    <div class="setup-switch" role="group" aria-label="Identity setup">
+      <button
+        type="button"
+        [attr.aria-pressed]="mode === 'managed'"
+        (click)="chooseMode('managed')"
+      >
+        Greenlight managed <span>For a fresh start</span>
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="mode === 'company'"
+        (click)="chooseMode('company')"
+      >
+        Your identity provider <span>For an existing team</span>
+      </button>
+    </div>
+    <label class="provider-picker" *ngIf="mode === 'company'">
+      <span class="sr-only">Company identity provider</span>
+      <select [value]="provider" (change)="chooseProvider($event)">
+        <option *ngFor="let option of providers" [value]="option">{{ option }}</option>
+      </select>
+    </label>
+    <span class="managed-caption" *ngIf="mode === 'managed'"
+      >One place for people &amp; approvals</span
+    >
+  </div>
+
+  <div #theater class="theater" [class.is-playing]="playing" [attr.data-scene]="step">
+    <aside class="scene-narration">
+      <p class="scene-index">{{ step + 1 | number: '2.0-0' }} <span>/ 05</span></p>
+      <h2>{{ chapter.title }}</h2>
+      <p class="scene-copy">{{ chapter.copy }}</p>
+      <div class="scene-track" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </aside>
+
+    <div class="scene-screen" [ngSwitch]="step" aria-live="polite">
+      <div *ngSwitchCase="0" class="scene identity-scene">
+        <div class="connection-flow" aria-hidden="true">
+          <div class="connection-node">
+            <span>{{
+              mode === 'managed'
+                ? 'g.'
+                : provider === 'Okta'
+                  ? 'O'
+                  : provider === 'Microsoft Entra'
+                    ? 'E'
+                    : 'ID'
+            }}</span
+            ><small>{{ identityName }}</small>
+          </div>
+          <div class="connection-wire"><i></i></div>
+          <div class="connection-node connection-node--gl">
+            <span>g.</span><small>Approval layer</small>
+          </div>
+          <div class="connection-wire"><i></i></div>
+          <div class="connection-node">
+            <span class="app-glyph">&#9638;</span><small>Your product</small>
+          </div>
+        </div>
+        <div class="workspace-card">
+          <div class="workspace-icon">a</div>
+          <div>
+            <strong>Acme workspace</strong>
+            <p>
+              {{
+                mode === 'company' ? 'Existing company identity' : 'Identity managed by Greenlight'
+              }}
+            </p>
+          </div>
+          <span class="tiny-tag">DEMO</span>
+          <div class="workspace-detail">
+            <span>Who can approve</span><strong>Finance team</strong>
+          </div>
+          <div class="workspace-detail">
+            <span>Independent reviewers</span><strong>{{ requiredApprovals }} required</strong>
+          </div>
+        </div>
+        <button class="scene-primary" type="button" (click)="next()">
+          {{ mode === 'managed' ? 'Preview managed setup' : 'Preview connection' }}
+          <span aria-hidden="true">&#8594;</span>
+        </button>
+      </div>
+
+      <div *ngSwitchCase="1" class="scene code-scene">
+        <div class="code-window">
+          <div class="window-top">
+            <span><i></i><i></i><i></i></span><strong>payments.ts</strong
+            ><span>Illustrative integration</span>
+          </div>
+          <div class="code-lines">
+            <code
+              ><span class="code-muted">// Before your app moves money</span><br /><br /><span
+                class="code-purple"
+                >const</span
+              >
+              approval = <span class="code-purple">await</span> greenlight<br />
+              .requestApproval(&#123;<br />
+              resource: <span class="code-green">"invoice:123:revision:4"</span>,<br />
+              action: <span class="code-green">"release"</span>,<br />
+              policy: <span class="code-green">"finance_review"</span>,<br />
+              operationId: operation.id<br />
+              &#125;);<br /><br /><span class="code-muted"
+                >// Resume only after human approval</span
+              ></code
+            >
+          </div>
+        </div>
+        <div class="screen-note">
+          <span aria-hidden="true">&#10003;</span> Your identity. Your application. An explicit
+          approval step.
+        </div>
+        <button class="scene-primary" type="button" (click)="next()">
+          Try an agent action <span aria-hidden="true">&#8594;</span>
+        </button>
+      </div>
+
+      <div *ngSwitchCase="2" class="scene request-scene">
+        <div class="request-origin">
+          <span class="agent-icon" aria-hidden="true">&#10022;</span>
+          <div><strong>Finance agent</strong><small>Acting for Jamie · Acme</small></div>
+          <span class="tiny-tag">REQUESTER</span>
+        </div>
+        <div class="message-bubble">
+          Invoice 123 matches the purchase order. I’d like to release the €4,800 payment to
+          Northstar Studio.
+        </div>
+        <div class="gate-line">
+          <span class="gate-icon" aria-hidden="true">&#8545;</span>
+          <div>
+            <strong>Waiting for human approval</strong>
+            <p>
+              Finance policy · {{ requiredApprovals }} independent
+              {{ requiredApprovals === 1 ? 'reviewer' : 'reviewers' }}
+            </p>
+          </div>
+        </div>
+        <div class="held-action">
+          <span class="status-dot"></span> Payment held <span>No money has moved</span>
+        </div>
+        <button class="scene-primary" type="button" (click)="next()">
+          Open the review <span aria-hidden="true">&#8594;</span>
+        </button>
+      </div>
+
+      <div *ngSwitchCase="3" class="scene review-scene" [class.was-rejected]="rejected">
+        <div class="review-heading">
+          <div>
+            <span class="small-label">Payment approval</span>
+            <h3>Release invoice 123</h3>
+          </div>
+          <span class="review-status">{{ rejected ? 'Declined' : 'Needs review' }}</span>
+        </div>
+        <div class="payment-total">€4,800<span>EUR</span></div>
+        <dl class="payment-details">
+          <div>
+            <dt>Recipient</dt>
+            <dd>Northstar Studio</dd>
+          </div>
+          <div>
+            <dt>Reason</dt>
+            <dd>Matched purchase order</dd>
+          </div>
+          <div>
+            <dt>Requested by</dt>
+            <dd>Jamie · Finance agent</dd>
+          </div>
+        </dl>
+        <div class="reviewer" *ngIf="!rejected">
+          <span class="avatar">{{ approvals === 0 ? 'MC' : 'AM' }}</span>
+          <div>
+            <strong>{{ nextReviewer }}</strong
+            ><small>Finance approver · via {{ identityName }}</small>
+          </div>
+          <span class="vote-count">{{ approvals }} / {{ requiredApprovals }}</span>
+        </div>
+        <div class="review-buttons" *ngIf="!rejected">
+          <button type="button" class="scene-primary" (click)="approve()">
+            Approve as {{ approvals === 0 ? 'Maya' : 'Alex' }}
+            <span aria-hidden="true">&#10003;</span></button
+          ><button type="button" class="decline-button" (click)="reject()">Decline</button>
+        </div>
+        <div class="declined-message" *ngIf="rejected">
+          <strong>Declined. The payment stays blocked.</strong>
+          <p>The demo records the decision and stops the action.</p>
+          <button type="button" (click)="replay()">Replay the walkthrough &#8594;</button>
+        </div>
+        <p class="review-footer">The requester cannot approve their own action.</p>
+      </div>
+
+      <div *ngSwitchCase="4" class="scene receipt-scene">
+        <div class="success-orbit" aria-hidden="true"><span>&#10003;</span></div>
+        <p class="small-label">Approval complete</p>
+        <h3>People decide.<br />Your product continues.</h3>
+        <div class="receipt">
+          <div><span>Invoice 123</span><strong>€4,800</strong></div>
+          <div>
+            <span>Approval</span
+            ><strong>{{ requiredApprovals }} / {{ requiredApprovals }} reviewers</strong>
+          </div>
+          <div>
+            <span>App execution</span><strong class="receipt-success">Simulated success</strong>
+          </div>
+          <div><span>Decision record</span><strong>Linked to this action</strong></div>
+        </div>
+        <button type="button" class="replay-button" (click)="replay()">
+          &#8635; Replay the walkthrough
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="player-controls">
+    <button
+      class="play-button"
+      type="button"
+      (click)="play()"
+      [attr.aria-label]="
+        playing
+          ? 'Pause walkthrough'
+          : step === 4 || rejected
+            ? 'Replay walkthrough'
+            : 'Play walkthrough'
+      "
+    >
+      <span aria-hidden="true">{{ playing ? '&#8545;' : '&#9654;' }}</span
+      >{{ playing ? 'Pause' : step === 4 || rejected ? 'Replay' : 'Play tour' }}
+    </button>
+    <nav class="chapter-controls" aria-label="Walkthrough chapters">
+      <button
+        *ngFor="let item of chapters; let i = index"
+        type="button"
+        (click)="selectChapter(i)"
+        [attr.aria-current]="step === i ? 'step' : null"
+        [class.is-complete]="step > i"
+      >
+        <span></span><small>{{ item.label }}</small>
+      </button>
+    </nav>
+    <span class="tour-length">~25 sec</span>
+  </footer>
+</section>
+<p class="preview-disclosure">
+  Simulated product experience. Approval and identity integration tested locally; managed onboarding
+  and additional identity providers are proposed paths.
+</p>

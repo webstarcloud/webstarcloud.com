@@ -16,15 +16,15 @@
   width: min(100%, 1320px);
   min-height: 100%;
   margin: 0 auto;
-  padding: 46px clamp(18px, 5vw, 64px) 110px;
+  padding: 38px clamp(18px, 5vw, 64px) 110px;
 }
 
 .greenlight-intro {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
   align-items: end;
-  gap: 56px;
-  padding-bottom: 42px;
+  gap: 42px;
+  padding-bottom: 32px;
 }
 
 .greenlight-eyebrow,
@@ -41,11 +41,22 @@
   max-width: 820px;
   margin: 14px 0 0;
   color: #f7fbf8;
-  font-size: 3.6rem;
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: 0;
+  font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -.04em;
 }
+
+.greenlight-intro h1 > span { color: #b6f78c; }
+.greenlight-intro__description > p { margin: 0; color: #a9b7ad; font: .92rem/1.65 Roboto, Arial, sans-serif; }
+.greenlight-intro__copy .greenlight-eyebrow { display: flex; align-items: center; gap: 8px; font-size: .6rem; letter-spacing: .12em; color: #a9b7ad; }
+.greenlight-eyebrow > span { width: 6px; height: 6px; border-radius: 50%; background: #b6f78c; }
+.policy-lab { margin-top: 34px; border-top: 1px solid #ffffff1c; border-bottom: 1px solid #ffffff1c; }
+.policy-lab summary { padding: 19px 4px; color: #d2dfd1; cursor: pointer; font-size: .8rem; }
+.policy-lab summary span { margin-left: 16px; color: #93a193; font-size: .7rem; }
+.policy-lab[open] { padding-bottom: 18px; }
+.pilot-link { display: inline-block; margin-top: 20px; color: #b6f78c; font-size: .8rem; text-decoration: none; }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid #b6f78c; outline-offset: 4px; }
 
 .greenlight-intro__copy > p:last-of-type {
   max-width: 760px;
@@ -62,7 +73,8 @@
   margin-top: 24px;
 }
 
-.greenlight-actions a {
+.greenlight-actions a,
+.greenlight-actions button {
   display: inline-flex;
   align-items: center;
   min-height: 42px;
@@ -74,6 +86,8 @@
   font-size: 0.76rem;
   font-weight: 700;
   text-decoration: none;
+  cursor: pointer;
+  gap: 8px;
 }
 
 .greenlight-actions .greenlight-actions__quiet {
@@ -467,6 +481,9 @@
 }
 
 @media (max-width: 680px) {
+  .greenlight-intro { gap: 22px; }
+  .greenlight-actions { margin-top: 16px; flex-wrap: wrap; }
+  .policy-lab summary span { display: block; margin: 8px 0 0; }
   .greenlight-page {
     padding-top: 30px;
   }

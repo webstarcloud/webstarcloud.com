@@ -55,7 +55,14 @@ script rejects missing or mismatched copies.
   technical skills, a CV download and recent software development.
 - `/ventures` lists the venture portfolio with working products first.
 - `/ventures/anchorkeep` is the public AnchorKeep product cockpit, including interactive push, CI, failure, and recovery flows.
-- `/greenlight` includes an interactive four-eyes decision simulation.
+- `/greenlight` leads with a playable product walkthrough: choose managed identity
+  or a company identity provider, preview an integration, and follow an agent action
+  through human review to a simulated execution receipt. Visitors can pause, select
+  chapters, approve, decline, or replay. The four-eyes policy console remains in an
+  expandable section below. The identity integration is tested locally; managed
+  onboarding and additional identity providers are explicitly proposed paths.
+  Public copy uses Greenlight branding and company SSO terminology. Underlying
+  identity infrastructure is documented in the separate backend project.
 - `/anchorkeep` is the gated AnchorKeep workspace route.
 - `/labs` lists research and package experiments.
 - `/labs/llm-input-hardening` is an interactive browser preview of the package policies and stable reason codes.

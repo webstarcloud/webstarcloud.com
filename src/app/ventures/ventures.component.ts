@@ -9,6 +9,7 @@ interface VentureCard {
   summary: string;
   icon: 'recovery' | 'capability' | 'simulation' | 'trust';
   route?: string;
+  linkLabel?: string;
 }
 
 @Component({
@@ -29,11 +30,12 @@ export class VenturesComponent {
     },
     {
       name: 'Greenlight',
-      boundary: 'Trust boundary',
-      stage: 'Working POC',
-      summary: 'A managed decision layer that governs consequential AI and human actions before execution.',
+      boundary: 'Human approval',
+      stage: 'Interactive walkthrough',
+      summary: 'Human approval built into your product. Explore the flow from company identity to a reviewed agent action.',
       icon: 'trust',
-      route: '/greenlight'
+      route: '/greenlight',
+      linkLabel: 'Play the walkthrough'
     },
     {
       name: 'AnchorKeep',

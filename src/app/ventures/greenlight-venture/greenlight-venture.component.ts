@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { GreenlightWalkthroughComponent } from './greenlight-walkthrough.component';
 
 type ActorId = 'alice' | 'bob' | 'carol';
 type RunStatus = 'pending' | 'approved' | 'rejected' | 'executed';
@@ -32,7 +33,7 @@ interface DecisionSnapshot {
 @Component({
   selector: 'app-greenlight-venture',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, GreenlightWalkthroughComponent],
   templateUrl: './greenlight-venture.component.html',
   styleUrl: './greenlight-venture.component.css'
 })
@@ -42,12 +43,6 @@ export class GreenlightVentureComponent {
     { id: 'bob', name: 'Bob', role: 'Finance approver', eligible: true },
     { id: 'carol', name: 'Carol', role: 'Risk approver', eligible: true }
   ];
-
-  readonly productProof = [
-    { value: 'HTTP + SDK', label: 'Integration surface' },
-    { value: 'Idempotent', label: 'Mutation contract' },
-    { value: 'Append-only', label: 'Decision evidence' }
-  ] as const;
 
   currentActorId: ActorId = 'alice';
   resourceNumber = 123;
