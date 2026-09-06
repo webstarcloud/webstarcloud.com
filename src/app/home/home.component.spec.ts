@@ -30,11 +30,7 @@ describe('HomeComponent', () => {
       tone: 'public'
     }));
 
-    expect(component.selectedWork[1]).toEqual(jasmine.objectContaining({
-      name: 'Agent API Hardening / Blacksmith',
-      type: 'Agent infrastructure · Working preview',
-      tone: 'lead'
-    }));
+    expect(component.selectedWork.length).toBe(1);
   });
 
   it('presents the documented TMNL outcome precisely', () => {
@@ -44,7 +40,7 @@ describe('HomeComponent', () => {
       name: 'TMNL',
       kind: 'Production',
       blurb: jasmine.stringContaining('five Dutch banks'),
-      metric: '$1.5M documented savings'
+      metric: '$1.5M infrastructure cost reduction'
     }));
   });
 
@@ -57,8 +53,9 @@ describe('HomeComponent', () => {
       .join(' ');
 
     expect(backbase).toEqual(jasmine.objectContaining({
-      metric: 'One agentic use case live',
-      blurb: jasmine.stringContaining('control and data planes')
+      kind: 'Current',
+      metric: 'Multiple internal and external customer projects are live in production.',
+      blurb: jasmine.stringContaining('control and data plane APIs')
     }));
     expect(absa?.metric).toBe('5,000 records/30 min · 40,000 artefacts/300 systems');
     expect(standardBank?.blurb).toContain('for a bank with more than 19 million customers');
@@ -67,15 +64,4 @@ describe('HomeComponent', () => {
     expect(allCopy).not.toContain('12 countries');
   });
 
-  it('labels exploratory GPU and model work as R&D', () => {
-    const research = component.platforms.find((platform) => platform.kind === 'R&D');
-
-    expect(research).toEqual(jasmine.objectContaining({
-      name: 'GPU & model systems',
-      blurb: jasmine.stringContaining('AWS P5/H100'),
-      metric: 'R&D · not presented as production'
-    }));
-    expect(research?.blurb).toContain('autoencoders');
-    expect(research?.blurb).toContain('deepfakes');
-  });
 });

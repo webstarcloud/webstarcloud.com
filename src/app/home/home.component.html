@@ -1,8 +1,38 @@
 <div class="container min-vh-100">
+    <section class="scale" aria-label="Career highlights and current work">
+        <header class="scale-head">
+            <p class="scale-kicker">Career highlights</p>
+            <p class="scale-lede">Building platforms, leading technical delivery and staying hands-on with the code.</p>
+        </header>
+
+        <div class="scale-grid">
+            <article class="scale-card" *ngFor="let p of platforms" [attr.data-kind]="p.kind">
+                <p class="scale-card__context">{{ p.kind }} &middot; {{ p.context }}</p>
+                <h3 class="scale-card__name">{{ p.name }}</h3>
+                <p class="scale-card__blurb">{{ p.blurb }}</p>
+                <p class="scale-card__metric">{{ p.metric }}</p>
+            </article>
+        </div>
+
+        <p class="scale-proof">I started coding on a ZX Spectrum at eight and began learning C++ at thirteen after a Christmas gift. Today I build Python agent systems and cloud platforms.</p>
+    </section>
+
+    <section class="technical-focus" aria-labelledby="technical-focus-title">
+        <h2 id="technical-focus-title">Technical skills</h2>
+        <dl>
+            <div><dt>Cloud platforms</dt><dd>GCP, Azure, AWS, on-premises; Kubernetes, Terraform, Aviatrix and Linux</dd></div>
+            <div><dt>Python and agents</dt><dd>Python, LangGraph, LangChain, Agno, NeMo Guardrails; loop and harness engineering</dd></div>
+            <div><dt>ML and acceleration</dt><dd>PyTorch, TensorFlow, Numba; JAX (prototyping)</dd></div>
+            <div><dt>Software and delivery</dt><dd>Go, Rust, Java, TypeScript, JavaScript, C++; CI/CD and test automation</dd></div>
+            <div><dt>Identity and access</dt><dd>Okta, Active Directory, WorkOS</dd></div>
+            <div><dt>Data platforms</dt><dd>Kafka, Flink, Spark, EMR, Airflow and SageMaker</dd></div>
+        </dl>
+    </section>
+
     <section class="selected-work" aria-labelledby="selected-work-title">
         <header class="selected-work__header">
-            <p id="selected-work-title">Selected work</p>
-            <span>AI systems and the infrastructure that makes them dependable</span>
+            <p id="selected-work-title">Recent software development</p>
+            <a routerLink="/ventures">Explore projects &#8594;</a>
         </header>
         <nav class="selected-work__list" aria-label="Selected projects">
             <a *ngFor="let work of selectedWork; let index = index" [routerLink]="work.route"
@@ -16,24 +46,6 @@
                 <span class="selected-work__arrow" aria-hidden="true">&#8594;</span>
             </a>
         </nav>
-    </section>
-
-    <section class="scale" aria-label="Production systems and research work">
-        <header class="scale-head">
-            <p class="scale-kicker">Production proof + R&amp;D</p>
-            <p class="scale-lede">From 0&rarr;1 builds to systems people rely on. Production work and technical exploration are labelled separately.</p>
-        </header>
-
-        <div class="scale-grid">
-            <article class="scale-card" *ngFor="let p of platforms" [attr.data-kind]="p.kind">
-                <p class="scale-card__context">{{ p.kind }} &middot; {{ p.context }}</p>
-                <h3 class="scale-card__name">{{ p.name }}</h3>
-                <p class="scale-card__blurb">{{ p.blurb }}</p>
-                <p class="scale-card__metric">{{ p.metric }}</p>
-            </article>
-        </div>
-
-        <p class="scale-proof">12+ years &middot; startup-speed builds &middot; production banking systems &middot; hands-on ML and GPU research &middot; critical-path code through delivery.</p>
     </section>
 
     <div class="row justify-content-md-center">

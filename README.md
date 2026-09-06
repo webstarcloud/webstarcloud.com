@@ -35,11 +35,24 @@ or diverged branch, stages all current changes for review, and uses a normal (no
 push to `origin/main`. Cancelling leaves the reviewed changes staged but makes no commit
 or push. GitHub Pages publishes the committed `docs/` directory asynchronously.
 
+## Profile and CV
+
+The headline is **Building agentic AI platforms and unified control planes**,
+David's preferred LinkedIn wording. Supporting content follows his selected
+`career/cv/targeted/thijs-grond/David-Webster.pdf` in the parent workspace.
+The homepage leads with TMNL, LeasePlan and InvestSure, then current and earlier
+work, technical skills, and the published `llm-input-hardening` package.
+
+`src/assets/David-Webster.pdf` is an unchanged copy of that selected PDF. The
+homepage links to `/assets/David-Webster.pdf`; the older
+`/assets/David-Webster-AI-Systems-Builder.pdf` URL serves the same bytes for existing
+links. Update both assets together when David selects a replacement CV. The build
+script rejects missing or mismatched copies.
+
 ## Ventures and Labs
 
-- `/` leads with David's AI Systems Builder proposition, verified production outcomes, contact actions,
-  and an AI-first Selected Work rail for `llm-input-hardening`, Agent API Hardening / Blacksmith, and Greenlight. Production work
-  and hands-on R&D are labelled separately.
+- `/` presents cloud platforms and AI agents, career highlights, current work,
+  technical skills, a CV download and recent software development.
 - `/ventures` lists the venture portfolio with working products first.
 - `/ventures/anchorkeep` is the public AnchorKeep product cockpit, including interactive push, CI, failure, and recovery flows.
 - `/greenlight` includes an interactive four-eyes decision simulation.

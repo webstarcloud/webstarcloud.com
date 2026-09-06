@@ -84,9 +84,56 @@
 
 .selected-work__list {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     border-top: 1px solid rgba(238, 247, 240, 0.14);
     border-bottom: 1px solid rgba(238, 247, 240, 0.14);
+}
+
+.selected-work__header a {
+    color: #6ee7ff;
+    font-size: 0.8rem;
+    text-underline-offset: 0.2em;
+}
+
+.technical-focus {
+    width: min(100%, 1120px);
+}
+
+.technical-focus h2 {
+    color: #a8ff7a;
+    font: 700 0.8rem/1.4 var(--accent-font);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.technical-focus dl {
+    margin: 20px 0 0;
+}
+
+.technical-focus dl > div {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(0, 3fr);
+    gap: 12px 24px;
+    padding: 14px 0;
+    border-top: 1px solid rgba(238, 247, 240, 0.12);
+}
+
+.technical-focus dt,
+.technical-focus dd {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.technical-focus dd {
+    color: rgba(238, 247, 240, 0.7);
+}
+
+@media (max-width: 600px) {
+    .technical-focus dl > div {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+    }
 }
 
 .selected-work__list a {
@@ -244,16 +291,16 @@
     transform: translateY(-2px);
 }
 
-.scale-card[data-kind="R&D"] {
+.scale-card[data-kind="Current"] {
     border-color: rgba(110, 231, 255, 0.24);
     background: rgba(10, 22, 27, 0.72);
 }
 
-.scale-card[data-kind="R&D"]:hover {
+.scale-card[data-kind="Current"]:hover {
     border-color: rgba(110, 231, 255, 0.5);
 }
 
-.scale-card[data-kind="R&D"] .scale-card__metric {
+.scale-card[data-kind="Current"] .scale-card__metric {
     color: #6ee7ff;
 }
 

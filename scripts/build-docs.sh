@@ -19,6 +19,14 @@ readonly -a SPA_ROUTES=(
 )
 
 cd "${PROJECT_ROOT}"
+
+# Both URLs must serve the selected CV; retain the older URL for existing links.
+if [[ ! -s src/assets/David-Webster.pdf ]] || \
+  ! cmp -s src/assets/David-Webster.pdf src/assets/David-Webster-AI-Systems-Builder.pdf; then
+  echo "Build failed: the selected CV is missing or its legacy URL contains a different PDF." >&2
+  exit 1
+fi
+
 npm run build
 
 if [[ ! -f "${DIST_DIR}/index.html" ]]; then

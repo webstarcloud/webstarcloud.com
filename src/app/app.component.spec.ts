@@ -25,7 +25,7 @@ describe('AppComponent', () => {
   it('should expose the professional site title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('David Webster | AI Systems Builder');
+    expect(app.title).toEqual('David Webster | Building agentic AI platforms and unified control planes');
   });
 
   it('should render the stage shell', () => {
@@ -44,15 +44,16 @@ describe('AppComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('h1')?.textContent?.trim()).toBe(
-      'I build production AI systems that can act—and remain under control.'
+      'Building agentic AI platforms and unified control planes'
     );
-    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('5,000');
-    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('40,000');
+    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('TMNL');
+    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('LeasePlan');
+    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('InvestSure');
     expect(compiled.querySelector('.professional-proof')?.textContent).toContain('$1.5M');
     expect(compiled.textContent).not.toContain('Customers served');
     expect(compiled.textContent).not.toContain('Billions');
-    expect(compiled.querySelectorAll<HTMLAnchorElement>('a[href$=".pdf"]').length).toBe(0);
-    expect(compiled.textContent).not.toContain('CV');
+    expect(compiled.querySelector<HTMLAnchorElement>('a[download="David-Webster.pdf"]')?.getAttribute('href'))
+      .toBe('/assets/David-Webster.pdf');
     expect(compiled.querySelector<HTMLAnchorElement>('a[href="mailto:dwebster182@gmail.com"]'))
       .not.toBeNull();
   });
