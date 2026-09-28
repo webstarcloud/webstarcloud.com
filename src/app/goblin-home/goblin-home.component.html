@@ -1,0 +1,279 @@
+<div class="chat-app" [class.sidebar-open]="sidebarOpen()" [class.is-goblin]="model.experimental">
+  <button
+    *ngIf="sidebarOpen()"
+    class="sidebar-scrim"
+    (click)="sidebarOpen.set(false)"
+    aria-label="Close navigation"
+  ></button>
+  <aside
+    class="chat-sidebar"
+    [attr.inert]="!sidebarOpen() ? '' : null"
+    aria-label="Chat navigation"
+  >
+    <div class="sidebar-brand">
+      <img
+        src="/assets/favicon.ico"
+        alt="David Webster’s dodecahedron"
+        width="31"
+        height="31"
+      /><span>Small models.<br /><strong>Open curiosity.</strong></span
+      ><button class="icon-button" (click)="sidebarOpen.set(false)" aria-label="Collapse sidebar">
+        ⇤
+      </button>
+    </div>
+    <button class="new-chat" (click)="newChat()">
+      <span aria-hidden="true">＋</span> New chat
+      <span class="new-chat-mark" aria-hidden="true">↗</span>
+    </button>
+    <div class="recent-chats">
+      <p class="sidebar-label">This session</p>
+      <ng-container *ngIf="store.sessions().length; else noChats"
+        ><button
+          *ngFor="let session of store.sessions()"
+          class="conversation-link"
+          [class.active]="session.id === store.activeId()"
+          (click)="openSession(session)"
+        >
+          {{ session.title }}
+        </button></ng-container
+      ><ng-template #noChats
+        ><p class="empty-history">A little space for<br />your next idea.</p></ng-template
+      >
+    </div>
+    <nav class="sidebar-links" aria-label="Explore">
+      <a routerLink="/research"
+        ><span aria-hidden="true">⌁</span> Research <span aria-hidden="true">↗</span></a
+      ><a routerLink="/about"
+        ><span aria-hidden="true">◌</span> About & support <span aria-hidden="true">↗</span></a
+      >
+    </nav>
+    <div class="sidebar-footer">
+      <span class="owner-avatar">dw</span>
+      <div><strong>David Webster</strong><span>Independent builder & researcher</span></div>
+    </div>
+  </aside>
+  <div class="chat-main">
+    <header class="chat-header">
+      <button
+        *ngIf="!sidebarOpen()"
+        class="icon-button open-sidebar"
+        (click)="sidebarOpen.set(true)"
+        aria-label="Open sidebar"
+      >
+        ☰
+      </button>
+      <div class="model-picker">
+        <button
+          class="model-trigger"
+          (click)="modelMenu.set(!modelMenu())"
+          [disabled]="busy()"
+          [attr.aria-expanded]="modelMenu()"
+          aria-controls="model-options"
+        >
+          <strong>{{ model.name }}</strong
+          ><span>{{ model.mode }}</span
+          ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
+        </button>
+        <div
+          *ngIf="modelMenu()"
+          class="model-options"
+          id="model-options"
+          aria-label="Choose a model"
+        >
+          <p>Choose your pace</p>
+          <button
+            *ngFor="let option of models"
+            (click)="selectModel(option.id)"
+            [attr.aria-pressed]="option.id === selectedId()"
+          >
+            <span class="model-symbol" aria-hidden="true">{{
+              option.id === 'gobwen-flash' ? 'ϟ' : option.id === 'gobwen-think' ? '✳' : '✺'
+            }}</span
+            ><span
+              ><strong
+                >{{ option.name }} <span>{{ option.mode }}</span></strong
+              ><small>{{ option.description }}</small
+              ><small class="model-source">{{ option.source }}</small></span
+            ><span *ngIf="option.id === selectedId()" class="selected-mark" aria-hidden="true"
+              >✓</span
+            ></button
+          ><a routerLink="/research/models">Meet the models ↗</a>
+        </div>
+      </div>
+      <div class="header-tools">
+        <ng-container *ngIf="auth.state$ | async as account">
+          <button class="account-button" [disabled]="account.loading || busy()"
+            (click)="account.isAuthenticated ? auth.signOut() : signIn()"
+            [attr.title]="account.isAuthenticated ? account.email : 'Sign in with Google'">
+            {{ account.loading ? 'Connecting…' : account.isAuthenticated ? 'Sign out' : 'Sign in' }}
+          </button>
+        </ng-container>
+        <button
+          class="protection-button"
+          aria-label="Input protection"
+          (click)="tools.set('protection')"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6z" />
+            <path d="m8 12 3 3 5-6" /></svg
+          ><span>Input protection</span></button
+        ><button
+          class="icon-button metrics-button"
+          (click)="tools.set('performance')"
+          aria-label="View response performance"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 18V12M10 18V6M16 18V9M22 18V3" />
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="conversation" #transcript [class.has-turns]="turns().length">
+      <section *ngIf="!turns().length" class="welcome" aria-labelledby="chat-title">
+        <div class="welcome-emblem" aria-hidden="true">
+          <div class="emblem-halo"></div>
+          <img src="/assets/favicon.ico" width="68" height="68" alt="" />
+        </div>
+        <p class="welcome-kicker">
+          {{
+            model.experimental
+              ? 'A LITTLE UNPREDICTABLE. VERY GOBLIN.'
+              : 'A SMALL MODEL. A WORLD OF POSSIBILITIES.'
+          }}
+        </p>
+        <h1 id="chat-title">
+          {{ model.experimental ? 'Let’s get a little weird.' : 'Where should we begin?' }}
+        </h1>
+        <p>
+          {{
+            model.experimental
+              ? 'Raw, curious, occasionally gibberish. Meet our home-grown experiment.'
+              : 'A question, an idea, a problem. Make room for a little curiosity.'
+          }}
+        </p>
+      </section>
+      <div *ngIf="turns().length" class="turn-list" aria-label="Conversation">
+        <article *ngFor="let turn of turns()" class="chat-turn">
+          <div class="user-message">{{ turn.prompt }}</div>
+          <div class="assistant-label">
+            <img src="/assets/favicon.ico" width="22" height="22" alt="" /><strong>{{
+              turn.model.name
+            }}</strong
+            ><span>{{ turn.model.mode }}</span>
+          </div>
+          <details *ngIf="turn.reasoning" class="reasoning">
+            <summary>Model reasoning</summary>
+            <p>{{ turn.reasoning }}</p>
+          </details>
+          <p *ngIf="turn.answer" class="assistant-message">{{ turn.answer }}</p>
+          <p *ngIf="turn.status === 'waiting'" class="working" role="status">
+            {{ turn.guard === 'checked' ? 'Starting the model… A first answer can take about a minute.' : 'Connecting & checking input…' }}
+          </p>
+          <p *ngIf="turn.status === 'complete' && turn.finishReason === 'length'" class="turn-status">Response reached its length limit.</p>
+          <p *ngIf="turn.error" class="turn-error" role="alert">{{ turn.error }}</p>
+          <p *ngIf="turn.status === 'stopped'" class="turn-status">
+            Stopped{{ turn.answer ? ' · partial response' : '' }}
+          </p>
+          <div
+            class="turn-actions"
+            *ngIf="turn.status !== 'waiting' && turn.status !== 'streaming'"
+          >
+            <button *ngIf="turn.answer" (click)="copy(turn)">
+              {{ copied() === turn.id ? 'Copied' : 'Copy' }}</button
+            ><button
+              *ngIf="
+                turn.status === 'error' || turn.status === 'blocked' || turn.status === 'stopped'
+              "
+              (click)="retry(turn)"
+              [disabled]="busy()"
+            >
+              Edit & retry</button
+            ><span *ngIf="turn.guard === 'checked'">Input checked</span
+            ><span *ngIf="turn.metrics"
+              >{{ turn.metrics.totalMs / 1000 | number: '1.1-1' }}s total</span
+            >
+          </div>
+        </article>
+      </div>
+      <div class="composer-area" [class.conversation-composer]="turns().length">
+        <form class="composer" (ngSubmit)="send()">
+          <label class="sr-only" for="chat-message">Message {{ model.name }}</label
+          ><textarea
+            #composer
+            id="chat-message"
+            name="message"
+            [(ngModel)]="draft"
+            (input)="resize()"
+            (keydown)="keydown($event)"
+            [placeholder]="model.experimental ? 'Say something strange…' : 'Ask Gobwen anything…'"
+            rows="2"
+            maxlength="4000"
+            [readOnly]="busy()"
+          ></textarea>
+          <div class="composer-bottom">
+            <span class="composer-model"
+              ><span aria-hidden="true">{{ model.experimental ? '✺' : '✧' }}</span
+              >{{
+                model.experimental
+                  ? 'Expect the unexpected'
+                  : model.mode === 'Flash'
+                    ? 'A little less waiting'
+                    : 'Room to think'
+              }}</span
+            ><button
+              *ngIf="!busy(); else stopButton"
+              class="send-button"
+              type="submit"
+              [disabled]="!draft.trim()"
+              aria-label="Send message"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 19V5m-6 6 6-6 6 6" />
+              </svg></button
+            ><ng-template #stopButton
+              ><button
+                class="send-button"
+                type="button"
+                (click)="stop()"
+                aria-label="Stop generating"
+              >
+                <span class="stop-square"></span></button
+            ></ng-template>
+          </div>
+        </form>
+        <p *ngIf="error()" class="composer-error" role="alert">{{ error() }}</p>
+        <ng-container *ngIf="auth.state$ | async as account">
+          <p *ngIf="account.errorMessage" class="composer-error" role="alert">{{ account.errorMessage }}</p>
+          <p *ngIf="chat.configured && !account.isAuthenticated && !account.loading" class="conversation-note">
+            <button class="inline-sign-in" type="button" (click)="signIn()">Sign in with Google</button> · 20 free requests a day while the preview is open.
+          </p>
+        </ng-container>
+        <div *ngIf="!turns().length" class="prompt-suggestions">
+          <button *ngFor="let sample of samples" (click)="fillPrompt(sample)">
+            {{ sample }} <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+        <p class="connection-note" *ngIf="!chat.configured">
+          <span></span> Model connection coming next.
+          <a routerLink="/research/models">Meet the models</a>
+        </p>
+        <p class="conversation-note" *ngIf="chat.configured">
+          Small models can make big mistakes. Check important answers.
+        </p>
+      </div>
+    </div>
+    <footer class="chat-footer">
+      <span>An independent experiment by <a routerLink="/about">David Webster</a></span
+      ><button (click)="tools.set('performance')">
+        Built to be measured <span aria-hidden="true">↗</span>
+      </button>
+    </footer>
+  </div>
+  <app-chat-tools
+    *ngIf="tools() as panel"
+    [panel]="panel"
+    [modelId]="selectedId()"
+    [turns]="turns()"
+    (closed)="tools.set(null)"
+  ></app-chat-tools>
+</div>

@@ -35,6 +35,10 @@
     transform: translateX(0);
 }
 
+.auth-panel[hidden] {
+    display: none;
+}
+
 .auth-header {
     display: flex;
     align-items: flex-start;

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0c100d"/>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <circle cx="67" cy="62" r="4" fill="#b1f884"/>
+    <text x="84" y="68" fill="#a4ada6" font-size="16" letter-spacing="2">INDEPENDENT RESEARCH BY DAVID WEBSTER</text>
+    <text x="60" y="220" fill="#edf2e8" font-size="134" font-weight="700" letter-spacing="-8">GOBLIN</text>
+    <text x="60" y="341" fill="#edf2e8" font-size="134" font-weight="700" letter-spacing="-8">LAB<tspan fill="#b1f884">.</tspan></text>
+    <text x="66" y="418" fill="#edf2e8" font-size="31">An independent lab exploring</text>
+    <text x="66" y="459" fill="#edf2e8" font-size="31">how intelligence is learned.</text>
+    <path d="M66 549H1134" stroke="#35432f"/>
+    <text x="66" y="590" fill="#a4ada6" font-size="17">davidwebstar.com</text>
+    <text x="1134" y="590" fill="#b1f884" font-size="17" text-anchor="end">SMALL MODELS. OPEN QUESTIONS.</text>
+  </g>
+  <g transform="translate(895 285)" fill="none" stroke="#b1f884">
+    <circle r="184" opacity=".13"/><circle r="126" opacity=".2" stroke-dasharray="3 8"/>
+    <path d="M-141-109L-77-64L0-115L89-54L151-112M-164 28L-93 18L-77-64L11-5L89-54L92 72L161 105M-124 137L-48 113L11-5L92 72L85 161M0-115L11-5L-93 18L-48 113L92 72M-77-64L89-54M-93 18L92 72" opacity=".28"/>
+    <path d="M-77-64L11-5L89-54M11-5L-48 113L92 72" opacity=".9" stroke-width="2"/>
+    <g fill="#b1f884"><circle cx="-77" cy="-64" r="5"/><circle cx="0" cy="-115" r="4"/><circle cx="89" cy="-54" r="5"/><circle cx="-93" cy="18" r="4"/><circle cx="-48" cy="113" r="5"/><circle cx="92" cy="72" r="5"/><circle cx="11" cy="-5" r="8"/></g>
+    <circle cx="11" cy="-5" r="19" opacity=".35"/>
+  </g>
+</svg>

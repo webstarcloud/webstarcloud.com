@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { environment } from '../../environments/environment';
 import { storePostLoginRoute } from './auth-return';
@@ -43,6 +43,10 @@ export class AuthService {
 
   get snapshot() {
     return this.stateSubject.value;
+  }
+
+  getAccessToken(): Promise<string> {
+    return firstValueFrom(this.oidcSecurityService.getAccessToken());
   }
 
   signIn(returnPath = '/') {

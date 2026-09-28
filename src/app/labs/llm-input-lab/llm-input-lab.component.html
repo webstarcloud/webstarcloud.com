@@ -2,124 +2,95 @@
   <header class="lab-product-bar">
     <div class="lab-brand">
       <span>IH</span>
-      <div>
-        <strong>llm-input-hardening</strong>
-        <small>Deterministic text integrity</small>
-      </div>
+      <div><strong>llm-input-hardening</strong><small>v3.0.0 · Apache 2.0 · Rust + Python</small></div>
     </div>
-    <div class="lab-product-actions">
-      <a routerLink="/labs">Labs</a>
-      <a class="pypi-link" href="https://pypi.org/project/llm-input-hardening/" target="_blank" rel="noreferrer">PyPI</a>
-    </div>
+    <nav class="lab-product-actions" aria-label="Library links">
+      <a routerLink="/" fragment="research">Research</a>
+      <a href="https://github.com/davidwebstar34/llm-input-hardening" target="_blank" rel="noreferrer">Source</a>
+      <a class="pypi-link" href="https://pypi.org/project/llm-input-hardening/3.0.0/" target="_blank" rel="noreferrer">PyPI</a>
+    </nav>
   </header>
 
   <section class="lab-intro" aria-labelledby="input-hardening-title">
     <div>
-      <p class="lab-eyebrow">Input boundary / Public package</p>
-      <h1 id="input-hardening-title">Make hostile text visible before it reaches the model.</h1>
-      <p>
-        Normalize Unicode, remove destabilizing controls and invisibles, and emit a structured report
-        before untrusted text reaches prompts, tools, or code generation.
-      </p>
+      <p class="lab-eyebrow">Goblin Lab / Supporting tooling</p>
+      <h1 id="input-hardening-title">See what’s hiding in your text.</h1>
+      <p>Try a sample or paste text. The live library shows what changes, what gets flagged, and whether the policy allows it through.</p>
     </div>
-    <dl class="lab-facts">
-      <div><dt>Deterministic</dt><dd>No model call</dd></div>
-      <div><dt>Versioned</dt><dd>Stable report schema</dd></div>
-      <div><dt>Rust + Python</dt><dd>Production package</dd></div>
-    </dl>
   </section>
 
-  <section class="hardening-tool" aria-labelledby="hardening-tool-title">
+  <section class="hardening-tool" aria-labelledby="hardening-tool-title" [attr.aria-busy]="loading">
     <header class="hardening-tool__header">
-      <div>
-        <p class="lab-eyebrow">Interactive browser preview</p>
-        <h2 id="hardening-tool-title">Inspect the text boundary</h2>
-      </div>
-      <div class="sample-switcher" aria-label="Load hostile text sample">
-        <button *ngFor="let sample of samples; trackBy: trackSample" type="button" (click)="loadSample(sample)">
-          {{ sample.label }}
-        </button>
+      <h2 id="hardening-tool-title">Inspect the input boundary</h2>
+      <div class="sample-switcher" aria-label="Load and inspect a sample">
+        <button *ngFor="let sample of samples" type="button" (click)="loadSample(sample)">{{ sample.label }}</button>
       </div>
     </header>
-
     <div class="policy-bar" role="group" aria-label="Hardening policy">
-      <button *ngFor="let item of policies; trackBy: trackPolicy" type="button"
-        [class.is-active]="policy === item.name" [attr.aria-pressed]="policy === item.name"
-        (click)="setPolicy(item.name)">
-        <strong>{{ item.label }}</strong>
-        <span>{{ item.use }}</span>
+      <button *ngFor="let item of policies" type="button" [class.is-active]="policy === item.name"
+        [attr.aria-pressed]="policy === item.name" (click)="setPolicy(item.name)">
+        <strong>{{ item.label }}</strong><span>{{ item.use }}</span>
       </button>
     </div>
+    <p class="sample-explanation" *ngIf="explanation">{{ explanation }}</p>
 
     <div class="hardening-workspace">
-      <label class="text-pane text-pane--input">
-        <span class="pane-heading"><strong>Untrusted input</strong><small>{{ inputText.length }} characters</small></span>
-        <textarea [ngModel]="inputText" (ngModelChange)="updateInput($event)" spellcheck="false"
-          aria-label="Untrusted input text"></textarea>
-      </label>
-
+      <div class="text-pane text-pane--input">
+        <label for="inspection-input" class="pane-heading"><strong>Input</strong><small>{{ characterCount }} / {{ maxCharacters }}</small></label>
+        <textarea id="inspection-input" [ngModel]="inputText" (ngModelChange)="updateInput($event)" spellcheck="false"
+          aria-describedby="inspection-privacy" dir="auto"></textarea>
+        <details class="visible-text"><summary>Reveal invisible characters</summary><pre>{{ inputVisible }}</pre></details>
+        <button class="inspect-button" type="button" (click)="inspect()" [disabled]="loading || characterCount > maxCharacters">
+          {{ loading ? 'Inspecting…' : 'Inspect text' }}
+        </button>
+      </div>
       <section class="text-pane text-pane--output" aria-label="Sanitized output">
-        <span class="pane-heading">
-          <strong>Sanitized output</strong>
-          <small [class.is-changed]="result.changed">{{ result.changed ? 'Changed' : 'Unchanged' }}</small>
+        <span class="pane-heading"><strong>Sanitized output</strong>
+          <small *ngIf="result" [class.is-changed]="result.report.changed">{{ result.report.changed ? 'Changed' : 'Unchanged' }}</small>
         </span>
-        <pre>{{ result.output }}</pre>
+        <ng-container *ngIf="result; else awaitingOutput">
+          <pre>{{ result.clean || '(empty)' }}</pre>
+          <details class="visible-text"><summary>Reveal invisible characters</summary><pre>{{ visibleCharacters(result.clean) }}</pre></details>
+        </ng-container>
+        <ng-template #awaitingOutput><p class="empty-result">Run an inspection to see the library’s output.</p></ng-template>
       </section>
-
-      <aside class="signal-pane" aria-label="Hardening signals">
-        <div class="signal-summary">
-          <p class="lab-eyebrow">Structured report</p>
-          <strong>{{ result.removedTotal }}</strong>
-          <span>removals · {{ result.normalization }}</span>
-        </div>
-
-        <div class="signal-list" *ngIf="result.removed.length || result.flagged.length; else cleanInput">
-          <div *ngFor="let signal of result.removed" data-kind="removed">
-            <code>{{ signal.code }}</code>
-            <span>{{ signal.label }}</span>
-            <strong>&times;{{ signal.count }}</strong>
+      <aside class="signal-pane" aria-label="Inspection decision" aria-live="polite">
+        <ng-container *ngIf="result; else awaitingDecision">
+          <div class="signal-summary" [attr.data-action]="result.decision.action">
+            <p class="lab-eyebrow">Policy decision</p><strong>{{ result.decision.action }}</strong>
+            <span>{{ removedTotal }} removals · {{ result.report.normalization }}</span>
           </div>
-          <div *ngFor="let signal of result.flagged" data-kind="flagged">
-            <code>{{ signal.code }}</code>
-            <span>{{ signal.label }}</span>
-            <strong>&times;{{ signal.count }}</strong>
+          <div class="signal-list" *ngIf="signals.length; else cleanInput">
+            <div *ngFor="let signal of signals" data-kind="flagged"><code>{{ signal.code }}</code><strong>&times;{{ signal.count }}</strong></div>
           </div>
-        </div>
-
-        <ng-template #cleanInput>
-          <p class="clean-input">No configured signals detected.</p>
-        </ng-template>
+          <ng-template #cleanInput><p class="clean-input">No configured signals detected.</p></ng-template>
+          <p class="decision-note" *ngIf="result.decision.action === 'quarantine'">Hold for review before passing this input on.</p>
+          <p class="decision-note" *ngIf="result.decision.action === 'reject'">This policy blocks the input, even after sanitization.</p>
+          <small class="engine-version">Executed by {{ result.library.name }} {{ result.library.version }}</small>
+        </ng-container>
+        <ng-template #awaitingDecision><p class="empty-result">{{ loading ? 'Running the library…' : 'The decision and reason codes will appear here.' }}</p></ng-template>
       </aside>
     </div>
+    <p class="inspection-error" *ngIf="error" role="alert">{{ error }}</p>
 
-    <details class="report-detail">
-      <summary>View report JSON</summary>
-      <pre><code>{{ result.reportJson }}</code></pre>
-    </details>
-
-    <footer class="preview-note">
-      Browser preview of core policy behavior. Use the Rust/Python package as the production authority.
-    </footer>
+    <section class="encoded-evidence" *ngIf="result?.report?.stats?.encoded_unicode_samples?.length" aria-label="Encoded Unicode evidence">
+      <h3>Hidden behind an encoding</h3>
+      <article *ngFor="let sample of result?.report?.stats?.encoded_unicode_samples">
+        <div><code>{{ sample.encodings.join(' → ') }}</code><span> → </span><strong>{{ sample.codepoints.join(', ') }}</strong></div>
+        <p>{{ sample.reasons.join(', ') }} · {{ sample.decode_depth }} decoding layer(s) · {{ sample.source }} characters {{ sample.start }}–{{ sample.end }} (end excluded)</p>
+      </article>
+      <p>Inspection reads bounded decoding candidates. The returned text keeps its original encoding. Decode your application’s format before final hardening.</p>
+    </section>
+    <details class="report-detail" *ngIf="result"><summary>View full report JSON</summary><pre><code>{{ reportJson }}</code></pre></details>
+    <footer class="preview-note" id="inspection-privacy">Runs on Dave’s Brain. Inspection text is not sent to a language model or included in application traces. Up to 2,000 characters per request.</footer>
   </section>
 
   <section class="lab-evidence" aria-labelledby="lab-evidence-title">
-    <header>
-      <p class="lab-eyebrow">Security boundary</p>
-      <h2 id="lab-evidence-title">Text integrity, not model intent.</h2>
-    </header>
+    <header><p class="lab-eyebrow">What this demonstrates</p><h2 id="lab-evidence-title">A visible, deterministic input boundary.</h2></header>
     <div class="lab-evidence__rows">
-      <article>
-        <span>01</span><h3>Detect what humans cannot see</h3>
-        <p>Bidi controls, zero-width characters, default ignorables, mixed scripts, and encoded payload shapes.</p>
-      </article>
-      <article>
-        <span>02</span><h3>Choose policy by consequence</h3>
-        <p>Preserve chat semantics, harden execution arguments, and retain source formatting where code needs it.</p>
-      </article>
-      <article>
-        <span>03</span><h3>Keep other guardrails</h3>
-        <p>This complements tool allowlists, authorization, sandboxing, prompt defenses, and output validation.</p>
-      </article>
+      <article><span>01</span><h3>Text can change and still be blocked</h3><p>Cleaning and enforcement are separate. A removed control can still trigger rejection.</p></article>
+      <article><span>02</span><h3>Unchanged can still mean risky</h3><p>v3 detects encoded Unicode risks without silently decoding the returned text.</p></article>
+      <article><span>03</span><h3>Policy depends on use</h3><p>Compare chat, tool arguments, and code. Keep authorization, tool restrictions, and prompt defenses in your application.</p></article>
     </div>
   </section>
 </main>

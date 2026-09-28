@@ -61,3 +61,7 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
+
+# Funding service secrets and persistent payment ledger
+funding-server/.env
+funding-server/data/

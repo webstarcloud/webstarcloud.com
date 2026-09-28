@@ -1,28 +1,30 @@
-<div class="stage-shell" [ngClass]="'stage-shell--' + stageMode" [class.stage-shell--response]="responseOpen">
-  <header class="stage-nav">
-    <a class="stage-brand" routerLink="/" aria-label="David Webster home">
+<div class="stage-shell" [ngClass]="'stage-shell--' + (isLabPage ? 'lab-home' : stageMode)" [class.stage-shell--response]="responseOpen">
+  <a class="skip-link" [routerLink]="[]" fragment="main-content">Skip to content</a>
+  <header class="stage-nav" *ngIf="!isLabHome">
+    <a class="stage-brand" routerLink="/" aria-label="Back to chat">
       <span class="stage-brand__mark" aria-hidden="true"></span>
       <span class="stage-brand__copy">
         <strong>David Webster</strong>
       </span>
     </a>
 
-    <nav class="stage-links" aria-label="David Webster sections">
-      <a routerLink="/ventures" routerLinkActive="is-active">Projects</a>
-      <a routerLink="/labs" routerLinkActive="is-active">Labs</a>
+    <nav class="stage-links" aria-label="Main navigation">
+      <a routerLink="/">Chat</a>
+      <a routerLink="/research" [class.is-active]="isNotebook" [attr.aria-current]="isNotebook ? 'location' : null">Research</a>
+      <a routerLink="/about" routerLinkActive="is-active" ariaCurrentWhenActive="page">About</a>
     </nav>
 
     <div class="stage-actions">
       <a class="stage-contact" href="mailto:dwebster182@gmail.com">Contact</a>
-      <button class="stage-access" type="button" (click)="openAuthPanel()" aria-label="Open private access">
+      <button *ngIf="!isLabPage" class="stage-access" type="button" (click)="openAuthPanel()" aria-label="Open private access">
         Access
       </button>
     </div>
   </header>
 
-  <section class="home-stage">
+  <section *ngIf="!isLabPage" class="home-stage">
     <section *ngIf="isHomeStage" class="professional-hero" aria-labelledby="professional-hero-title">
-      <p class="professional-hero__eyebrow">Principal Solution Architect at Backbase</p>
+      <p class="professional-hero__eyebrow">David Webster · AI systems & research</p>
       <h1 id="professional-hero-title">Building agentic AI platforms and unified control planes</h1>
       <p class="professional-hero__lede">
         I’m a hands-on platform engineer and technical lead with 12 years building production software
@@ -43,13 +45,20 @@
     </section>
 
     <section class="stage-avatar" aria-label="Interactive David Webster console">
+      <p *ngIf="isHomeStage" class="brain-context">Dave’s Brain · Existing AI demo. Powered by an external model; a personal Goblin model is a future direction.</p>
       <app-particles [stageMode]="stageMode" (requestAccess)="openAuthPanel()"
         (responseStateChange)="setResponseOpen($event)"></app-particles>
     </section>
   </section>
 
-  <main class="stage-surface" [class.stage-surface--home]="isHomeStage"
+  <main id="main-content" tabindex="-1" class="stage-surface" [class.stage-surface--home]="isHomeStage"
+    [class.stage-surface--lab-home]="isLabPage" [class.stage-surface--chat]="isLabHome"
     [class.stage-surface--obscured]="responseOpen" [attr.data-stage]="stageMode">
+    <aside *ngIf="isPausedDemo" class="paused-notice" aria-label="Project status">
+      <strong>Paused project</strong>
+      <span>This earlier demo is preserved for reference. Current experiments are in the research journal.</span>
+      <a routerLink="/research">Explore the research &#8599;</a>
+    </aside>
     <router-outlet #routerOutlet="outlet"></router-outlet>
   </main>
 

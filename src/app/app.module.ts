@@ -5,10 +5,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { HomeComponent } from './home/home.component';
-import { ParticlesComponent } from './particles/particles.component';
+import { ParticlesModule } from './particles/particles.module';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { ArtifactViewerComponent } from './artifact-viewer/artifact-viewer.component';
 import { AuthPanelComponent } from './auth/auth-panel.component';
 import { AuthModule, LogLevel } from 'angular-auth-oidc-client';
 import { environment } from '../environments/environment';
@@ -47,8 +46,6 @@ const oidcConfig = {
   declarations: [
     AppComponent,
     HomeComponent,
-    ParticlesComponent,
-    ArtifactViewerComponent,
     AuthPanelComponent,
   ],
   imports: [
@@ -56,6 +53,7 @@ const oidcConfig = {
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    ParticlesModule,
     AuthModule.forRoot({
       config: oidcConfig
     })

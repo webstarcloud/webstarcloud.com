@@ -7,6 +7,10 @@
     pointer-events: none;
 }
 
+.particles-panel.is-specimen { height: 100%; }
+.is-specimen .canvas-wrapper { width: 100%; height: 100%; margin: 0; }
+.avatar-fallback { position: absolute; inset: 38% 12% auto; z-index: 4; color: #d3ecc4; text-align: center; font-size: .8rem; line-height: 1.6; }
+
 .canvas-wrapper {
     position: relative;
     display: flex;
@@ -263,11 +267,20 @@
 }
 
 .chat-surface__question {
+    unicode-bidi: plaintext;
     max-width: 760px;
     margin: 0;
     color: rgba(238, 247, 240, 0.58);
     font: 500 1.16rem/1.5 var(--accent-font);
 }
+
+.guard-examples { margin-top: 12px; padding: 12px; color: #d9e9e4; background: #0c141bd9; border: 1px solid #6ee7ff40; border-radius: 8px; text-align: left; font: 400 .875rem/1.5 Roboto, Arial, sans-serif; }
+.guard-examples summary { cursor: pointer; color: #8be5ff; }
+.guard-examples p { margin: 12px 0; font-size: 1rem; }
+.guard-examples div { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.guard-examples button { border: 1px solid #719095; border-radius: 5px; padding: 8px 12px; color: #effbf8; background: #193039; font: inherit; cursor: pointer; }
+.guard-examples button:disabled { opacity: .5; cursor: default; }
+.guard-examples small { font-size: .875rem; color: #b3c9c7; }
 
 .sr-only {
     position: absolute;

@@ -9,24 +9,32 @@ import { StageMode } from './particles/particles.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnDestroy {
-  readonly title = 'David Webster | Building agentic AI platforms and unified control planes';
+  readonly title = 'Gobwen | Small models. Open curiosity.';
   authPanelOpen = false;
   responseOpen = false;
   stageMode: StageMode = 'home';
+  isLabHome = true;
+  isNotebook = false;
+  isAbout = false;
+  get isLabPage(): boolean { return this.isLabHome || this.isNotebook || this.isAbout; }
   private readonly routerSubscription: Subscription;
 
   constructor(private readonly router: Router) {
-    this.stageMode = this.getStageMode(this.router.url);
+    this.updateRoute(this.router.url);
     this.routerSubscription = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
-        this.stageMode = this.getStageMode(event.urlAfterRedirects);
+        this.updateRoute(event.urlAfterRedirects);
         this.responseOpen = false;
       });
   }
 
   get isHomeStage() {
-    return this.stageMode === 'home';
+    return this.stageMode === 'home' && !this.isLabPage;
+  }
+
+  get isPausedDemo(): boolean {
+    return this.stageMode === 'anchorkeep' || this.stageMode === 'greenlight';
   }
 
   openAuthPanel() {
@@ -43,6 +51,14 @@ export class AppComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.routerSubscription.unsubscribe();
+  }
+
+  private updateRoute(url: string): void {
+    const path = url.split('?')[0].split('#')[0];
+    this.isLabHome = path === '' || path === '/';
+    this.isNotebook = path.startsWith('/notebook/') || path === '/research' || path.startsWith('/research/');
+    this.isAbout = path === '/about';
+    this.stageMode = this.getStageMode(url);
   }
 
   private getStageMode(url: string): StageMode {

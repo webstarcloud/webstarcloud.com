@@ -3,8 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  chatEndpoint: '', // Protected SSE gateway. No fallback to the older external-model demo.
+  fundingApiUrl: '', // Enable only after the payment service and run dispatcher are deployed.
   production: false,
   api: {
+    inspectionUrl: 'http://127.0.0.1:8001',
     baseUrl: 'https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test',
     gatewayKey: 'rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI'
   },

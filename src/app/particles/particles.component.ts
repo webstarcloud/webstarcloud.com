@@ -6,8 +6,9 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
+import { ATTACK_DEMOS, AttackDemoId, HardeningReceipt, readHardeningReceipt } from './chat-hardening';
 
-type ParticleMode = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling';
+type ParticleMode = 'architecture' | 'agentic' | 'migration' | 'resilience' | 'tooling' | 'goblin';
 export type StageMode = 'home' | 'ventures' | 'labs' | 'anchorkeep' | 'greenlight' | 'lab-detail';
 
 interface ModeTheme {
@@ -34,6 +35,8 @@ type AvatarMotion = 'assembling' | 'bursting' | 'dispersed' | 'idle';
 export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('rendererContainer') rendererContainer!: ElementRef<HTMLDivElement>;
   @Input() stageMode: StageMode = 'home';
+  @Input() displayMode: 'chat' | 'specimen' = 'chat';
+  @Input() motionPaused = false;
   @Output() requestAccess = new EventEmitter<void>();
   @Output() responseStateChange = new EventEmitter<boolean>();
   private readonly anonymousResponseKey = 'dave2-anonymous-response-used';
@@ -54,6 +57,9 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   responseClosing = false;
   gateLocked = false;
   isAuthenticated = false;
+  readonly attackDemos = ATTACK_DEMOS;
+  hardeningReceipt?: HardeningReceipt;
+  private chatRequest?: Subscription;
 
   public myMessage = 'Dave 2.0 // online';
   public displayedMessage = '';
@@ -64,11 +70,13 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   displayedDots = '';
 
   loading = false;
+  avatarUnavailable = false;
   loadingDots = '';
   loadingDotsIntervalId?: number;
   private readonly desktopModelPosition = new THREE.Vector3(80, 12, -20);
   private readonly desktopScale = 10;
   private readonly modeThemes: Record<ParticleMode, ModeTheme> = {
+    goblin: { accentA: 0xb5ff70, accentB: 0x35e89b, keywords: [] },
     architecture: {
       accentA: 0x66d6ff,
       accentB: 0x8d90ff,
@@ -146,12 +154,16 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['stageMode']) {
-      const nextMode = this.getParticleModeForStage(this.stageMode);
+    if (changes['stageMode'] || changes['displayMode']) {
+      const nextMode = this.displayMode === 'specimen' ? 'goblin' : this.getParticleModeForStage(this.stageMode);
       this.activeMode = nextMode;
-      this.queueSceneModeTransition(nextMode);
+      if (this.displayMode === 'specimen') {
+        this.setInitialSceneMode(nextMode);
+      } else {
+        this.queueSceneModeTransition(nextMode);
+      }
 
-      if (!changes['stageMode'].firstChange && this.responseOpen) {
+      if (changes['stageMode'] && !changes['stageMode'].firstChange && this.responseOpen) {
         if (this.responseCloseTimer) {
           window.clearTimeout(this.responseCloseTimer);
           this.responseCloseTimer = undefined;
@@ -166,16 +178,16 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
   }
 
-  getData(question: string) {
+  getData(question: string, demo?: AttackDemoId) {
+    if (this.displayMode === 'specimen') { return; }
+    this.hardeningReceipt = undefined;
     if (!this.apiBaseUrl) {
       this.stopDotsAnimation();
-      this.completeAnswer('The brain endpoint is not configured.');
+      this.completeAnswer('The brain endpoint is not configured.', false);
       return;
     }
 
-    const body = {
-      question
-    };
+    const body = demo ? { operation: 'attack_demo', sample: demo } : { question };
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
@@ -184,22 +196,28 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
       headers = headers.set('x-api-key', this.apiGatewayKey);
     }
 
-    this.http.post(this.apiBaseUrl, body, { headers, responseType: 'text' }).subscribe({
+    this.chatRequest?.unsubscribe();
+    const endpoint = demo ? environment.api.inspectionUrl : this.apiBaseUrl;
+    this.chatRequest = this.http.post(endpoint, body, { headers, responseType: 'text' }).subscribe({
       next: (response) => {
+        this.hardeningReceipt = readHardeningReceipt(response);
         const message = this.getResponseText(response);
         this.stopDotsAnimation();
-        this.completeAnswer(message);
+        this.completeAnswer(message, !demo);
       },
       error: (error) => {
+        this.hardeningReceipt = readHardeningReceipt(error.error);
         const fallbackMessage = this.getErrorText(error);
         this.stopDotsAnimation();
-        console.error(error);
-        this.completeAnswer(fallbackMessage);
+        this.completeAnswer(this.hardeningReceipt?.blocked
+          ? 'This input was blocked by Dave’s Brain’s input protection. You can edit your question or try another example.'
+          : fallbackMessage, false);
       }
     });
   }
 
   async askQuestion() {
+    if (this.isDisabled) { return; }
     const prompt = this.question.trim();
     if (!prompt) {
       return;
@@ -217,6 +235,18 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.displayedMessage = 'Thinking';
     this.startDotsAnimation();
     this.getData(prompt);
+  }
+
+  tryAttack(id: AttackDemoId): void {
+    if (this.isDisabled) { return; }
+    const sample = this.attackDemos.find(item => item.id === id);
+    if (!sample) { return; }
+    this.question = sample.question;
+    this.activeResponseMarkdown = '';
+    this.isDisabled = true;
+    this.displayedMessage = 'Checking input protection';
+    this.startDotsAnimation();
+    this.getData(this.question, sample.id);
   }
 
   startLoadingDotsAnimation() {
@@ -309,7 +339,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     const record = response as Record<string, unknown>;
-    for (const key of ['answer', 'message', 'response', 'text']) {
+    for (const key of ['answer', 'message', 'response', 'text', 'error']) {
       const candidate = record[key];
       if (typeof candidate === 'string' && candidate.trim()) {
         return candidate.trim();
@@ -355,12 +385,12 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     return (value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'));
   }
 
-  private completeAnswer(message: string) {
+  private completeAnswer(message: string, consumePreview = true) {
     this.activeResponseMarkdown = message;
     this.displayedMessage = '';
     this.isDisabled = false;
     this.setResponseSurface(true);
-    if (!this.isAuthenticated) {
+    if (consumePreview && !this.isAuthenticated) {
       this.markAnonymousResponseUsed();
       this.updateGateState();
     }
@@ -374,6 +404,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.responseClosing = true;
     this.responseCloseTimer = window.setTimeout(() => {
       this.activeResponseMarkdown = '';
+      this.hardeningReceipt = undefined;
       this.responseClosing = false;
       this.responseCloseTimer = undefined;
       this.setResponseSurface(false);
@@ -531,6 +562,16 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     loader.load(
       'assets/dave.glb',
       (gltf) => {
+        if (!this.active) {
+          gltf.scene.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              child.geometry.dispose();
+              const materials = Array.isArray(child.material) ? child.material : [child.material];
+              materials.forEach(material => material.dispose());
+            }
+          });
+          return;
+        }
         const avatarRoot = new THREE.Group();
         const coreObject = gltf.scene;
         const shellObject = gltf.scene.clone(true);
@@ -578,6 +619,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
       },
       undefined,
       (error) => {
+        this.avatarUnavailable = true;
         this.loading = false;
         this.stopLoadingDotsAnimation();
         console.warn('The original 3D avatar could not be loaded.', error);
@@ -919,6 +961,8 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     try {
       this.renderer = this.createRenderer();
     } catch (error) {
+      this.avatarUnavailable = true;
+      this.loading = false;
       console.warn('The interactive avatar is unavailable because WebGL could not be initialized.', error);
       return;
     }
@@ -1006,6 +1050,13 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     window.requestAnimationFrame(() => this.animate());
+    if (this.motionPaused) {
+      this.finishAssemblePointClouds();
+      const avatar = this.scene.getObjectByName('myObject');
+      if (avatar) { avatar.rotation.x = 0; }
+      this.renderer.render(this.scene, this.camera);
+      return;
+    }
     this.frame += 0.05;
     this.updateSceneModeTransition();
 
@@ -1150,6 +1201,7 @@ export class ParticlesComponent implements AfterViewInit, OnChanges, OnDestroy {
       window.clearInterval(this.intervalId);
     }
     this.authSubscription?.unsubscribe();
+    this.chatRequest?.unsubscribe();
     if (this.dotsIntervalId) {
       window.clearInterval(this.dotsIntervalId);
     }

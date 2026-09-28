@@ -19,7 +19,9 @@ body, html {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow-x: hidden; /* Optional: Prevent horizontal scrolling */
+    /* Clip sideways overflow without creating a separate body scroll container;
+       Angular's viewport scroller must own in-page research links. */
+    overflow-x: clip;
 }
 
 .control-row,

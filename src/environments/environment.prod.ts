@@ -1,6 +1,9 @@
 export const environment = {
+  chatEndpoint: 'https://j2f2ggjaq67eyddygujxlqbglm0xezgc.lambda-url.eu-west-1.on.aws/v1/chat',
+  fundingApiUrl: '', // Public service origin only. Never put payment or compute secrets here.
   production: true,
   api: {
+    inspectionUrl: 'https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test',
     baseUrl: 'https://clzngwfhz1.execute-api.eu-west-1.amazonaws.com/test',
     gatewayKey: 'rSxnSS5RnZ4HqW1lxzY1T8py4F0hYoLH9sVFTqHI'
   },

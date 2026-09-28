@@ -1,11 +1,11 @@
 <div class="auth-backdrop" *ngIf="open" (click)="closePanel()"></div>
 
-<aside class="auth-panel" [class.auth-panel--open]="open" [attr.aria-hidden]="!open"
+<aside class="auth-panel" [class.auth-panel--open]="open" [hidden]="!open" [attr.aria-hidden]="!open"
     role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <ng-container *ngIf="authState$ | async as state">
         <header class="auth-header">
             <div>
-                <p class="auth-kicker">WebstarCloud access</p>
+                <p class="auth-kicker">Private access</p>
                 <h2 id="auth-title" class="auth-title">
                     {{ state.isAuthenticated ? 'Private workspace' : 'Contact David' }}
                 </h2>

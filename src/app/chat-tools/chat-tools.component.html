@@ -1,0 +1,96 @@
+<dialog #dialog (cancel)="cancel($event)" aria-labelledby="tools-title">
+  <header>
+    <span>{{ panel === 'protection' ? 'THE INPUT BOUNDARY' : 'OBSERVE, THEN OPTIMIZE' }}</span
+    ><button (click)="close()" aria-label="Close panel">×</button>
+  </header>
+  <ng-container *ngIf="panel === 'protection'; else performance">
+    <h2 id="tools-title">A little protection.<br />Before the model.</h2>
+    <p>
+      Our <a routerLink="/labs/llm-input-hardening" (click)="close()">llm-input-hardening</a> checks
+      text for hidden controls, misleading Unicode and encoded obfuscation.
+    </p>
+    <p class="subtle">
+      The new chat requires a server check before generation. This inspector exercises the real
+      package separately; it does not call a model or provide complete protection against prompt
+      injection.
+    </p>
+    <div class="samples">
+      <button (click)="sample(false)">Ordinary text</button
+      ><button (click)="sample(true)">Encoded control</button>
+    </div>
+    <label for="guard-sample">Try an input check</label
+    ><textarea
+      id="guard-sample"
+      [(ngModel)]="text"
+      (ngModelChange)="reset()"
+      rows="3"
+      maxlength="4000"
+    ></textarea>
+    <div class="check-actions">
+      <span>Text is sent only when you check it.</span
+      ><button class="primary" (click)="inspect()" [disabled]="checking() || !text.trim()">
+        {{ checking() ? 'Checking…' : 'Check input' }} ↗
+      </button>
+    </div>
+    <p class="error" *ngIf="error()" role="alert">{{ error() }}</p>
+    <section
+      *ngIf="result() as result"
+      class="inspection-result"
+      [class.blocked]="result.decision.action !== 'allow'"
+      role="status"
+    >
+      <strong>{{
+        result.decision.action === 'allow' ? 'Passed inspection' : 'Stopped at the boundary'
+      }}</strong>
+      <p>
+        {{ result.library.name }} {{ result.library.version }} · {{ result.decision.action }} ·
+        strict_exec
+      </p>
+      <pre>{{ visible(result.clean) }}</pre>
+      <p *ngIf="result.decision.reason_codes.length">
+        {{ result.decision.reason_codes.join(' · ') }}
+      </p>
+      <small>This was an inspection only. No model was called.</small>
+    </section>
+  </ng-container>
+  <ng-template #performance
+    ><h2 id="tools-title">Fast should be<br />something we can measure.</h2>
+    <p>
+      The latest completed responses for this model, in this conversation. No estimates or sample
+      numbers.
+    </p>
+    <dl class="metrics">
+      <div>
+        <dt>Cold TTFT</dt>
+        <dd>{{ cold === null ? '—' : (cold! / 1000 | number: '1.2-2') + 's' }}</dd>
+        <span>First output after a cold start</span>
+      </div>
+      <div>
+        <dt>Warm TTFT</dt>
+        <dd>{{ warm === null ? '—' : (warm! / 1000 | number: '1.2-2') + 's' }}</dd>
+        <span>First output with a warm worker</span>
+      </div>
+      <div>
+        <dt>Tokens / sec</dt>
+        <dd>
+          {{ latest?.tokensPerSecond == null ? '—' : (latest!.tokensPerSecond | number: '1.1-1') }}
+        </dd>
+        <span>Server-measured decode rate</span>
+      </div>
+      <div>
+        <dt>Total response</dt>
+        <dd>{{ latest ? (latest.totalMs / 1000 | number: '1.2-2') + 's' : '—' }}</dd>
+        <span>Submit to completed stream</span>
+      </div>
+    </dl>
+    <p class="subtle">
+      {{ measured.length }} completed
+      {{ measured.length === 1 ? 'response' : 'responses' }} measured. The server must identify cold
+      or warm starts. Unknown state stays unclassified. TTFT includes the input check, network and
+      any first reasoning output; it is not necessarily time to the final answer.
+    </p>
+    <a class="article-link" routerLink="/research/performance" (click)="close()"
+      >Read the first measurements ↗</a
+    ></ng-template
+  >
+</dialog>
