@@ -505,3 +505,9 @@ svg {
     animation: none;
   }
 }
+.answer-sources { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.answer-sources a { color: var(--accent, #8cae88); font-size: 12px; text-decoration: underline; }
+.research-recording { max-width: 680px; margin: 12px auto; color: #96968f; font-size: 12px; line-height: 1.6; }
+.research-recording summary { cursor: pointer; text-align: center; }
+.research-recording label { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
+.research-recording input { accent-color: #8cae88; }

@@ -76,6 +76,34 @@ describe('Protected chat stream', () => {
     }
     expect(JSON.parse(request.calls.mostRecent().args[1].body).model).toBe('gobwen-flash');
     expect(request.calls.mostRecent().args[1].headers.Authorization).toBe('Bearer test-access-token');
+    expect(JSON.parse(request.calls.mostRecent().args[1].body).captureConversation).toBeUndefined();
+  });
+  it('accepts bounded source links only after protection and rejects executable URLs', async () => {
+    const done = frame('done', { outputTokens: 0, decodeMs: null });
+    request.and.resolveTo(response(frame('meta', meta) + frame('sources', {
+      sources: [{ id: 1, title: 'Omarchy', url: 'https://omarchy.org/' }],
+    }) + done));
+    const events: ChatEvent[] = [];
+    await run(events);
+    expect(events[1]).toEqual({ type: 'sources', sources: [{ id: 1, title: 'Omarchy', url: 'https://omarchy.org/' }] });
+    request.and.resolveTo(response(frame('meta', meta) + frame('sources', {
+      sources: [{ id: 1, title: 'bad', url: 'javascript:alert(1)' }],
+    }) + done));
+    await expectAsync(run([])).toBeRejectedWithError(/URL/);
+  });
+  it('sends explicit recording choice and reports a failed save honestly', async () => {
+    request.and.resolveTo(response(frame('meta', meta) + frame('delta', { text: 'Hi', channel: 'answer' }) +
+      frame('done', { outputTokens: 1, decodeMs: null, recording: { archive: 'unavailable', langwatch: 'unavailable' } })));
+    const events: ChatEvent[] = [];
+    await TestBed.inject(ChatService).stream('gobwen-flash', [{ role: 'user', content: 'Hi' }], new AbortController().signal,
+      event => events.push(event), { conversationId: 'd6f009db-3715-45ca-86e1-7b2c10150640', captureConversation: true });
+    expect(JSON.parse(request.calls.mostRecent().args[1].body).captureConversation).toBeTrue();
+    const done = events[events.length - 1];
+    if (done.type !== 'done') fail('Expected completion');
+    else {
+      expect(done.recordingNotice).toBe('Conversation recording failed');
+      expect(done.metrics.firstAnswerMs).not.toBeNull();
+    }
   });
   it('does not invoke the gateway without a signed-in token', async () => {
     TestBed.overrideProvider(CHAT_ACCESS_TOKEN, { useValue: async () => '' });

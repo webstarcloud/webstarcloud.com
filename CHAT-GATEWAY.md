@@ -4,6 +4,8 @@ Production uses the persistent `davesbrain-chat-prod` stack in AWS eu-west-1,
 implemented in `../davesbrain/model-lambda`. The three model functions use 4096 MB,
 ARM64 CPUs, one concurrent request each and no provisioned concurrency. A 256 MB
 Node.js gateway verifies Cognito access tokens and streams the selected model.
+The public edge is a Cognito-authorized API Gateway REST streaming route; the
+former public Function URL has been removed.
 Development keeps `chatEndpoint` empty. There is no fallback to the older Dave's
 Brain model. No AWS credentials or shared chat secrets belong in the Angular build.
 
@@ -32,17 +34,27 @@ chat template, runtime, quantization and context/output limits before measuring.
 {
   "model": "gobwen-flash",
   "messages": [{"role": "user", "content": "Hello"}],
-  "stream": true
+  "stream": true,
+  "conversationId": "12345678-1234-4234-8234-123456789abc",
+  "captureConversation": false
 }
 ```
 
 Cookies are omitted. The gateway verifies signature, expiry, issuer, client, access
 token type and `openid` scope. Only `https://davidwebstar.com` is allowed by CORS.
 An atomic DynamoDB transaction enforces 20 requests per user per UTC day, 100
-shared requests per UTC day and five per user per minute. Accepted attempts count
+shared requests per UTC day, five per user per minute and ten globally per minute.
+API Gateway additionally uses best-effort throttling at one request/second with
+burst three. Accepted attempts count
 even if subsequently blocked, busy, stopped or failed. These usage limits are not
-an AWS billing cap; rejected gateway requests still have a small invocation cost.
+an AWS billing cap; rejected edge requests still incur API Gateway costs.
 Payments and donor entitlements remain future work.
+
+`conversationId` is a browser-generated UUID; the server hashes it with the verified
+user subject for trace grouping. `captureConversation` must be a boolean, defaults
+false, and requires an ID when true. Consent enables LangWatch and private archive
+message/answer capture, marked unreviewed for training. Opt-out traces contain
+metadata only. Credentials and raw reasoning are never intentionally recorded.
 
 Both gateway and model validate roles and input limits: 32 KiB body, 2,000 Unicode
 code points per message, 6,000 total, and at most 21 alternating user/assistant
@@ -79,6 +91,14 @@ expandable section. `servedModel` must identify the actual pinned artifact;
 according to worker lifecycle evidence, not whether this is the visitor's first
 message. Send `unknown` if the gateway cannot determine this.
 
+After `meta`, an optional `sources` event contains up to three `{id,title,url}`
+records. IDs must be sequential and URLs HTTPS without embedded credentials.
+Search runs automatically for recognized factual questions. The server renders
+selected source excerpts, not free-form factual prose. Calculator answers bypass
+inference with `startState: "unknown"`, zero output tokens and null decode timing.
+`done.recording` carries `langwatch: sent|unavailable` and
+`archive: saved|off|unavailable`. The UI reports recording failures when opted in.
+
 Instead of `meta`, a blocked request sends one terminal `blocked` event with an
 enabled hardening receipt, `blocked: true` and `model_called: false`. It must not
 invoke inference. A gateway failure sends `event: error` with JSON data, then
@@ -101,8 +121,9 @@ or private model reasoning; log request IDs, decision codes and timing instead.
   its first and last generated token. Network chunks are not token counts.
 - **Total response time:** client submit to receipt of `done`.
 
-For Think, TTFT includes visible reasoning output; separately benchmark time to
-first answer token before making a user-facing speed claim. `decodeMs: null`,
+For Think, TTFT includes visible reasoning output; `firstAnswerMs` separately
+measures submission to first visible answer. Search selection is buffered until
+validated, so its first visible output follows model selection. `decodeMs: null`,
 fewer than two tokens, or a zero duration produces an unavailable decode rate.
 The performance panel shows the latest measured turn per selected model, keeps
 cold/warm separate, and leaves missing measurements blank. It is not an aggregate

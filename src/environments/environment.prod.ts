@@ -1,5 +1,5 @@
 export const environment = {
-  chatEndpoint: 'https://j2f2ggjaq67eyddygujxlqbglm0xezgc.lambda-url.eu-west-1.on.aws/v1/chat',
+  chatEndpoint: 'https://1m35ubpz0i.execute-api.eu-west-1.amazonaws.com/prod/v1/chat',
   fundingApiUrl: '', // Public service origin only. Never put payment or compute secrets here.
   production: true,
   api: {

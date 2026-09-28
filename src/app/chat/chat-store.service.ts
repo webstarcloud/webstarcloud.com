@@ -6,6 +6,8 @@ export interface ChatSession {
   modelId: ChatModelId;
   turns: ChatTurn[];
   draft: string;
+  conversationId: string;
+  captureConversation: boolean;
 }
 @Injectable({ providedIn: 'root' })
 export class ChatStore {
@@ -14,7 +16,7 @@ export class ChatStore {
   readonly activeId = signal<number | null>(null);
   private nextId = Date.now();
   newSession(modelId: ChatModelId): ChatSession {
-    const session = { id: ++this.nextId, title: 'New chat', modelId, turns: [], draft: '' };
+    const session = { id: ++this.nextId, title: 'New chat', modelId, turns: [], draft: '', conversationId: crypto.randomUUID(), captureConversation: false };
     this.sessions.update((items) => [session, ...items]);
     this.activeId.set(session.id);
     return session;

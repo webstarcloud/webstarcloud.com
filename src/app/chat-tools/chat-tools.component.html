@@ -88,6 +88,7 @@
       {{ measured.length === 1 ? 'response' : 'responses' }} measured. The server must identify cold
       or warm starts. Unknown state stays unclassified. TTFT includes the input check, network and
       any first reasoning output; it is not necessarily time to the final answer.
+      <ng-container *ngIf="latest?.firstAnswerMs != null">First answer text: {{ latest!.firstAnswerMs! / 1000 | number: '1.2-2' }}s.</ng-container>
     </p>
     <a class="article-link" routerLink="/research/performance" (click)="close()"
       >Read the first measurements ↗</a

@@ -42,6 +42,7 @@ export class GoblinHomeComponent implements OnDestroy {
   readonly tools = signal<'protection' | 'performance' | null>(null);
   readonly copied = signal<number | null>(null);
   draft = this.store.current()?.draft ?? '';
+  captureConversation = this.store.current()?.captureConversation ?? false;
   private controller?: AbortController;
   private copyTimer?: ReturnType<typeof setTimeout>;
   private scrollFrame?: number;
@@ -88,6 +89,7 @@ export class GoblinHomeComponent implements OnDestroy {
     this.store.activeId.set(null);
     this.turns.set([]);
     this.draft = '';
+    this.captureConversation = false;
     this.error.set('');
     this.modelMenu.set(false);
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
@@ -98,6 +100,7 @@ export class GoblinHomeComponent implements OnDestroy {
     this.store.activeId.set(session.id);
     this.turns.set(session.turns);
     this.draft = session.draft;
+    this.captureConversation = session.captureConversation;
     this.selectedId.set(session.modelId);
     this.error.set('');
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
@@ -171,6 +174,7 @@ export class GoblinHomeComponent implements OnDestroy {
         (event) => {
           if (controller.signal.aborted) return;
           if (event.type === 'ready') update({ guard: 'checked', servedModel: event.servedModel });
+          if (event.type === 'sources') update({ sources: event.sources });
           if (event.type === 'delta') {
             const current = this.turns().find((item) => item.id === turn.id)!;
             update({
@@ -188,8 +192,9 @@ export class GoblinHomeComponent implements OnDestroy {
               error:
                 'Input protection stopped this message before it reached the model. Edit your message to try again.',
             });
-          if (event.type === 'done') update({ status: 'complete', metrics: event.metrics, finishReason: event.finishReason });
+          if (event.type === 'done') update({ status: 'complete', metrics: event.metrics, finishReason: event.finishReason, recordingNotice: event.recordingNotice });
         },
+        { conversationId: this.store.current()!.conversationId, captureConversation: this.captureConversation },
       );
     } catch (error) {
       if (controller.signal.aborted) update({ status: 'stopped' });
@@ -236,7 +241,7 @@ export class GoblinHomeComponent implements OnDestroy {
       this.error.set('Clipboard access is unavailable. You can select and copy the answer.');
     }
   }
-  private persist() {
+  persist() {
     const session = this.store.current();
     if (session)
       this.store.save({
@@ -244,6 +249,7 @@ export class GoblinHomeComponent implements OnDestroy {
         modelId: this.selectedId(),
         turns: this.turns(),
         draft: this.draft,
+        captureConversation: this.captureConversation,
         title: this.turns()[0]?.prompt.slice(0, 48) || 'New chat',
       });
   }

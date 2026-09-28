@@ -43,7 +43,9 @@ export interface ChatMetrics {
   tokensPerSecond: number | null;
   totalMs: number;
   outputTokens: number;
+  firstAnswerMs?: number | null;
 }
+export interface ChatSource { id: number; title: string; url: string }
 export interface ChatTurn {
   id: number;
   prompt: string;
@@ -56,6 +58,8 @@ export interface ChatTurn {
   metrics?: ChatMetrics;
   servedModel?: string;
   finishReason?: string;
+  sources?: ChatSource[];
+  recordingNotice?: string;
 }
 export function decodeRate(outputTokens: number, decodeMs: number | null): number | null {
   return Number.isSafeInteger(outputTokens) &&

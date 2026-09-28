@@ -166,6 +166,10 @@
             <p>{{ turn.reasoning }}</p>
           </details>
           <p *ngIf="turn.answer" class="assistant-message">{{ turn.answer }}</p>
+          <nav *ngIf="turn.sources?.length" class="answer-sources" aria-label="Sources consulted">
+            <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}</a>
+          </nav>
+          <p *ngIf="turn.recordingNotice" class="conversation-note" role="status">{{ turn.recordingNotice }}</p>
           <p *ngIf="turn.status === 'waiting'" class="working" role="status">
             {{ turn.guard === 'checked' ? 'Starting the model… A first answer can take about a minute.' : 'Connecting & checking input…' }}
           </p>
@@ -260,6 +264,12 @@
         <p class="conversation-note" *ngIf="chat.configured">
           Small models can make big mistakes. Check important answers.
         </p>
+        <details class="research-recording" *ngIf="chat.configured">
+          <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
+          <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="busy()" /> Save this conversation for research and future model training</label>
+          <p>When enabled, messages and answers are saved in LangWatch and a private research archive. They need review before training. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
+          <p>Factual questions may be sent to <a href="https://brave.com/search/api/" target="_blank" rel="noopener noreferrer">Brave Search</a> automatically. Sources appear below the answer. Basic performance and error information is recorded without conversation text when research recording is off.</p>
+        </details>
       </div>
     </div>
     <footer class="chat-footer">

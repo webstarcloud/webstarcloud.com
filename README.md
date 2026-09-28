@@ -137,6 +137,17 @@ limits and the emergency stop. The local chat endpoint remains empty to avoid
 accidental production calls from development. The inspector is a separate backend
 operation and does not call the chat models.
 
+Chat now displays validated source links, first-answer latency and an optional
+research-recording notice. The collapsed privacy panel defaults conversation
+capture off; opting in sends messages/answers to LangWatch and a private archive
+for review before future training. Basic timing/error metadata is still recorded
+when capture is off. Turning capture off does not delete previous records.
+Factual questions may be sent automatically to Brave Search; the backend returns
+source excerpts, or an honest unavailable response when search cannot run.
+Arithmetic-shaped requests use a bounded server calculator. No provider secrets
+are shipped to the browser. Production uses Cognito-authenticated API Gateway
+REST streaming, with shared quotas enforced before model invocation.
+
 Dave's Brain shows a server-provided input-protection receipt with its answer or
 block response, including library version, policy, reasons, and whether the model
 was called. The profile page's **Try Dave's Brain's input protection** examples invoke
@@ -162,7 +173,7 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 Run `npm test -- --watch=false --browsers=ChromeHeadless` for the noninteractive
 suite, including route compatibility, chat placement and paused notices.
 
-Local verification on 28 September 2026: all 65 frontend tests passed in headless
+Local verification on 28 September 2026: all 74 frontend tests passed in headless
 watch mode, including stream framing, guard enforcement, timing provenance and
 conversation cancellation/history. The production Pages build passed with 25
 direct-route shells. Desktop and 390px chat, Research and About layouts were
