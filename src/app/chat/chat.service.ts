@@ -170,6 +170,10 @@ export class ChatService {
           } else if (frame.event === 'done') {
             const count = data['outputTokens'];
             const decodeMs = data['decodeMs'];
+            const input = data['inputTokens'];
+            const called = data['modelCalled'];
+            const modelMs = data['modelDurationMs'];
+            const bypass = data['modelBypass'];
             if (
               !checked ||
               !Number.isSafeInteger(count) ||
@@ -178,6 +182,13 @@ export class ChatService {
                 (typeof decodeMs !== 'number' || !Number.isFinite(decodeMs) || decodeMs < 0))
             )
               throw new Error('The response metrics are invalid.');
+            if ((input != null && (!Number.isSafeInteger(input) || (input as number) < 0)) ||
+                (called !== undefined && typeof called !== 'boolean') ||
+                (modelMs !== undefined && (typeof modelMs !== 'number' || !Number.isFinite(modelMs) || modelMs < 0 || modelMs > 120_000)) ||
+                (bypass != null && !['calculator', 'source_excerpts', 'site_profile'].includes(String(bypass))) ||
+                (bypass != null && called !== false) ||
+                (called === false && (count !== 0 || input !== 0 || modelMs !== 0)))
+              throw new Error('The model usage receipt could not be verified.');
             onEvent({
               type: 'done',
               finishReason: typeof data['finishReason'] === 'string' ? data['finishReason'] : undefined,
@@ -196,6 +207,10 @@ export class ChatService {
                   ? data['engineTokensPerSecond'] : decodeRate(count as number, decodeMs as number | null),
                 totalMs: performance.now() - started,
                 outputTokens: count as number,
+                ...(input !== undefined ? { inputTokens: input as number | null } : {}),
+                ...(called !== undefined ? { modelCalled: called as boolean } : {}),
+                ...(modelMs !== undefined ? { modelDurationMs: modelMs as number } : {}),
+                ...(bypass != null ? { modelBypass: bypass as 'calculator' | 'source_excerpts' | 'site_profile' } : {}),
               },
             });
             return;

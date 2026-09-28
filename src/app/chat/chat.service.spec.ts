@@ -206,6 +206,29 @@ describe('Protected chat stream', () => {
     );
     await expectAsync(run([])).toBeRejectedWithError(/before the answer was complete/);
   });
+  it('accepts explicit zero-token bypass receipts and actual model usage', async () => {
+    for (const usage of [
+      {inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0, modelBypass: 'calculator'},
+      {inputTokens: 100, outputTokens: 20, modelCalled: true, modelDurationMs: 1500},
+    ]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('done', {...usage, decodeMs: null})));
+      const events: ChatEvent[] = [];
+      await run(events);
+      const done = events[1];
+      if (done.type === 'done') expect(done.metrics).toEqual(jasmine.objectContaining(usage));
+      else fail('missing usage receipt');
+    }
+  });
+  it('rejects contradictory or invalid savings receipts', async () => {
+    for (const patch of [{outputTokens: 1}, {inputTokens: null}, {modelDurationMs: 1},
+      {modelCalled: true}, {modelBypass: 'invented'}, {inputTokens: -1}, {modelDurationMs: -1}]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('done', {
+        inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0,
+        modelBypass: 'calculator', decodeMs: null, ...patch,
+      })));
+      await expectAsync(run([])).toBeRejectedWithError(/usage receipt/);
+    }
+  });
   it('does not count chunks as tokens or divide by a zero decode duration', () => {
     expect(decodeRate(1, 100)).toBeNull();
     expect(decodeRate(10, 0)).toBeNull();

@@ -147,6 +147,32 @@ They are not p50/p95 or a latency guarantee; they exclude the new gateway/browse
 
 ## Checks before connecting
 
+### Usage and compute comparison
+
+Optional `done` fields: `inputTokens` (actual tokenizer count, or null when
+unavailable), `modelCalled` (boolean), `modelDurationMs` (model execution only,
+excluding search and trace delivery), and `modelBypass` (`calculator`,
+`source_excerpts`, or `site_profile`). A bypass requires `modelCalled: false`
+and zero input/output tokens and model duration. Failed lookups may skip the
+model but do not carry a successful bypass reason or earn a savings badge.
+Old servers without these fields still render; missing counts are not guessed.
+
+The footer shows actual input + output tokens and a successful model call
+avoided. A dollar estimate appears only after a measured warm run of the exact
+same model alias and artifact in this conversation. It compares each bypass to
+the median warm model duration, multiplied by 4 GB and $0.0000133334/GB-second
+(eu-west-1 ARM tier-one list rate, checked 2026-09-28). Cold and incomplete turns
+are excluded. Later samples update estimates; the Performance panel totals only
+the selected alias. These are reference-compute estimates, not measured savings,
+billing credits, or hypothetical token counts. Other request costs remain, and
+questions differ in required work. Recheck `chat-savings.ts` whenever the model
+memory size, region, architecture, or pricing changes.
+
+Price source: [AWS regional price list](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/eu-west-1/index.json),
+SKU `KXNSA7NBRHBHXXPS`, usage type `EU-Lambda-GB-Second-ARM`, first tier.
+
+### Release checks
+
 Run the frontend tests, then exercise the actual gateway with ordinary, blocked,
 multi-turn and cancelled inputs. Confirm that blocked inputs never reach the
 model, the served revision matches the alias, deltas render immediately, and

@@ -4,6 +4,7 @@ import { ChatService, ChatEvent } from '../chat/chat.service';
 import { GoblinHomeComponent } from './goblin-home.component';
 import { AuthService } from '../auth/auth.service';
 import { of } from 'rxjs';
+import { CHAT_MODELS, ChatTurn } from '../chat/chat.models';
 
 describe('Chat homepage', () => {
   let fixture: ComponentFixture<GoblinHomeComponent>;
@@ -106,5 +107,28 @@ describe('Chat homepage', () => {
     expect(page.turns()).toEqual([]);
     expect(service.stream).not.toHaveBeenCalled();
     expect(page.error()).toContain('Sign in');
+  });
+  it('shows real usage and waits for a matching warm baseline before displaying dollars', () => {
+    const page = fixture.componentInstance;
+    const skipped: ChatTurn = {
+      id: 1, prompt: 'What is 2 + 2?', answer: '4', reasoning: '', model: CHAT_MODELS[0],
+      status: 'complete', guard: 'checked', servedModel: 'model-v1',
+      metrics: { startState: 'unknown', ttftMs: 20, tokensPerSecond: null, totalMs: 40,
+        inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0, modelBypass: 'calculator' },
+    };
+    page.turns.set([skipped]);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.saving-badge')?.textContent).toContain('Model call avoided');
+    expect(el.textContent).toContain('0 tokens');
+    page.turns.set([skipped, { ...skipped, id: 2, metrics: {
+      ...skipped.metrics!, startState: 'warm', inputTokens: 100, outputTokens: 50,
+      modelCalled: true, modelDurationMs: 4000, modelBypass: undefined,
+    } }]);
+    fixture.detectChanges();
+    expect(el.querySelectorAll('.saving-badge').length).toBe(1);
+    expect(el.querySelector('.saving-badge')?.textContent).toContain('−$0.0002 est.');
+    expect(el.querySelector('.saving-badge')?.getAttribute('title')).toContain('not a billing credit');
+    expect(el.textContent).toContain('150 tokens');
   });
 });

@@ -324,6 +324,14 @@ svg {
   padding: 5px 0;
   font-size: inherit;
 }
+.turn-actions .saving-badge {
+  color: #b9dca4;
+  border: 1px solid #405536;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #20291c;
+  cursor: help;
+}
 .working,
 .turn-status {
   font-size: 0.8rem;

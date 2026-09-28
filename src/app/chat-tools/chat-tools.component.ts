@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatModelId, ChatTurn } from '../chat/chat.models';
+import { COMPUTE_COMPARISON, inferenceSaving, savingLabel } from '../chat/chat-savings';
 import {
   InputHardeningService,
   InspectionResult,
@@ -44,6 +45,15 @@ export class ChatToolsComponent implements OnDestroy, AfterViewInit {
   readonly error = signal('');
   text = 'Hello, curious world.';
   readonly visible = visibleCharacters;
+  readonly comparison = COMPUTE_COMPARISON;
+  readonly savingLabel = savingLabel;
+  get savings() {
+    const avoided = this.measured.filter(turn => turn.metrics?.modelCalled === false && turn.metrics.modelBypass);
+    const estimates = avoided.map(turn => inferenceSaving(turn, this.turns)).filter(value => value !== null);
+    return { calls: avoided.length, estimatedCalls: estimates.length,
+      usd: estimates.reduce((sum, value) => sum + value!.usd, 0),
+      outputTokens: this.measured.reduce((sum, turn) => sum + turn.metrics!.outputTokens, 0) };
+  }
   get measured() {
     return this.turns.filter(
       (turn) => turn.model.id === this.modelId && turn.status === 'complete' && turn.metrics,

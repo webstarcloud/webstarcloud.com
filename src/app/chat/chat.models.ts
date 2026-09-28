@@ -43,6 +43,10 @@ export interface ChatMetrics {
   tokensPerSecond: number | null;
   totalMs: number;
   outputTokens: number;
+  inputTokens?: number | null;
+  modelCalled?: boolean;
+  modelDurationMs?: number;
+  modelBypass?: 'calculator' | 'source_excerpts' | 'site_profile';
   firstAnswerMs?: number | null;
 }
 export interface ChatSource { id: number; title: string; url: string; kind?: 'indexed' | 'web'; indexedAt?: string }

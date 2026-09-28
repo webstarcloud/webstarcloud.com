@@ -17,6 +17,7 @@ import { ChatSession, ChatStore } from '../chat/chat-store.service';
 import { ChatToolsComponent } from '../chat-tools/chat-tools.component';
 import { AuthService } from '../auth/auth.service';
 import { conversationContext, restoreLoginDraft, saveLoginDraft } from '../chat/chat-context';
+import { inferenceSaving, savingDescription, savingLabel, usageLabel } from '../chat/chat-savings';
 
 @Component({
   selector: 'app-goblin-home',
@@ -41,6 +42,14 @@ export class GoblinHomeComponent implements OnDestroy {
   readonly sidebarOpen = signal(window.innerWidth > 760);
   readonly tools = signal<'protection' | 'performance' | null>(null);
   readonly copied = signal<number | null>(null);
+  readonly usageLabel = usageLabel;
+  savingsLabel(turn: ChatTurn): string {
+    const saving = inferenceSaving(turn, this.turns());
+    return saving ? savingLabel(saving.usd) : 'Model call avoided';
+  }
+  savingsDescription(turn: ChatTurn): string {
+    return savingDescription(inferenceSaving(turn, this.turns()));
+  }
   draft = this.store.current()?.draft ?? '';
   captureConversation = this.store.current()?.captureConversation ?? false;
   private controller?: AbortController;
