@@ -21,7 +21,7 @@ export const CHAT_ACCESS_TOKEN = new InjectionToken<() => Promise<string>>('Chat
   },
 });
 export type ChatEvent =
-  | { type: 'ready'; servedModel: string }
+  | { type: 'ready'; servedModel: string; contextNotice?: string }
   | { type: 'delta'; text: string; channel: 'answer' | 'reasoning' }
   | { type: 'blocked' }
   | { type: 'sources'; sources: ChatSource[] }
@@ -119,9 +119,14 @@ export class ChatService {
                 'The model identity or input protection receipt could not be verified.',
               );
             }
+            const dropped = asRecord(data['hardening'])['history_pairs_dropped'] ?? 0;
+            if (!Number.isSafeInteger(dropped) || (dropped as number) < 0 || (dropped as number) > 10)
+              throw new Error('The context protection receipt could not be verified.');
             checked = true;
             state = data['startState'] as ChatMetrics['startState'];
-            onEvent({ type: 'ready', servedModel: data['servedModel'] });
+            onEvent({ type: 'ready', servedModel: data['servedModel'],
+              ...(dropped ? { contextNotice: 'Some earlier context was left out because input protection flagged a previous reply.' } : {}),
+            });
           } else if (frame.event === 'sources') {
             if (!checked || !Array.isArray(data['sources']) || data['sources'].length > 3)
               throw new Error('The search sources are invalid.');

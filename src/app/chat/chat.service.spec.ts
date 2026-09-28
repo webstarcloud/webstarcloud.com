@@ -163,6 +163,27 @@ describe('Protected chat stream', () => {
     await run(events);
     expect(events).toEqual([{ type: 'blocked' }]);
   });
+  it('explains when flagged assistant history was removed without blocking the new question', async () => {
+    request.and.resolveTo(response(
+      frame('meta', { ...meta, hardening: { ...meta.hardening, changed: true, history_pairs_dropped: 1 } }) +
+      frame('delta', { channel: 'answer', text: 'A new answer' }) +
+      frame('done', { outputTokens: 0, decodeMs: null }),
+    ));
+    const events: ChatEvent[] = [];
+    await run(events);
+    const ready = events[0];
+    if (ready.type === 'ready') expect(ready.contextNotice).toContain('previous reply');
+    else fail('missing protection receipt');
+    expect(events.some(event => event.type === 'blocked')).toBeFalse();
+  });
+  it('rejects invalid history-removal counts', async () => {
+    for (const count of [-1, 11, '1', 0.5]) {
+      request.and.resolveTo(response(frame('meta', { ...meta,
+        hardening: { ...meta.hardening, history_pairs_dropped: count },
+      })));
+      await expectAsync(run([])).toBeRejectedWithError(/context protection receipt/);
+    }
+  });
   it('keeps unknown cold/warm state unclassified and missing decode timings unestimated', async () => {
     request.and.resolveTo(
       response(

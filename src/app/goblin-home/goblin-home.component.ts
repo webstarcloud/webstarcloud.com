@@ -173,7 +173,7 @@ export class GoblinHomeComponent implements OnDestroy {
         controller.signal,
         (event) => {
           if (controller.signal.aborted) return;
-          if (event.type === 'ready') update({ guard: 'checked', servedModel: event.servedModel });
+          if (event.type === 'ready') update({ guard: 'checked', servedModel: event.servedModel, contextNotice: event.contextNotice });
           if (event.type === 'sources') update({ sources: event.sources });
           if (event.type === 'delta') {
             const current = this.turns().find((item) => item.id === turn.id)!;

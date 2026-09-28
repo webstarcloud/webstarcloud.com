@@ -60,6 +60,7 @@ export interface ChatTurn {
   finishReason?: string;
   sources?: ChatSource[];
   recordingNotice?: string;
+  contextNotice?: string;
 }
 export function decodeRate(outputTokens: number, decodeMs: number | null): number | null {
   return Number.isSafeInteger(outputTokens) &&

@@ -165,6 +165,7 @@
             <summary>Model reasoning</summary>
             <p>{{ turn.reasoning }}</p>
           </details>
+          <p *ngIf="turn.contextNotice" class="conversation-note" role="status">{{ turn.contextNotice }}</p>
           <p *ngIf="turn.answer" class="assistant-message">{{ turn.answer }}</p>
           <nav *ngIf="turn.sources?.length" class="answer-sources" aria-label="Sources consulted">
             <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}<small *ngIf="source.kind">{{ source.kind === 'indexed' ? 'Trusted index' : 'Web search' }}<ng-container *ngIf="source.indexedAt"> · {{ source.indexedAt | date:'d MMM' }}</ng-container></small></a>

@@ -66,6 +66,11 @@ from the checked/sanitized content. It checks the full relevant
 input boundary, including supplied history. Never trust a client-reported guard
 decision. A receipt documents server enforcement; client receipt validation alone
 does not secure an endpoint or prevent arbitrary prompt injection.
+User input keeps strict enforcement. A flagged assistant history message is
+removed along with the context prefix through that exchange; it is never treated
+as trusted because the browser labels it `assistant`. Optional
+`hardening.history_pairs_dropped` (integer 0..10) makes the UI explain lost context
+without blaming the current question. Later safe exchanges remain available.
 
 ## Stream
 
@@ -75,7 +80,7 @@ allowed request with `meta`, emitted after guarding and before model invocation:
 
 ```text
 event: meta
-data: {"model":"gobwen-flash","servedModel":"Qwen/Qwen3.5-0.8B@PINNED_REVISION","startState":"warm","hardening":{"enabled":true,"changed":false,"blocked":false,"model_called":false,"library_version":"3.0.0","policy":"balanced_chat","action":"allow","reason_codes":[]}}
+data: {"model":"gobwen-flash","servedModel":"Qwen/Qwen3.5-0.8B@PINNED_REVISION","startState":"warm","hardening":{"enabled":true,"changed":false,"blocked":false,"model_called":false,"library_version":"3.0.0","policy":"strict_exec","action":"allow","reason_codes":[]}}
 
 event: delta
 data: {"channel":"answer","text":"Hello!"}
@@ -97,7 +102,7 @@ Optional `kind` is `indexed` or `web`; indexed sources must include a valid
 `indexedAt` date, shown as provenance in the UI. A selected-page index is tried
 before the private SearXNG service's configured whole-web engines.
 Search runs automatically for recognized factual questions. The server renders
-selected source excerpts, not free-form factual prose. Calculator answers bypass
+selected source excerpts, not free-form factual prose. Single-source and calculator answers bypass
 inference with `startState: "unknown"`, zero output tokens and null decode timing.
 `done.recording` carries `langwatch: sent|unavailable` and
 `archive: saved|off|unavailable`. The UI reports recording failures when opted in.
