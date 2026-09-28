@@ -268,7 +268,7 @@
           <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
           <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="busy()" /> Save this conversation for research and future model training</label>
           <p>When enabled, messages and answers are saved in LangWatch and a private research archive. They need review before training. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
-          <p>Factual questions may be sent to <a href="https://brave.com/search/api/" target="_blank" rel="noopener noreferrer">Brave Search</a> automatically. Sources appear below the answer. Basic performance and error information is recorded without conversation text when research recording is off.</p>
+          <p>Automatic source lookup is being configured. Sources will appear below verified answers. Basic performance and error information is recorded without conversation text when research recording is off.</p>
         </details>
       </div>
     </div>
