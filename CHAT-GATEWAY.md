@@ -112,6 +112,11 @@ enabled hardening receipt, `blocked: true` and `model_called: false`. It must no
 invoke inference. A gateway failure sends `event: error` with JSON data, then
 closes. The UI deliberately shows a generic error instead of server internals.
 
+An output-loop failure uses `error.code: "repetition"`. The UI explains that
+generation stopped and the partial answer may be wrong. It never marks that
+turn complete or includes it in subsequent model context. Other error codes
+keep the generic message; arbitrary server error text is never displayed.
+
 Only `done` completes a response. Unexpected EOF marks it incomplete. Stop,
 navigation away and a 150-second request deadline cancel the client connection.
 Lambda can keep running after a disconnect: the generation deadline is 75 seconds,

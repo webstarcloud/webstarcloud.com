@@ -215,6 +215,8 @@ export class ChatService {
             });
             return;
           } else if (frame.event === 'error') {
+            if (data['code'] === 'repetition')
+              throw new Error('The model got stuck repeating, so generation was stopped. This partial answer may be wrong and won’t be used in your next message.');
             throw new Error('The model stopped unexpectedly. You can try the request again.');
           } else {
             throw new Error('The chat service sent an unsupported event.');

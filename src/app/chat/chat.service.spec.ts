@@ -54,6 +54,14 @@ describe('Protected chat stream', () => {
     await expectAsync(run([])).toBeRejectedWithError(/hasn’t been sent/);
     expect(request).not.toHaveBeenCalled();
   });
+  it('explains a detected output loop and never completes the partial answer', async () => {
+    request.and.resolveTo(response(frame('meta', meta) +
+      frame('delta', { text: 'Partial answer', channel: 'answer' }) +
+      frame('error', { code: 'repetition', message: 'private detail must stay hidden' })));
+    const events: ChatEvent[] = [];
+    await expectAsync(run(events)).toBeRejectedWithError(/got stuck repeating/);
+    expect(events.some(event => event.type === 'done')).toBeFalse();
+  });
   it('assembles split UTF-8/SSE events and reports actual token metrics', async () => {
     request.and.resolveTo(
       response(

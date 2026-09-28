@@ -15,6 +15,13 @@ describe('Small model conversation context', () => {
     expect(conversationContext([turn('q', 'x'.repeat(2001))], 'hi', 'gobwen-flash').length).toBe(1);
     expect(conversationContext([turn('q', 'a')], 'hi', 'goblin')).toEqual([{ role: 'user', content: 'hi' }]);
   });
+  it('excludes a failed repetitive answer from subsequent model context', () => {
+    const failed = { ...turn('question', 'Repeated partial answer'), status: 'error' as const };
+    expect(conversationContext([turn('earlier', 'Safe answer'), failed], 'Continue', 'gobwen-flash')).toEqual([
+      { role: 'user', content: 'earlier' }, { role: 'assistant', content: 'Safe answer' },
+      { role: 'user', content: 'Continue' },
+    ]);
+  });
   it('restores the sign-in draft once and discards expired or corrupt values', () => {
     const values = new Map<string, string>();
     const storage = { setItem: (key: string, value: string) => values.set(key, value), getItem: (key: string) => values.get(key) ?? null, removeItem: (key: string) => values.delete(key) };
