@@ -142,8 +142,13 @@ research-recording notice. The collapsed privacy panel defaults conversation
 capture off; opting in sends messages/answers to LangWatch and a private archive
 for review before future training. Basic timing/error metadata is still recorded
 when capture is off. Turning capture off does not delete previous records.
-Automatic source lookup is awaiting configuration of an owner-selected source
-list. The backend returns an honest unavailable response when search cannot run.
+Automatic source lookup checks a configured trusted-page index first, then uses
+a private SearXNG Lambda with Google, Bing and DuckDuckGo. Sources show whether
+they came from the index or web search, including snapshot dates. The backend
+returns an honest unavailable response when it cannot retrieve evidence. Index
+refresh is manual; snapshots expire after seven days. The research architecture
+page links the source archive for the AGPL search service. Its source-page and
+engine lists live in `../davesbrain/model-lambda/search/`.
 Arithmetic-shaped requests use a bounded server calculator. No provider secrets
 are shipped to the browser. Production uses Cognito-authenticated API Gateway
 REST streaming, with shared quotas enforced before model invocation.

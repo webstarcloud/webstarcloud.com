@@ -167,7 +167,7 @@
           </details>
           <p *ngIf="turn.answer" class="assistant-message">{{ turn.answer }}</p>
           <nav *ngIf="turn.sources?.length" class="answer-sources" aria-label="Sources consulted">
-            <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}</a>
+            <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}<small *ngIf="source.kind">{{ source.kind === 'indexed' ? 'Trusted index' : 'Web search' }}<ng-container *ngIf="source.indexedAt"> · {{ source.indexedAt | date:'d MMM' }}</ng-container></small></a>
           </nav>
           <p *ngIf="turn.recordingNotice" class="conversation-note" role="status">{{ turn.recordingNotice }}</p>
           <p *ngIf="turn.status === 'waiting'" class="working" role="status">
@@ -268,7 +268,7 @@
           <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
           <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="busy()" /> Save this conversation for research and future model training</label>
           <p>When enabled, messages and answers are saved in LangWatch and a private research archive. They need review before training. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
-          <p>Automatic source lookup is being configured. Sources will appear below verified answers. Basic performance and error information is recorded without conversation text when research recording is off.</p>
+          <p>Gobwen checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
         </details>
       </div>
     </div>

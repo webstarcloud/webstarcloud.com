@@ -93,6 +93,9 @@ message. Send `unknown` if the gateway cannot determine this.
 
 After `meta`, an optional `sources` event contains up to three `{id,title,url}`
 records. IDs must be sequential and URLs HTTPS without embedded credentials.
+Optional `kind` is `indexed` or `web`; indexed sources must include a valid
+`indexedAt` date, shown as provenance in the UI. A selected-page index is tried
+before the private SearXNG service's configured whole-web engines.
 Search runs automatically for recognized factual questions. The server renders
 selected source excerpts, not free-form factual prose. Calculator answers bypass
 inference with `startState: "unknown"`, zero output tokens and null decode timing.

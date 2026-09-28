@@ -133,7 +133,16 @@ export class ChatService {
               const url = new URL(source['url']);
               if (url.protocol !== 'https:' || url.username || url.password)
                 throw new Error('The search source URL is invalid.');
-              return { id: index + 1, title: source['title'], url: url.href };
+              const kind = source['kind'];
+              const indexedAt = source['indexedAt'];
+              if (kind !== undefined && kind !== 'indexed' && kind !== 'web')
+                throw new Error('The search source type is invalid.');
+              if (kind === 'indexed' && (typeof indexedAt !== 'string' || indexedAt.length > 40 || !Number.isFinite(Date.parse(indexedAt))))
+                throw new Error('The indexed source date is invalid.');
+              return { id: index + 1, title: source['title'], url: url.href,
+                ...(kind ? { kind: kind as 'indexed' | 'web' } : {}),
+                ...(kind === 'indexed' ? { indexedAt: indexedAt as string } : {}),
+              };
             });
             onEvent({ type: 'sources', sources });
           } else if (frame.event === 'delta') {

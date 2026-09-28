@@ -91,6 +91,18 @@ describe('Protected chat stream', () => {
     }) + done));
     await expectAsync(run([])).toBeRejectedWithError(/URL/);
   });
+  it('preserves indexed provenance and rejects invalid snapshot metadata', async () => {
+    const done = frame('done', { outputTokens: 0, decodeMs: null });
+    const source = { id: 1, title: 'Docs', url: 'https://docs.example/', kind: 'indexed' as const, indexedAt: '2026-09-28T12:00:00Z' };
+    request.and.resolveTo(response(frame('meta', meta) + frame('sources', { sources: [source] }) + done));
+    const events: ChatEvent[] = [];
+    await run(events);
+    expect(events[1]).toEqual({ type: 'sources', sources: [source] });
+    for (const change of [{ indexedAt: 'not-a-date' }, { kind: 'invented' }]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('sources', { sources: [{ ...source, ...change }] }) + done));
+      await expectAsync(run([])).toBeRejected();
+    }
+  });
   it('sends explicit recording choice and reports a failed save honestly', async () => {
     request.and.resolveTo(response(frame('meta', meta) + frame('delta', { text: 'Hi', channel: 'answer' }) +
       frame('done', { outputTokens: 1, decodeMs: null, recording: { archive: 'unavailable', langwatch: 'unavailable' } })));

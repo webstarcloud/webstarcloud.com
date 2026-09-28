@@ -45,7 +45,7 @@ export interface ChatMetrics {
   outputTokens: number;
   firstAnswerMs?: number | null;
 }
-export interface ChatSource { id: number; title: string; url: string }
+export interface ChatSource { id: number; title: string; url: string; kind?: 'indexed' | 'web'; indexedAt?: string }
 export interface ChatTurn {
   id: number;
   prompt: string;
