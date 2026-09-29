@@ -453,9 +453,9 @@
 
 /* The research homepage has its own lightweight layout; the existing interactive
    stage is retained on About and the earlier demo routes. */
-.stage-shell--lab-home { background: #141715; }
-.stage-shell--lab-home::before { background: radial-gradient(ellipse at 85% 12%, rgba(107, 146, 71, .045), transparent 55%); }
-.stage-shell--lab-home .stage-nav { background: rgba(20, 23, 21, .92); }
+.stage-shell--lab-home { background: #141619; }
+.stage-shell--lab-home::before { background: radial-gradient(ellipse at 85% 12%, rgba(160, 185, 215, .025), transparent 55%); }
+.stage-shell--lab-home .stage-nav { background: rgba(20, 22, 25, .92); }
 .stage-surface--lab-home {
     position: relative;
     inset: auto;
@@ -494,7 +494,7 @@
 
 .stage-surface--chat { padding:0; }
 .stage-shell--lab-home .stage-links { border:0;background:none;gap:12px; }
-.stage-shell--lab-home .stage-links a { text-transform:none;font-weight:400;color:#9ca791; }
-.stage-shell--lab-home .stage-links a.is-active,.stage-shell--lab-home .stage-links a:hover { background:#baf7a410;color:#d5eac7; }
-.stage-shell--lab-home .stage-contact { text-transform:none;background:none;border-color:#a8c09030;color:#bfccaF;font-weight:400; }
+.stage-shell--lab-home .stage-links a { text-transform:none;font-weight:400;color:#a0a4aa; }
+.stage-shell--lab-home .stage-links a.is-active,.stage-shell--lab-home .stage-links a:hover { background:#b3c9e510;color:#dce2ea; }
+.stage-shell--lab-home .stage-contact { text-transform:none;background:none;border-color:#b3c9e530;color:#c4ccd6;font-weight:400; }
 .stage-shell--lab-home .stage-brand__copy strong { font-weight:400;font-size:.8rem; }

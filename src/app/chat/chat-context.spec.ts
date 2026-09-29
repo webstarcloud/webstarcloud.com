@@ -26,7 +26,7 @@ describe('Small model conversation context', () => {
     const values = new Map<string, string>();
     const storage = { setItem: (key: string, value: string) => values.set(key, value), getItem: (key: string) => values.get(key) ?? null, removeItem: (key: string) => values.delete(key) };
     expect(saveLoginDraft('Keep me', 'goblin', storage)).toBeTrue();
-    expect(restoreLoginDraft(storage)).toEqual({ draft: 'Keep me', model: 'goblin' });
+    expect(restoreLoginDraft(storage)).toEqual({ draft: 'Keep me', model: 'gobwen-flash' });
     expect(restoreLoginDraft(storage)).toBeNull();
     values.set('gobwen.login-draft', '{broken');
     expect(restoreLoginDraft(storage)).toBeNull();

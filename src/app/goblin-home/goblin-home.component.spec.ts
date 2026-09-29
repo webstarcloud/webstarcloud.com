@@ -31,17 +31,50 @@ describe('Chat homepage', () => {
     expect(el.querySelector('app-goblin-chamber')).toBeNull();
     expect(el.textContent).not.toContain('GOBLIN LAB');
   });
-  it('selects Goblin, prepares prompts and preserves a draft when the endpoint is absent', async () => {
+  it('selects Think and preserves a draft when the endpoint is absent', async () => {
     const page = fixture.componentInstance;
-    page.selectModel('goblin');
+    page.selectModel('gobwen-think');
     page.fillPrompt('A strange little story');
     await page.send();
     fixture.detectChanges();
-    expect(page.model.experimental).toBeTrue();
+    expect(page.model.mode).toBe('Think');
     expect(page.draft).toBe('A strange little story');
     expect(page.error()).toContain('hasn’t been sent');
     expect(service.stream).not.toHaveBeenCalled();
     expect(page.turns()).toEqual([]);
+  });
+  it('keeps Thinking visible through metadata, sources and reasoning, then streams the first answer immediately', async () => {
+    service.configured = true;
+    let emit!: (event: ChatEvent) => void;
+    let finish!: () => void;
+    service.stream.and.callFake((_model, _messages, _signal, onEvent) => {
+      emit = onEvent;
+      return new Promise<void>(resolve => finish = resolve);
+    });
+    const page = fixture.componentInstance;
+    const el = fixture.nativeElement as HTMLElement;
+    page.draft = 'Who is the king?';
+    const sending = page.send();
+    fixture.detectChanges();
+    expect(el.querySelector('.working')?.textContent).toContain('Thinking');
+    emit({ type: 'ready', servedModel: 'Qwen' });
+    emit({ type: 'sources', sources: [{ id: 1, title: 'Royal House', url: 'https://www.royal-house.nl/' }] });
+    emit({ type: 'delta', channel: 'reasoning', text: 'Read the evidence.' });
+    fixture.detectChanges();
+    expect(el.querySelector('.working')).not.toBeNull();
+    expect(el.querySelector('.answer-sources')).toBeNull();
+    emit({ type: 'delta', channel: 'answer', text: 'Willem' });
+    fixture.detectChanges();
+    expect(el.querySelector('.working')).toBeNull();
+    expect(el.querySelector('.assistant-message.is-streaming')?.textContent).toBe('Willem');
+    expect(el.querySelector('.answer-sources')).not.toBeNull();
+    emit({ type: 'delta', channel: 'answer', text: '-Alexander. [1]' });
+    emit({ type: 'done', metrics: { startState: 'warm', ttftMs: 10, totalMs: 20, outputTokens: 5, tokensPerSecond: 30 } });
+    finish();
+    await sending;
+    fixture.detectChanges();
+    expect(el.querySelector('.assistant-message')?.textContent).toBe('Willem-Alexander. [1]');
+    expect(el.querySelector('.is-streaming')).toBeNull();
   });
   it('streams real service events into a conversation and keeps completed turns in the next request', async () => {
     service.configured = true;

@@ -1,12 +1,10 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BehaviorSubject } from 'rxjs';
 import { GoblinChamberComponent } from './goblin-chamber.component';
 import { FIRST_RUN, FundingService, FundingState } from './funding.service';
-import { ParticlesModule } from '../particles/particles.module';
 
-describe('GoblinChamberComponent', () => {
+describe('Research funding card', () => {
   let fixture: ComponentFixture<GoblinChamberComponent>;
   let states: BehaviorSubject<FundingState>;
   beforeEach(async () => {
@@ -14,7 +12,7 @@ describe('GoblinChamberComponent', () => {
     await TestBed.configureTestingModule({
       imports:[GoblinChamberComponent, RouterTestingModule],
       providers:[{provide:FundingService, useValue:{state$:states}}]
-    }).overrideComponent(GoblinChamberComponent, {remove:{imports:[ParticlesModule]}, add:{schemas:[NO_ERRORS_SCHEMA]}}).compileComponents();
+    }).compileComponents();
     fixture = TestBed.createComponent(GoblinChamberComponent); fixture.detectChanges();
   });
   afterEach(() => fixture.destroy());
@@ -29,21 +27,16 @@ describe('GoblinChamberComponent', () => {
   it('fills from verified amounts and closes checkout at the target; failed reads hide the balance', () => {
     const element = fixture.nativeElement as HTMLElement;
     states.next(funded(1800, 'collecting')); fixture.detectChanges();
-    expect(element.querySelector<HTMLElement>('.fluid--front')?.style.height).toBe('25%');
+    expect(element.querySelector<HTMLProgressElement>('progress')?.value).toBe(1800);
+    expect(element.querySelector('.funding-percent')?.textContent).toBe('25%');
     expect(element.querySelector('a[href^="https://buy.stripe.com"]')).not.toBeNull();
     states.next(funded(7500, 'funded')); fixture.detectChanges();
-    expect(element.querySelector<HTMLElement>('.fluid--front')?.style.height).toBe('100%');
+    expect(element.querySelector('.funding-percent')?.textContent).toBe('100%');
     expect(element.textContent).toContain('$75');
     expect(element.querySelector('a[href^="https://buy.stripe.com"]')).toBeNull();
     states.next({kind:'unavailable'}); fixture.detectChanges();
     expect(element.querySelector('progress')).toBeNull();
-    expect(element.querySelector<HTMLElement>('.fluid--front')?.style.height).toBe('0%');
+    expect(element.querySelector('.funding-percent')).toBeNull();
     expect(element.textContent).toContain('Funding status unavailable');
-  });
-  it('exposes a working, pressed-state animation toggle', () => {
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    const before = fixture.componentInstance.paused(); button.click(); fixture.detectChanges();
-    expect(fixture.componentInstance.paused()).toBe(!before);
-    expect(button.getAttribute('aria-pressed')).toBe(String(!before));
   });
 });

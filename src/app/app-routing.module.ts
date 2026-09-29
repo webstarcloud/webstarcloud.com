@@ -14,7 +14,7 @@ export const appRoutes: Routes = [
   {
     path: '',
     component: GoblinHomeComponent,
-    title: 'Gobwen | Small models. Open curiosity.',
+    title: 'David Webster | Intelligence research',
     pathMatch: 'full'
   },
   { path: 'about', component: AboutPageComponent, title: 'About & support | David Webster' },

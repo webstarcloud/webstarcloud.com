@@ -9,7 +9,7 @@ import { StageMode } from './particles/particles.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnDestroy {
-  readonly title = 'Gobwen | Small models. Open curiosity.';
+  readonly title = 'David Webster | Intelligence research';
   authPanelOpen = false;
   responseOpen = false;
   stageMode: StageMode = 'home';

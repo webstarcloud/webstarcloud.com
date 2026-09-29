@@ -73,13 +73,7 @@ export class GoblinHomeComponent implements OnDestroy {
     return this.models.find((item) => item.id === this.selectedId())!;
   }
   get samples(): string[] {
-    return this.model.experimental
-      ? [
-          'Invent a very peculiar word',
-          'Continue: In the goblin workshop,',
-          'Write a tiny goblin story',
-        ]
-      : ['Explain something simply', 'Help me solve a problem', 'Make something with code'];
+    return ['Explain something simply', 'Help me solve a problem', 'Make something with code'];
   }
   @HostListener('document:keydown.escape') escape() {
     this.modelMenu.set(false);
@@ -87,7 +81,7 @@ export class GoblinHomeComponent implements OnDestroy {
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
   }
   selectModel(id: ChatModelId) {
-    if (this.busy()) return;
+    if (this.busy() || !this.models.some(model => model.id === id)) return;
     this.selectedId.set(id);
     this.modelMenu.set(false);
     this.persist();

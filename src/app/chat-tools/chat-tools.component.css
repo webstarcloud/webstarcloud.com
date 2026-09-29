@@ -9,14 +9,14 @@ dialog {
   max-height: calc(100dvh - 40px);
   overflow: auto;
   padding: 28px;
-  border: 1px solid #b9d39f33;
+  border: 1px solid #b3c9e533;
   border-radius: 18px;
-  background: #1a201a;
-  color: #e2eadb;
+  background: #1a1c1f;
+  color: #e0e2e5;
   box-shadow: 0 25px 90px #0009;
 }
 dialog::backdrop {
-  background: #070b08ae;
+  background: #07090cae;
   backdrop-filter: blur(8px);
 }
 header {
@@ -29,11 +29,11 @@ header {
 header > span {
   font: 0.55rem/1.5 var(--accent-font);
   letter-spacing: 0.1em;
-  color: #97ab89;
+  color: #97999c;
 }
 header > button {
   font: 1.5rem/1 Arial;
-  color: #9cac91;
+  color: #9c9ea1;
   border: 0;
   background: none;
   padding: 4px 8px;
@@ -47,35 +47,35 @@ h2 {
 p {
   font-size: 0.81rem;
   line-height: 1.8;
-  color: #b1bca8;
+  color: #b0b2b5;
 }
 a {
-  color: #baf7a4;
+  color: #b3c9e5;
   text-underline-offset: 3px;
 }
 .subtle {
   font-size: 0.71rem;
-  color: #8f9f83;
+  color: #8e9093;
 }
 button:focus-visible,
 a:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #baf7a4;
+  outline: 2px solid #b3c9e5;
   outline-offset: 4px;
 }
 label {
   display: block;
   font-size: 0.72rem;
-  color: #b7c9ab;
+  color: #b7b9bc;
   margin: 20px 0 9px;
 }
 textarea {
   width: 100%;
-  border: 1px solid #b9d39f33;
-  background: #10170e;
+  border: 1px solid #b3c9e533;
+  background: #101215;
   border-radius: 9px;
   padding: 13px;
-  color: #dce9d0;
+  color: #dadcdf;
   resize: vertical;
   min-height: 85px;
   font: 0.85rem/1.6 monospace;
@@ -86,9 +86,9 @@ textarea {
   margin-top: 22px;
 }
 .samples button {
-  border: 1px solid #b9d39f33;
+  border: 1px solid #b3c9e533;
   background: none;
-  color: #bacdb0;
+  color: #bbbdc0;
   font-size: 0.66rem;
   border-radius: 6px;
   padding: 8px 10px;
@@ -104,11 +104,11 @@ textarea {
 .check-actions > span {
   font-size: 0.6rem;
   line-height: 1.6;
-  color: #8e9f82;
+  color: #8e9093;
 }
 .primary {
-  background: #baf7a4;
-  color: #172110;
+  background: #b3c9e5;
+  color: #16181b;
   border: 0;
   border-radius: 8px;
   padding: 10px 13px;
@@ -124,14 +124,14 @@ textarea {
 }
 .inspection-result {
   margin-top: 22px;
-  border: 1px solid #baf7a44a;
+  border: 1px solid #b3c9e54a;
   border-radius: 9px;
   padding: 18px;
-  background: #baf7a405;
+  background: #b3c9e505;
 }
 .inspection-result strong {
   font-size: 0.85rem;
-  color: #baf7a4;
+  color: #b3c9e5;
 }
 .inspection-result p,
 .inspection-result small {
@@ -140,7 +140,7 @@ textarea {
   overflow-wrap: anywhere;
 }
 .inspection-result pre {
-  color: #d5e5c8;
+  color: #d4d6d9;
   white-space: pre-wrap;
   font-size: 0.75rem;
   margin: 15px 0;
@@ -156,29 +156,29 @@ textarea {
   grid-template-columns: 1fr 1fr;
   margin: 25px 0;
   gap: 1px;
-  background: #b9d39f22;
-  border: 1px solid #b9d39f22;
+  background: #b3c9e522;
+  border: 1px solid #b3c9e522;
   border-radius: 10px;
   overflow: hidden;
 }
 .metrics > div {
   padding: 20px;
-  background: #1a201a;
+  background: #1a1c1f;
 }
 dt {
   font: 400 0.63rem var(--accent-font);
-  color: #aabd9b;
+  color: #a9abae;
 }
 dd {
   font: 400 2rem var(--accent-font);
   margin: 9px 0;
-  color: #e1edd8;
+  color: #e0e2e5;
   letter-spacing: -0.05em;
 }
 .metrics span {
   font-size: 0.61rem;
   line-height: 1.6;
-  color: #8e9f82;
+  color: #8e9093;
   display: block;
 }
 .article-link {
@@ -188,7 +188,7 @@ dd {
   text-decoration: none;
 }
 .savings-summary {
-  border-top: 1px solid #b9d39f22;
+  border-top: 1px solid #b3c9e522;
   margin-top: 24px;
   padding-top: 12px;
 }
@@ -201,12 +201,12 @@ dd {
   overflow-wrap: anywhere;
 }
 .savings-method summary {
-  color: #aabd9b;
+  color: #a9abae;
   font-size: 0.71rem;
   cursor: pointer;
 }
 .savings-method summary:focus-visible {
-  outline: 2px solid #baf7a4;
+  outline: 2px solid #b3c9e5;
   outline-offset: 4px;
 }
 @media (max-width: 500px) {

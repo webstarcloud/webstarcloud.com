@@ -1,9 +1,9 @@
 :host {
   display: block;
-  --chat-ink: #edf0e9;
-  --chat-muted: #969e97;
+  --chat-ink: #ebedf0;
+  --chat-muted: #97999c;
   --chat-rule: #ffffff10;
-  --chat-accent: #baf7a4;
+  --chat-accent: #b3c9e5;
 }
 .chat-app {
   display: flex;
@@ -11,7 +11,7 @@
   height: 100dvh;
   min-height: 540px;
   color: var(--chat-ink);
-  background: #141715;
+  background: #131518;
   font-family: Arial, Helvetica, sans-serif;
 }
 button,
@@ -32,7 +32,7 @@ a {
 }
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #baf7a4;
+  outline: 2px solid #b3c9e5;
   outline-offset: 4px;
 }
 button {
@@ -56,7 +56,7 @@ svg {
   align-items: center;
   padding: 0 28px;
   scrollbar-width: thin;
-  scrollbar-color: #455140 transparent;
+  scrollbar-color: #45474a transparent;
 }
 .welcome {
   text-align: center;
@@ -74,7 +74,7 @@ svg {
 }
 .welcome-emblem img {
   position: relative;
-  filter: drop-shadow(0 0 17px #55ff001c);
+  filter: drop-shadow(0 0 17px #b3c9e51c);
   animation: float 9s ease-in-out infinite;
   opacity: 0.9;
 }
@@ -82,11 +82,11 @@ svg {
   position: absolute;
   inset: -50px;
   border-radius: 50%;
-  background: radial-gradient(circle, #87cc4220, transparent 65%);
+  background: radial-gradient(circle, #b3c9e520, transparent 65%);
   filter: blur(12px);
 }
 .welcome-kicker {
-  color: #7f9176;
+  color: #808285;
   font: 400 0.55rem/1.5 var(--accent-font);
   letter-spacing: 0.19em;
   margin: 0 0 15px;
@@ -99,7 +99,7 @@ svg {
 .welcome > p:last-child {
   font-size: 0.83rem;
   line-height: 1.7;
-  color: #95a08e;
+  color: #949699;
   margin: 0;
 }
 .composer-area {
@@ -107,16 +107,16 @@ svg {
   margin: 33px auto 0;
 }
 .composer {
-  border: 1px solid #c4d7b727;
+  border: 1px solid #c4c6c927;
   border-radius: 19px;
-  background: linear-gradient(120deg, #222821, #1c211c);
+  background: linear-gradient(120deg, #222427, #1c1e21);
   padding: 17px 17px 12px;
   box-shadow: 0 8px 30px #00000010;
 }
 .composer:focus-within {
-  border-color: #baf7a45e;
+  border-color: #b3c9e55e;
   box-shadow:
-    0 0 0 2px #baf7a405,
+    0 0 0 2px #b3c9e505,
     0 12px 40px #0002;
 }
 .composer textarea {
@@ -133,10 +133,10 @@ svg {
     400 0.9rem/1.6 Arial,
     Helvetica,
     sans-serif;
-  color: #e2ebdc;
+  color: #e1e3e6;
 }
 .composer textarea::placeholder {
-  color: #8b9785;
+  color: #8b8d90;
 }
 .composer-bottom {
   display: flex;
@@ -149,11 +149,11 @@ svg {
   gap: 8px;
   align-items: center;
   font-size: 0.63rem;
-  color: #90a085;
+  color: #909295;
 }
 .composer-model > span {
   font-size: 1.1rem;
-  color: #a6b49a;
+  color: #a5a7aa;
 }
 .send-button {
   display: grid;
@@ -162,20 +162,20 @@ svg {
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: #baf7a4;
-  color: #152210;
+  background: #b3c9e5;
+  color: #16181b;
 }
 .send-button:disabled {
-  background: #91ab7933;
-  color: #a7be98;
+  background: #b3c9e533;
+  color: #a8aaad;
 }
 .send-button:not(:disabled):hover {
-  background: #d5ffc7;
+  background: #b3c9e5;
 }
 .stop-square {
   width: 12px;
   height: 12px;
-  background: #152210;
+  background: #16181b;
   border-radius: 2px;
 }
 .prompt-suggestions {
@@ -186,28 +186,28 @@ svg {
   margin-top: 19px;
 }
 .prompt-suggestions button {
-  border: 1px solid #c4d7b711;
+  border: 1px solid #c4c6c911;
   border-radius: 8px;
   background: #ffffff02;
   padding: 10px 12px;
-  color: #9eab96;
+  color: #9ea0a3;
   font-size: 0.64rem;
 }
 .prompt-suggestions span {
-  color: #687861;
+  color: #696b6e;
   margin-left: 8px;
 }
 .prompt-suggestions button:hover {
   background: #ffffff05;
-  color: #ceddc3;
-  border-color: #c4d7b733;
+  color: #cdcfd2;
+  border-color: #c4c6c933;
 }
 .connection-note,
 .conversation-note {
   text-align: center;
   margin: 20px 0;
   font-size: 0.62rem;
-  color: #7b8a73;
+  color: #7b7d80;
   line-height: 1.8;
 }
 .connection-note > span {
@@ -215,12 +215,12 @@ svg {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #8c9b7c;
+  background: #8a8c8f;
   vertical-align: middle;
   margin-right: 4px;
 }
 .connection-note a {
-  color: #acb99e;
+  color: #aaacaf;
   margin-left: 4px;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -230,26 +230,20 @@ svg {
   justify-content: space-between;
   gap: 16px;
   padding: 20px 32px;
-  color: #707e68;
+  color: #707275;
   font-size: 0.56rem;
 }
 .chat-footer a {
-  color: #91a084;
+  color: #909295;
 }
 .chat-footer button {
   padding: 0;
   background: none;
-  color: #91a084;
+  color: #909295;
   font-size: inherit;
 }
 .chat-footer button span {
   margin-left: 9px;
-}
-.is-goblin {
-  --chat-accent: #d1eda4;
-}
-.is-goblin .emblem-halo {
-  background: radial-gradient(circle, #b1f73328, transparent 70%);
 }
 .has-turns {
   padding-top: 30px;
@@ -266,8 +260,8 @@ svg {
   width: fit-content;
   margin: 0 0 25px auto;
   padding: 12px 18px;
-  background: #2a3227;
-  color: #e5eede;
+  background: #2a2c2f;
+  color: #e4e6e9;
   border-radius: 16px 16px 3px 16px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -286,20 +280,20 @@ svg {
 }
 .assistant-label > span {
   font-size: 0.6rem;
-  color: #83967a;
+  color: #848689;
 }
 .assistant-message {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font-size: 0.91rem;
   line-height: 1.85;
-  color: #cdd7c6;
+  color: #ccced1;
   margin-left: 32px;
 }
 .reasoning {
   margin: 12px 0 16px 32px;
   font-size: 0.78rem;
-  color: #98a68c;
+  color: #97999c;
 }
 .reasoning summary {
   cursor: pointer;
@@ -314,29 +308,55 @@ svg {
   display: flex;
   gap: 15px;
   align-items: center;
-  color: #85917b;
+  color: #848689;
   font-size: 0.62rem;
   margin-left: 32px;
 }
 .turn-actions button {
   background: none;
-  color: #aabb9e;
+  color: #aaacaf;
   padding: 5px 0;
   font-size: inherit;
 }
 .turn-actions .saving-badge {
-  color: #b9dca4;
-  border: 1px solid #405536;
+  color: #b3c9e5;
+  border: 1px solid #424447;
   border-radius: 999px;
   padding: 3px 8px;
-  background: #20291c;
+  background: #202225;
   cursor: help;
 }
 .working,
 .turn-status {
   font-size: 0.8rem;
-  color: #9caa91;
+  color: #9b9da0;
   margin-left: 32px;
+}
+.thinking-label {
+  display: inline-block;
+  color: #b5becb;
+  animation: thinking-pulse 1.8s ease-in-out infinite;
+}
+.thinking-dots > span {
+  display: inline-block;
+  animation: thinking-dot 1.4s ease-in-out infinite;
+}
+.thinking-dots > span:nth-child(2) { animation-delay: .15s; }
+.thinking-dots > span:nth-child(3) { animation-delay: .3s; }
+.assistant-message.is-streaming::after {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 14px;
+  margin-left: 4px;
+  vertical-align: -2px;
+  background: #b3c9e5;
+  animation: thinking-pulse 1s ease-in-out infinite;
+}
+@keyframes thinking-pulse { 50% { opacity: .45; } }
+@keyframes thinking-dot { 50% { opacity: .25; transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .thinking-label, .thinking-dots > span, .assistant-message.is-streaming::after { animation: none; }
 }
 .turn-error,
 .composer-error {
@@ -353,7 +373,7 @@ svg {
   bottom: 0;
   margin-top: auto;
   padding-top: 10px;
-  background: linear-gradient(transparent, #141715 10px);
+  background: linear-gradient(transparent, #131518 10px);
 }
 .sidebar-scrim {
   display: none;
@@ -514,9 +534,9 @@ svg {
   }
 }
 .answer-sources { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-.answer-sources a { color: var(--accent, #8cae88); font-size: 12px; text-decoration: underline; }
+.answer-sources a { color: var(--accent, #949699); font-size: 12px; text-decoration: underline; }
 .answer-sources small { display: block; margin-top: 3px; font-size: 10px; opacity: .72; }
 .research-recording { max-width: 680px; margin: 12px auto; color: #96968f; font-size: 12px; line-height: 1.6; }
 .research-recording summary { cursor: pointer; text-align: center; }
 .research-recording label { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
-.research-recording input { accent-color: #8cae88; }
+.research-recording input { accent-color: #949699; }

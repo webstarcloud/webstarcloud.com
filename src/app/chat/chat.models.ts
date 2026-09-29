@@ -10,7 +10,7 @@ export interface ChatModel {
 export const CHAT_MODELS: readonly ChatModel[] = [
   {
     id: 'gobwen-flash',
-    name: 'Gobwen',
+    name: 'Assistant',
     mode: 'Flash',
     description: 'Everyday questions. A direct answer.',
     source: 'Qwen3.5-0.8B · non-thinking',
@@ -18,19 +18,11 @@ export const CHAT_MODELS: readonly ChatModel[] = [
   },
   {
     id: 'gobwen-think',
-    name: 'Gobwen',
+    name: 'Assistant',
     mode: 'Think',
     description: 'Take a little more time with a problem.',
     source: 'Qwen3.5-0.8B · thinking',
     experimental: false,
-  },
-  {
-    id: 'goblin',
-    name: 'Goblin',
-    mode: 'Experimental',
-    description: 'Our small base model. Expect gobbledygook.',
-    source: 'goblin-250M · experimental base model',
-    experimental: true,
   },
 ];
 export interface ChatMessage {

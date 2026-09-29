@@ -1,31 +1,19 @@
-<section class="chamber" *ngIf="funding$ | async as funding" [class.motion-paused]="paused()" aria-labelledby="chamber-title">
-  <div class="instrument-heading"><span>INCUBATION CHAMBER / 001</span><button type="button" (click)="paused.set(!paused())" [attr.aria-pressed]="paused()" aria-label="Pause chamber animation">{{ paused() ? 'Resume motion' : 'Pause motion' }}</button></div>
-  <div class="tank-scene" role="img" [attr.aria-label]="'David’s 3D avatar in a cloning chamber. ' + label(funding) + '. Tank fill represents verified funding.'">
-    <div class="tank-halo"></div>
-    <div class="tank-cap tank-cap--top"><span>G / 250M</span><i></i><i></i><i></i></div>
-    <div class="tank-vessel">
-      <div class="tank-grid"></div>
-      <div class="fluid fluid--back" [style.height.%]="fill(funding)"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="specimen" aria-hidden="true"><app-particles displayMode="specimen" [motionPaused]="paused()"></app-particles></div>
-      <div class="fluid fluid--front" [class.is-empty]="fill(funding) === 0" [style.height.%]="fill(funding)"><div class="meniscus"></div></div>
-      <div class="glass-shine"></div>
-      <div class="scale" aria-hidden="true"><span>100</span><span>75</span><span>50</span><span>25</span><span>00</span></div>
-      <div class="specimen-label" aria-hidden="true"><span>SPECIMEN: D. WEBSTER</span><span>GOBLIN / BASE MODEL</span></div>
-    </div>
-    <div class="tank-cap tank-cap--bottom"><span class="status-light"></span><span>{{ funding.kind === 'ready' ? (fill(funding) | number:'1.0-0') + '% FUNDED' : 'STANDBY' }}</span></div>
-    <div class="tank-foot"></div>
-  </div>
-  <div class="funding-panel" id="funding">
-    <div class="funding-status" role="status"><span class="status-light"></span>{{ label(funding) }}</div>
-    <h2 id="chamber-title">Fill the tank. <span>Fund the next run.</span></h2>
-    <div class="funding-amount"><strong>{{ funding.kind === 'ready' ? (funding.snapshot.receivedMinor / 100 | currency:'USD':'symbol':'1.0-2') : '—' }}</strong><span>of US$72 <span class="target-label">{{ funding.kind === 'setup' ? 'proposed target' : 'target' }}</span></span><span class="token-target">20B TOKENS</span></div>
-    <progress *ngIf="funding.kind === 'ready'" [value]="funding.snapshot.receivedMinor" [max]="funding.snapshot.targetMinor" aria-label="Verified funding toward the 72 US dollar target"></progress>
-    <div *ngIf="funding.kind !== 'ready'" class="empty-meter" aria-hidden="true"></div>
-    <p>Real contributions will fill this chamber. At the target, the next funded Goblin experiment enters the run queue.</p>
-    <a *ngIf="funding.kind === 'ready' && funding.snapshot.status === 'collecting' && funding.snapshot.checkoutUrl; else setupLink" class="funding-action" [href]="funding.snapshot.checkoutUrl" rel="noreferrer">Contribute to this run <span aria-hidden="true">↗</span></a>
-    <ng-template #setupLink><a class="funding-action" routerLink="/notebook/funding">{{ funding.kind === 'setup' ? 'See the funding plan' : 'Run & funding details' }} <span aria-hidden="true">↗</span></a></ng-template>
-    <p class="funding-note" *ngIf="funding.kind === 'setup'">Contributions aren’t open yet. $72 is an initial compute estimate; the recipe, fees and spend limit are being finalized.</p>
-    <p class="funding-note" *ngIf="funding.kind === 'unavailable'">We can’t verify the balance right now. Contributions are unavailable here until the connection recovers.</p>
-    <p class="funding-note" *ngIf="funding.kind === 'ready'">Verified payments · refreshed {{ funding.snapshot.updatedAt | date:'shortTime' }} · <a routerLink="/notebook/funding">How funding works</a></p>
-  </div>
+<section class="funding-card" *ngIf="funding$ | async as funding" aria-labelledby="funding-title">
+  <div class="funding-heading"><span>RESEARCH FUND / 001</span><span class="status-light" aria-hidden="true"></span></div>
+  <p class="funding-status" role="status">{{ label(funding) }}</p>
+  <h2 id="funding-title">The next training run.</h2>
+  <p class="funding-summary">A bounded experiment in how small models learn.</p>
+  <dl class="run-details">
+    <div><dt>Training target</dt><dd>20B tokens</dd></div>
+    <div><dt>Initial compute estimate</dt><dd>US$72</dd></div>
+    <div><dt>Research output</dt><dd>Methods & findings</dd></div>
+  </dl>
+  <div class="funding-amount"><strong>{{ funding.kind === 'ready' ? (funding.snapshot.receivedMinor / 100 | currency:'USD':'symbol':'1.0-2') : '—' }}</strong><span>of US$72 {{ funding.kind === 'setup' ? 'proposed target' : 'target' }}</span><span *ngIf="funding.kind === 'ready'" class="funding-percent">{{ fill(funding) | number:'1.0-0' }}%</span></div>
+  <progress *ngIf="funding.kind === 'ready'" [value]="funding.snapshot.receivedMinor" [max]="funding.snapshot.targetMinor" aria-label="Verified funding toward the 72 US dollar target"></progress>
+  <div *ngIf="funding.kind !== 'ready'" class="empty-meter" aria-hidden="true"></div>
+  <a *ngIf="funding.kind === 'ready' && funding.snapshot.status === 'collecting' && funding.snapshot.checkoutUrl; else setupLink" class="funding-action" [href]="funding.snapshot.checkoutUrl" rel="noreferrer">Contribute to this run <span aria-hidden="true">↗</span></a>
+  <ng-template #setupLink><a class="funding-action" routerLink="/notebook/funding">{{ funding.kind === 'setup' ? 'Read the funding plan' : 'Run & funding details' }} <span aria-hidden="true">↗</span></a></ng-template>
+  <p class="funding-note" *ngIf="funding.kind === 'setup'">Contributions aren’t open yet. The training recipe, payment fees, and spending limit still need validation.</p>
+  <p class="funding-note" *ngIf="funding.kind === 'unavailable'">We can’t verify the balance right now. Contributions are unavailable until the connection recovers.</p>
+  <p class="funding-note" *ngIf="funding.kind === 'ready'">Verified payments · refreshed {{ funding.snapshot.updatedAt | date:'shortTime' }} · <a routerLink="/notebook/funding">How funding works</a></p>
 </section>

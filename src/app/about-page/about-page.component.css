@@ -5,9 +5,9 @@
   width: min(1100px, 100%);
   margin: auto;
   padding: 0 clamp(24px, 5vw, 65px);
-  color: #e5eade;
-  --muted: #9aa691;
-  --rule: #b1ca9826;
+  color: #e2e4e7;
+  --muted: #999b9e;
+  --rule: #b3c9e526;
 }
 .about-intro {
   display: grid;
@@ -19,7 +19,7 @@
 .eyebrow {
   font: 0.6rem/1.5 var(--accent-font);
   letter-spacing: 0.1em;
-  color: #a8bf98;
+  color: #a8aaad;
   margin-bottom: 25px;
 }
 h1 {
@@ -28,7 +28,7 @@ h1 {
   margin: 0 0 30px;
 }
 h1 span {
-  color: #baf7a4;
+  color: #b3c9e5;
 }
 p {
   color: var(--muted);
@@ -37,7 +37,7 @@ p {
 }
 .intro {
   font-size: 1.05rem;
-  color: #c8d5be;
+  color: #c7c9cc;
   max-width: 440px;
 }
 .about-links {
@@ -47,33 +47,33 @@ p {
   margin-top: 30px;
 }
 a {
-  color: #c5deaf;
+  color: #b3c9e5;
   font-size: 0.75rem;
   text-decoration: none;
 }
 a:hover {
-  color: #e5ffd0;
+  color: #b3c9e5;
 }
 a:focus-visible {
-  outline: 2px solid #baf7a4;
+  outline: 2px solid #b3c9e5;
   outline-offset: 5px;
 }
 .about-intro aside {
   text-align: center;
   padding: 45px 15px;
-  background: radial-gradient(ellipse, #baf7a40b, transparent 67%);
+  background: radial-gradient(ellipse, #b3c9e50b, transparent 67%);
 }
 .about-intro img {
-  filter: drop-shadow(0 0 45px #a4e36b1a);
+  filter: drop-shadow(0 0 45px #b3c9e51a);
   margin-bottom: 35px;
 }
 .about-intro aside p {
   font: 400 1.1rem/1.6 var(--accent-font);
   letter-spacing: -0.03em;
-  color: #c7d4bc;
+  color: #c6c8cb;
 }
 .about-intro aside span {
-  color: #819374;
+  color: #818386;
 }
 .support-section {
   display: grid;
@@ -95,11 +95,11 @@ h2 {
 }
 .support-copy strong {
   font-weight: 400;
-  color: #d4e6c6;
+  color: #d3d5d8;
 }
 .underlined {
   display: inline-block;
-  border-bottom: 1px solid #baf7a45e;
+  border-bottom: 1px solid #b3c9e55e;
   padding-bottom: 8px;
   margin-top: 10px;
 }
@@ -119,7 +119,7 @@ h2 {
 }
 .work-together > a {
   white-space: nowrap;
-  border: 1px solid #baf7a444;
+  border: 1px solid #b3c9e544;
   padding: 13px 20px;
   border-radius: 7px;
 }
@@ -130,7 +130,7 @@ footer {
   padding: 24px 0 35px;
   border-top: 1px solid var(--rule);
   font-size: 0.67rem;
-  color: #8a9b7e;
+  color: #8a8c8f;
 }
 footer span {
   margin-right: auto;

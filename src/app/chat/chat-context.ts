@@ -34,6 +34,7 @@ export function restoreLoginDraft(storage?: DraftStorage): { draft: string; mode
     const value = JSON.parse(raw);
     return typeof value.draft === 'string' && [...value.draft].length <= 2000 &&
       Number.isFinite(value.expires) && value.expires > Date.now() && value.expires <= Date.now() + 600_000 &&
-      CHAT_MODELS.some(model => model.id === value.model) ? { draft: value.draft, model: value.model } : null;
+      (value.model === 'goblin' || CHAT_MODELS.some(model => model.id === value.model))
+      ? { draft: value.draft, model: value.model === 'goblin' ? 'gobwen-flash' : value.model } : null;
   } catch { return null; }
 }

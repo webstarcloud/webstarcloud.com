@@ -1,4 +1,4 @@
-<div class="chat-app" [class.sidebar-open]="sidebarOpen()" [class.is-goblin]="model.experimental">
+<div class="chat-app" [class.sidebar-open]="sidebarOpen()">
   <button
     *ngIf="sidebarOpen()"
     class="sidebar-scrim"
@@ -16,7 +16,7 @@
         alt="David Webster’s dodecahedron"
         width="31"
         height="31"
-      /><span>Small models.<br /><strong>Open curiosity.</strong></span
+      /><span>David Webster<br /><strong>Independent research</strong></span
       ><button class="icon-button" (click)="sidebarOpen.set(false)" aria-label="Collapse sidebar">
         ⇤
       </button>
@@ -134,23 +134,9 @@
           <div class="emblem-halo"></div>
           <img src="/assets/favicon.ico" width="68" height="68" alt="" />
         </div>
-        <p class="welcome-kicker">
-          {{
-            model.experimental
-              ? 'A LITTLE UNPREDICTABLE. VERY GOBLIN.'
-              : 'A SMALL MODEL. A WORLD OF POSSIBILITIES.'
-          }}
-        </p>
-        <h1 id="chat-title">
-          {{ model.experimental ? 'Let’s get a little weird.' : 'Where should we begin?' }}
-        </h1>
-        <p>
-          {{
-            model.experimental
-              ? 'Raw, curious, occasionally gibberish. Meet our home-grown experiment.'
-              : 'A question, an idea, a problem. Make room for a little curiosity.'
-          }}
-        </p>
+        <p class="welcome-kicker">EXPLORING HOW INTELLIGENCE IS LEARNED</p>
+        <h1 id="chat-title">Start with a question.</h1>
+        <p>An independent lab for small models, useful systems, and open questions.</p>
       </section>
       <div *ngIf="turns().length" class="turn-list" aria-label="Conversation">
         <article *ngFor="let turn of turns()" class="chat-turn">
@@ -161,18 +147,18 @@
             }}</strong
             ><span>{{ turn.model.mode }}</span>
           </div>
-          <details *ngIf="turn.reasoning" class="reasoning">
+          <details *ngIf="turn.reasoning && turn.answer" class="reasoning">
             <summary>Model reasoning</summary>
             <p>{{ turn.reasoning }}</p>
           </details>
           <p *ngIf="turn.contextNotice" class="conversation-note" role="status">{{ turn.contextNotice }}</p>
-          <p *ngIf="turn.answer" class="assistant-message">{{ turn.answer }}</p>
-          <nav *ngIf="turn.sources?.length" class="answer-sources" aria-label="Sources consulted">
+          <p *ngIf="turn.answer" class="assistant-message" [class.is-streaming]="turn.status === 'streaming'">{{ turn.answer }}</p>
+          <nav *ngIf="turn.sources?.length && turn.answer" class="answer-sources" aria-label="Sources consulted">
             <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}<small *ngIf="source.kind">{{ source.kind === 'indexed' ? 'Trusted index' : 'Web search' }}<ng-container *ngIf="source.indexedAt"> · {{ source.indexedAt | date:'d MMM' }}</ng-container></small></a>
           </nav>
           <p *ngIf="turn.recordingNotice" class="conversation-note" role="status">{{ turn.recordingNotice }}</p>
-          <p *ngIf="turn.status === 'waiting'" class="working" role="status">
-            {{ turn.guard === 'checked' ? 'Starting the model… A first answer can take about a minute.' : 'Connecting & checking input…' }}
+          <p *ngIf="!turn.answer && (turn.status === 'waiting' || turn.status === 'streaming')" class="working" role="status" aria-label="Thinking">
+            <span class="thinking-label" aria-hidden="true">Thinking<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>
           </p>
           <p *ngIf="turn.status === 'complete' && turn.finishReason === 'length'" class="turn-status">Response reached its length limit.</p>
           <p *ngIf="turn.error" class="turn-error" role="alert">{{ turn.error }}</p>
@@ -212,7 +198,7 @@
             [(ngModel)]="draft"
             (input)="resize()"
             (keydown)="keydown($event)"
-            [placeholder]="model.experimental ? 'Say something strange…' : 'Ask Gobwen anything…'"
+            placeholder="Ask a question…"
             rows="2"
             maxlength="4000"
             [readOnly]="busy()"
@@ -271,7 +257,7 @@
           <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
           <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="busy()" /> Save this conversation for research and future model training</label>
           <p>When enabled, messages and answers are saved in LangWatch and a private research archive. They need review before training. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
-          <p>Gobwen checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
+          <p>The assistant checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
         </details>
       </div>
     </div>

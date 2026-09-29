@@ -41,7 +41,7 @@ describe('AppComponent', () => {
   it('should expose the lab site title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('Gobwen | Small models. Open curiosity.');
+    expect(app.title).toEqual('David Webster | Intelligence research');
   });
 
   it('uses the restored personal branding on secondary pages', async () => {

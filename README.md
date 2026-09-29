@@ -1,15 +1,16 @@
-# Gobwen · David Webster
+# David Webster · Intelligence research
 
 This project uses [Angular CLI](https://github.com/angular/angular-cli) 17.
 
 The repository keeps its historical `webstarcloud.com` name. The canonical live
 domain is `davidwebstar.com`.
 
-The homepage is a minimal chat interface with **Gobwen Flash**, **Gobwen Think**
-and experimental **Goblin** choices. The original dodecahedron remains the site
+The homepage is a minimal research assistant with **Flash** and **Think** modes.
+Public copy uses an independent intelligence research identity, without the fantasy
+persona. The experimental base model is documented in research, outside the chat menu. The original dodecahedron remains the site
 identity. Research articles and the About/support page give the models context
 without crowding the chat. Earlier projects remain paused, with shared demo URLs
-preserved. Chat streams from three on-demand 4 GB AWS Lambda functions through
+preserved. Chat streams from on-demand 4 GB AWS Lambda functions through
 an authenticated gateway. Google sign-in includes 20 requests per UTC day,
 subject to a shared 100-request daily preview allowance. Payments and supporter
 entitlements are not connected yet.
@@ -60,16 +61,16 @@ script rejects missing or mismatched copies.
 
 ## Pages and retained links
 
-- `/` is Gobwen chat: model selection, streaming-ready conversations, stop/copy/
+- `/` is the research assistant: mode selection, streamed conversations, stop/copy/
   retry, in-memory session history, input inspection and a performance panel.
   Empty `chatEndpoint` shows a connection-pending state and sends no message.
 - `/research` is the article index. `/research/{runs,roadmap,architecture,questions,
   models,performance}` holds the journal and learning notes. Run results are
   curated dated snapshots, not live telemetry. Old `/notebook` links redirect to
   their corresponding research pages; `/notebook/funding` retains the funding plan.
-- `/about` introduces David and the work. `/about#support` has the original 3D
-  avatar in its funding chamber, with pause and reduced-motion support. The liquid
-  represents verified contributions; unavailable data never becomes simulated money.
+- `/about` introduces David and the work. `/about#support` has a compact research
+  funding card with a verified balance and target. Unavailable data never becomes
+  simulated money. The cloning chamber has been removed.
 - `/profile` preserves the full career profile, CV and existing Dave's Brain demo,
   explicitly labeled as using an external model. `HomeComponent` is retained here.
 - `/ventures`, `/labs` and `/projects` redirect to `/`.
@@ -92,14 +93,9 @@ The old portfolio-index components remain in source for reference but are no
 longer routed. Retained AnchorKeep and Greenlight pages display a paused notice.
 The existing inspector path is unchanged so external links continue to work.
 
-The favicon is the original dodecahedron. The Gobwen social-preview
-PNG is generated from its editable SVG with:
-
-```bash
-rsvg-convert -o src/assets/chat-og.png src/assets/chat-og.svg
-```
-
-The generated PNG is checked in; building the site does not require this tool.
+The favicon and social preview use the original dodecahedron. The older themed
+social artwork is retained as an unused historical asset. Internal component names,
+API aliases and the funding campaign ID remain compatible with existing services.
 
 ### Input-hardening lab development
 
@@ -129,7 +125,7 @@ Use the success and failure scenarios to show that CI status and recoverability 
 
 ## Interactive stage
 
-The new Gobwen chat uses the protected SSE contract in
+The research assistant uses the protected SSE contract in
 [CHAT-GATEWAY.md](CHAT-GATEWAY.md). It includes model selection, a real-package
 inspection panel and four measured timing fields. Production uses the authenticated
 streaming gateway in `../davesbrain/model-lambda`; see its `LIVE.md` for deployment,
@@ -168,8 +164,7 @@ The standalone lab remains available for detailed policy/report exploration.
 The original Three.js hologram is retained on the profile. Its `dave.glb` model uses the
 original framing, additive glow shell, particle assembly, subtle deformation and
 idle rotation. Earlier product and inspector routes retain their existing stage
-modes. The legacy chat dock appears only on `/profile`. The About funding chamber
-shares the avatar in display-only mode; the new homepage has its own chat surface.
+modes. The legacy chat dock appears only on `/profile`. The About page uses a research funding card; the homepage has its own chat surface.
 
 ## Running unit tests
 
@@ -194,7 +189,7 @@ the shutdown warning is a separate runner limitation.
 
 Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-## Community-funded Goblin run
+## Community-funded research run
 
 The proposed first target is **US$72 for a 20B-token experiment**. The estimate,
 recipe, fees and hard spending limit still require validation. The live funding
@@ -212,6 +207,20 @@ The endpoint must return the matching USD campaign and target, integer amounts,
 a recent summary timestamp and an allowlisted Stripe checkout URL. Failed reads
 hide stale balances and retry every 30 seconds; leaving the page stops polling.
 
-The original chat and avatar share `ParticlesModule`; the chamber uses specimen
-mode. Dave's Brain, public model serving, supporter usage allowances and Codex /
-Claude / MCP integrations remain planned, without advertised availability.
+The original profile chat and avatar share `ParticlesModule`. Supporter allowances
+and external Codex / Claude / MCP integrations remain planned. The public assistant
+is already served through its protected gateway.
+
+## Research refresh — 30 September 2026
+
+The chat keeps an animated “Thinking…” status through connection, retrieval and
+reasoning. Metadata and source events do not end it. The first answer delta replaces
+it immediately, subsequent deltas append without an artificial typing delay, and
+stop/error/completion remove the activity indicator. Reduced-motion preferences
+disable the animation. Source cards and optional reasoning appear with the answer.
+
+The matching backend replaces excerpt selection with short, source-grounded
+generation. Both modes answer retrieved facts directly; Think still reasons on
+other prompts. Source links are evidence to inspect, not a guarantee of accuracy.
+Calculator/profile bypasses keep their real zero-token usage. Authentication,
+input hardening, shared quotas and opt-in LangWatch capture remain in place.
