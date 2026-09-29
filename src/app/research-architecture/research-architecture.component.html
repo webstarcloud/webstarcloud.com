@@ -1,0 +1,75 @@
+<article>
+  <p class="eyebrow">INSIDE THE ASSISTANT · 30 SEP 2026</p>
+  <h1>A question goes in.<br />What happens next?</h1>
+  <p class="lede">The chat is the experiment. Open a layer to see what it does, where its boundary is, and what I’m learning by building it.</p>
+  <div class="path-heading"><span class="tag">Implemented today</span><span>One request, end to end</span></div>
+  <div class="request-path" aria-label="The current assistant request path">
+    <details open>
+      <summary><span class="step-number">01</span><span><strong>Your question</strong><small>Browser · conversation context</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <div class="layer-content">
+        <p>You choose Flash or Think and send a message. The browser sends the current conversation with your signed-in request. A chat session lives in browser memory; it is not persistent personal memory or a model learning new weights.</p>
+        <p>That familiar interface is built on existing model and runtime components. “From first principles” means understanding and rebuilding the stack around them, with each decision made visible.</p>
+        <a routerLink="/research/models">Understand the model choice →</a>
+      </div>
+    </details>
+    <details>
+      <summary><span class="step-number">02</span><span><strong>Check access and limits</strong><small>Google sign-in · gateway · shared quotas</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <div class="layer-content">
+        <p>Amazon Cognito handles sign-in. API Gateway checks the access token and throttles traffic. The gateway validates the request and checks per-user and shared allowances in DynamoDB before invoking a private model worker.</p>
+        <p>The preview allows up to 20 requests per user and 100 shared requests per UTC day, with minute limits too. Shared limits still apply across accounts. Each model worker allows one concurrent request. These bound access; they are not a guarantee of a fixed AWS bill.</p>
+      </div>
+    </details>
+    <details>
+      <summary><span class="step-number">03</span><span><strong>Inspect the input</strong><small>Text integrity · before tools and inference</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <div class="layer-content">
+        <p>The worker runs llm-input-hardening before preparing a tool call or model prompt. It checks for hidden controls, misleading Unicode and encoded obfuscation. An unavailable check stops the request.</p>
+        <p>Passing this check does not make text trustworthy. Ordinary readable text can still contain malicious instructions, and retrieved pages cross their own trust boundary.</p>
+        <a routerLink="/research/input-protection">What input protection actually protects →</a>
+      </div>
+    </details>
+    <details>
+      <summary><span class="step-number">04</span><span><strong>Choose the answer path</strong><small>Bounded calculator · source lookup · direct generation</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <div class="layer-content">
+        <p>Explicit rules choose one bounded tool step. Simple arithmetic uses a decimal calculator. Questions about this site’s owner use a maintained profile. Those answers skip the model entirely.</p>
+        <p>Recognized factual questions check selected, indexed pages first, then whole-web search through a private SearXNG worker. Only the current question goes to search. If no evidence is available, the system declines to guess. Other questions proceed directly to generation.</p>
+        <p>This is rule-based routing, not a model deciding which tools to call or an ensemble of specialist models.</p>
+        <a routerLink="/research/search">Retrieval changes the trust boundary →</a>
+      </div>
+    </details>
+    <details>
+      <summary><span class="step-number">05</span><span><strong>Generate, when needed</strong><small>Qwen3.5-0.8B · llama.cpp · CPU Lambda</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <div class="layer-content">
+        <p>Both assistant modes use the same Qwen checkpoint, quantized to Q8_0, in separate 4 GB ARM64 Lambda workers. Weights load on demand. The prompt must fit a bounded context, and output has token, time and repetition limits.</p>
+        <p>Think has a reasoning budget for ordinary generation. Search-backed answers use direct generation in both modes: the model receives untrusted excerpts as context and produces a short answer. The interface adds the source links separately.</p>
+        <a routerLink="/research/models">Modes, quantization and their tradeoffs →</a>
+      </div>
+    </details>
+    <details>
+      <summary><span class="step-number">06</span><span><strong>Stream and measure</strong><small>Answer deltas · token usage · completion receipt</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <div class="layer-content">
+        <p>Server-sent events carry output through the gateway. “Thinking…” stays visible until the first answer text arrives, then the interface displays real answer chunks immediately. It is a waiting indicator, not a measurement of the model’s internal reasoning.</p>
+        <p>The browser measures first output, first answer and completion separately. The worker reports its cold or warm state and engine token usage. The Performance panel shows these observations for completed turns.</p>
+        <a routerLink="/research/performance">Where the four performance numbers come from →</a>
+      </div>
+    </details>
+  </div>
+  <aside class="observation">
+    <span class="eyebrow">ALONGSIDE THE REQUEST</span>
+    <h2>Observe first. Learn from evidence.</h2>
+    <p>LangWatch records performance and outcomes. Conversation capture is off by default. If you opt in, messages and answers are redacted and saved to LangWatch and a private research archive for review. They are not automatically approved for training. Redaction is imperfect; avoid sharing sensitive information.</p>
+    <p>These records are observations, not proof of answer quality. Small diagnostic probes already catch failures; a broader held-out evaluation suite is still work to do.</p>
+    <a routerLink="/research/evaluations">Why “it feels smarter” is not an evaluation →</a>
+  </aside>
+  <section class="entry">
+    <span class="tag tag--planned">Not implemented yet</span>
+    <h2>The next layers need their own evidence.</h2>
+    <p>Persistent memory, learned model routing, MCP actions and GPU serving are future experiments. Each needs a working implementation, a useful test and a write-up of what changed.</p>
+    <a class="text-link" routerLink="/research/roadmap">See the build questions →</a>
+  </section>
+  <section class="entry">
+    <p class="eyebrow">A PARALLEL RESEARCH TRACK</p>
+    <h2>What if I trained the model too?</h2>
+    <p>Goblin-250M is the separate experiment in training a small base model from scratch. Its checkpoint, loss and capability tests belong in the run journal. It does not power this assistant.</p>
+    <a class="text-link" routerLink="/research/runs">Explore the training experiment →</a>
+  </section>
+</article>

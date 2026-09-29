@@ -41,7 +41,9 @@
       >
     </div>
     <nav class="sidebar-links" aria-label="Explore">
-      <a routerLink="/research"
+      <a routerLink="/research/architecture"
+        ><span aria-hidden="true">◇</span> Architecture <span aria-hidden="true">↗</span></a
+      ><a routerLink="/research"
         ><span aria-hidden="true">⌁</span> Research <span aria-hidden="true">↗</span></a
       ><a routerLink="/about"
         ><span aria-hidden="true">◌</span> About & support <span aria-hidden="true">↗</span></a
@@ -97,7 +99,7 @@
             ><span *ngIf="option.id === selectedId()" class="selected-mark" aria-hidden="true"
               >✓</span
             ></button
-          ><a routerLink="/research/models">Meet the models ↗</a>
+          ><a routerLink="/research/models">How these modes work ↗</a>
         </div>
       </div>
       <div class="header-tools">
@@ -134,9 +136,7 @@
           <div class="emblem-halo"></div>
           <img src="/assets/favicon.ico" width="68" height="68" alt="" />
         </div>
-        <p class="welcome-kicker">EXPLORING HOW INTELLIGENCE IS LEARNED</p>
         <h1 id="chat-title">Start with a question.</h1>
-        <p>An independent lab for small models, useful systems, and open questions.</p>
       </section>
       <div *ngIf="turns().length" class="turn-list" aria-label="Conversation">
         <article *ngFor="let turn of turns()" class="chat-turn">
@@ -246,9 +246,14 @@
             {{ sample }} <span aria-hidden="true">↗</span>
           </button>
         </div>
+        <aside *ngIf="!turns().length" class="experiment-note" aria-label="About this experiment">
+          <strong>This interface is an experiment.</strong>
+          <p>I’m rebuilding the AI assistant stack from first principles<br class="wide-break" /> and documenting each layer as I go.</p>
+          <a routerLink="/research/architecture">Explore the architecture <span aria-hidden="true">→</span></a>
+        </aside>
         <p class="connection-note" *ngIf="!chat.configured">
           <span></span> Model connection coming next.
-          <a routerLink="/research/models">Meet the models</a>
+          <a routerLink="/research/models">How the models work</a>
         </p>
         <p class="conversation-note" *ngIf="chat.configured">
           Small models can make big mistakes. Check important answers.

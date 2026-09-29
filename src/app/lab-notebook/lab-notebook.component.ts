@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { map } from 'rxjs';
+import { ResearchArchitectureComponent } from '../research-architecture/research-architecture.component';
 
 @Component({
   selector: 'app-lab-notebook',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ResearchArchitectureComponent],
   templateUrl: './lab-notebook.component.html',
   styleUrl: './lab-notebook.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

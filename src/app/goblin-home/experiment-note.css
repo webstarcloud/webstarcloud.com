@@ -1,0 +1,24 @@
+.experiment-note {
+  max-width: 480px;
+  margin: 30px auto 25px;
+  text-align: center;
+  font-size: .75rem;
+  line-height: 1.7;
+  color: var(--chat-muted);
+}
+.experiment-note strong { color: #c3c7cc; font-weight: 400; }
+.experiment-note p { margin: 7px 0 11px; }
+.experiment-note a { color: var(--chat-accent); text-decoration: none; }
+.experiment-note a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.experiment-note a:focus-visible { outline: 2px solid var(--chat-accent); outline-offset: 5px; }
+.experiment-note a span { display: inline-block; margin-left: 5px; }
+@media (min-height: 701px) and (max-height: 780px) and (min-width: 761px) {
+  .welcome { margin-top: 24px; }
+  .welcome-emblem { width: 84px; height: 84px; margin-bottom: 18px; }
+  .composer-area:not(.conversation-composer) { margin-top: 24px; }
+  .experiment-note { margin-top: 20px; }
+}
+@media (max-width: 500px) {
+  .experiment-note { margin-top: 24px; padding: 0 8px; }
+  .wide-break { display: none; }
+}

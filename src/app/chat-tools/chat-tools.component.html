@@ -52,6 +52,7 @@
       </p>
       <small>This was an inspection only. No model was called.</small>
     </section>
+    <a class="article-link" routerLink="/research/input-protection" (click)="close()">What happens before your prompt reaches the model →</a>
   </ng-container>
   <ng-template #performance
     ><h2 id="tools-title">Fast should be<br />something we can measure.</h2>
@@ -92,7 +93,7 @@
     <section class="savings-summary" aria-label="Model usage and estimated savings">
       <h3>Less model work.</h3>
       <dl class="metrics">
-        <div><dt>Model calls avoided</dt><dd>{{ savings.calls }}</dd><span>Completed tool or source answers</span></div>
+        <div><dt>Model calls avoided</dt><dd>{{ savings.calls }}</dd><span>Completed responses that skipped generation</span></div>
         <div><dt>Est. compute avoided</dt><dd>{{ savingLabel(savings.usd) }}</dd><span>{{ savings.estimatedCalls }} calls with a measured comparison</span></div>
       </dl>
       <p class="subtle">{{ savings.outputTokens | number }} output tokens generated, including model reasoning. Skipped calls used zero model tokens.</p>
@@ -103,7 +104,7 @@
       </details>
     </section>
     <a class="article-link" routerLink="/research/performance" (click)="close()"
-      >Read the first measurements ↗</a
+      >How these timings are measured →</a
     ></ng-template
   >
 </dialog>

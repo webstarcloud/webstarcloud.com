@@ -24,7 +24,7 @@ import { inferenceSaving, savingDescription, savingLabel, usageLabel } from '../
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ChatToolsComponent],
   templateUrl: './goblin-home.component.html',
-  styleUrls: ['./chat-chrome.css', './goblin-home.component.css'],
+  styleUrls: ['./chat-chrome.css', './goblin-home.component.css', './experiment-note.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoblinHomeComponent implements OnDestroy {

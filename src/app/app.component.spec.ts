@@ -153,8 +153,28 @@ describe('AppComponent', () => {
     expect(fixture.nativeElement.querySelector('app-goblin-chamber')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.stage-avatar')).toBeNull();
     await navigate('/research');fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.article-row').length).toBe(4);
+    expect(fixture.nativeElement.querySelector('.architecture-entry')?.getAttribute('href')).toBe('/research/architecture');
+    expect(fixture.nativeElement.querySelectorAll('.article-row').length).toBe(7);
     expect(fixture.nativeElement.querySelector('app-goblin-chamber')).toBeNull();
+  });
+
+  it('opens each assistant layer from its research article link', async () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    await navigate('/research');
+    fixture.detectChanges();
+    const links = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.article-row'));
+    const destinations = links.map(link => link.getAttribute('href')!);
+
+    for (const destination of destinations) {
+      await navigate(destination);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(TestBed.inject(Router).url).withContext(destination).toBe(destination);
+      expect(fixture.nativeElement.querySelector('app-lab-notebook h1')).withContext(destination).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('.article-index')).withContext(destination).toBeNull();
+    }
   });
 
   it('tracks whether the answer workspace is open', () => {

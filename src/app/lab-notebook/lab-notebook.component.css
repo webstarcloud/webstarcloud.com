@@ -7,6 +7,8 @@ a:focus-visible {outline:2px solid var(--accent);outline-offset:5px;}
 .notebook-heading .eyebrow {margin-top:44px;color:var(--muted);}
 .notebook-intro {font:500 clamp(2.4rem,6vw,4.3rem)/1.05 var(--accent-font);letter-spacing:-.065em;margin:0 0 40px;}
 .notebook-intro span {color:var(--accent);}
+.notebook--detail .notebook-intro {display:none;}
+.notebook--detail .notebook-heading .eyebrow {margin:24px 0;}
 .notebook-nav {display:flex;gap:28px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);overflow-x:auto;}
 .notebook-nav a {padding:18px 0;color:var(--muted);font:500 .72rem/1.4 var(--accent-font);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;}
 .notebook-nav a.active {color:var(--accent);border-color:var(--accent);}
@@ -60,3 +62,7 @@ footer a {text-decoration:none;white-space:nowrap;}
 .article-row h2 { font-size:1.7rem;line-height:1.25; }
 .article-row p { max-width:570px;margin:0 0 20px; }
 .article-more { font-size:.73rem;color:#b3c9e5; }
+.architecture-entry {display:block;margin:0 0 36px;padding:28px;border:1px solid var(--rule);border-radius:12px;background:#b3c9e508;text-decoration:none;}
+.architecture-entry h2 {font-size:1.6rem;}
+.architecture-entry:hover {border-color:#b3c9e577;}
+.architecture-entry p {margin-bottom:22px;}

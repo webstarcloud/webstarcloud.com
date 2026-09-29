@@ -15,6 +15,15 @@ an authenticated gateway. Google sign-in includes 20 requests per UTC day,
 subject to a shared 100-request daily preview allowance. Payments and supporter
 entitlements are not connected yet.
 
+The assistant is the entry point to a public architectural notebook. The empty
+chat introduces it as an experiment in rebuilding the assistant stack; a visible
+Architecture link follows the real request through six expandable layers.
+Performance, Input protection and the model menu link to the relevant explanations.
+The notes distinguish deployed behavior, diagnostic evidence and planned work.
+Memory, learned model routing, MCP actions and GPU serving are not implemented.
+Goblin-250M remains the name of one base-model training experiment in the research,
+not the assistant persona or site identity.
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
@@ -65,7 +74,7 @@ script rejects missing or mismatched copies.
   retry, in-memory session history, input inspection and a performance panel.
   Empty `chatEndpoint` shows a connection-pending state and sends no message.
 - `/research` is the article index. `/research/{runs,roadmap,architecture,questions,
-  models,performance}` holds the journal and learning notes. Run results are
+  models,performance,input-protection,search,evaluations}` holds the journal and learning notes. Run results are
   curated dated snapshots, not live telemetry. Old `/notebook` links redirect to
   their corresponding research pages; `/notebook/funding` retains the funding plan.
 - `/about` introduces David and the work. `/about#support` has a compact research
