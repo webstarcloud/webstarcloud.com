@@ -34,6 +34,43 @@ const asRecord = (value: unknown): Record<string, unknown> => {
   return value as Record<string, unknown>;
 };
 
+/** Stop waiting even when an auth SDK or transport does not honor cancellation. */
+function abortable<T>(operation: () => Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) return Promise.reject(new DOMException('Request stopped.', 'AbortError'));
+  return new Promise<T>((resolve, reject) => {
+    let settled = false;
+    const settle = (complete: () => void) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener('abort', abort);
+      complete();
+    };
+    const abort = () => settle(() => reject(new DOMException('Request stopped.', 'AbortError')));
+    signal.addEventListener('abort', abort, { once: true });
+    try {
+      operation().then(value => settle(() => resolve(value)), error => settle(() => reject(error)));
+    } catch (error) {
+      settle(() => reject(error));
+    }
+  });
+}
+
+async function closeReader(reader?: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
+  if (!reader) return;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      reader.cancel().catch(() => {}),
+      new Promise<void>(resolve => timer = setTimeout(resolve, 1000)),
+    ]);
+  } catch {
+    // Cleanup cannot replace a verified completion or a useful public error.
+  } finally {
+    clearTimeout(timer);
+    try { reader.releaseLock(); } catch { /* An interrupted read may still be settling. */ }
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private readonly endpoint = inject(CHAT_ENDPOINT).trim();
@@ -72,11 +109,31 @@ export class ChatService {
     let checked = false;
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     let outputLength = 0;
+    let phase: 'token' | 'fetch' | 'read' | null = 'token';
     const toolStates = new Map<ChatToolActivity['name'], ChatToolActivity['status']>();
+    const interruption = (message: string): Error => {
+      const notes: string[] = [message];
+      if (outputLength) notes.push('The partial reply won’t be used in your next message.');
+      const prompt = lastMessage?.role === 'user' ? lastMessage.content : '';
+      const memoryChange = toolStates.has('memory_write') ||
+        (recording?.useMemory === true && /^\s*(?:Remember:|Forget memory:)/i.test(prompt));
+      const pythonRun = toolStates.has('python') ||
+        (recording?.useSandbox === true && /^\s*Run Python:/i.test(prompt));
+      if (memoryChange) notes.push(toolStates.get('memory_write') === 'complete'
+        ? 'The memory operation completed. Check Show saved memories before repeating it.'
+        : 'A memory change may already have completed. Check Show saved memories before repeating it.');
+      if (pythonRun) notes.push(toolStates.get('python') === 'complete'
+        ? 'Python completed. Running it again starts a new execution.'
+        : 'Python may already have run. Running it again starts a new execution.');
+      if (!memoryChange && !pythonRun) notes.push('You can edit and try the request again.');
+      return new Error(notes.join(' '));
+    };
     try {
-      const token = await this.accessToken();
+      const token = await abortable(() => this.accessToken(), controller.signal);
+      phase = null;
       if (!token) throw new Error('Sign in with Google to chat. Your message hasn’t been sent.');
-      const response = await this.request(this.endpoint, {
+      phase = 'fetch';
+      const response = await abortable(() => this.request(this.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ model, messages, stream: true,
@@ -88,7 +145,8 @@ export class ChatService {
         signal: controller.signal,
         credentials: 'omit',
         redirect: 'error',
-      });
+      }), controller.signal);
+      phase = null;
       if (!response.ok) {
         const failure = await response.json().catch(() => ({}));
         const messages: Record<string, string> = {
@@ -108,8 +166,10 @@ export class ChatService {
       const decoder = new TextDecoder();
       const parser = new EventStreamParser();
       while (true) {
-        const chunk = await reader.read();
-        if (chunk.done) throw new Error('The connection ended before the answer was complete.');
+        phase = 'read';
+        const chunk = await abortable(() => reader!.read(), controller.signal);
+        phase = null;
+        if (chunk.done) throw interruption('The connection ended before the answer was complete.');
         for (const frame of parser.push(decoder.decode(chunk.value, { stream: true }))) {
           const data = asRecord(frame.data);
           if (frame.event === 'blocked') {
@@ -172,7 +232,9 @@ export class ChatService {
               if (source['id'] !== index + 1 || typeof source['title'] !== 'string' ||
                   source['title'].length > 120 || typeof source['url'] !== 'string' || source['url'].length > 1500)
                 throw new Error('The search sources are invalid.');
-              const url = new URL(source['url']);
+              let url: URL;
+              try { url = new URL(source['url']); }
+              catch { throw new Error('The search source URL is invalid.'); }
               if (url.protocol !== 'https:' || url.username || url.password)
                 throw new Error('The search source URL is invalid.');
               const kind = source['kind'];
@@ -275,18 +337,22 @@ export class ChatService {
         }
       }
     } catch (error) {
+      if (signal.aborted) throw new DOMException('Request stopped.', 'AbortError');
       if (controller.signal.aborted && !signal.aborted)
-        throw new Error('The model took too long to respond. Please try again.');
+        throw phase === 'token'
+          ? new Error('Sign-in took too long. Your message hasn’t been sent. Please sign in again.')
+          : interruption('The request timed out before the answer was complete.');
+      if (phase === 'token')
+        throw new Error('Your sign-in could not be verified. Your message hasn’t been sent. Please sign in again.');
+      if (phase === 'fetch')
+        throw interruption('The connection failed before a response could be confirmed.');
+      if (phase === 'read')
+        throw interruption('The connection was interrupted before the answer was complete.');
       throw error;
     } finally {
       clearTimeout(timeout);
       signal.removeEventListener('abort', abort);
-      try {
-        await reader?.cancel();
-      } catch {
-        /* The connection may already be closed. */
-      }
-      reader?.releaseLock();
+      await closeReader(reader);
     }
   }
 }

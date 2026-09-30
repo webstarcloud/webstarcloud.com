@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
 import { CHAT_ACCESS_TOKEN, CHAT_ENDPOINT, CHAT_FETCH, ChatEvent, ChatService } from './chat.service';
 import { ChatRequestOptions, decodeRate } from './chat.models';
 import { EventStreamParser } from './event-stream';
@@ -29,6 +29,22 @@ const response = (text: string) => {
     }),
     { headers: { 'Content-Type': 'text/event-stream' } },
   );
+};
+const controlledResponse = (
+  prefix: string,
+  next: () => Promise<ReadableStreamReadResult<Uint8Array>>,
+  cancel: () => Promise<void> = async () => {},
+) => {
+  const reader = jasmine.createSpyObj<ReadableStreamDefaultReader<Uint8Array>>('reader', ['read', 'cancel', 'releaseLock']);
+  let first = true;
+  reader.read.and.callFake(() => {
+    if (!first) return next();
+    first = false;
+    return Promise.resolve({ done: false, value: new TextEncoder().encode(prefix) });
+  });
+  reader.cancel.and.callFake(cancel);
+  return { reader, response: { ok: true, headers: new Headers({ 'Content-Type': 'text/event-stream' }),
+    body: { getReader: () => reader } } as unknown as Response };
 };
 describe('Protected chat stream', () => {
   let request: jasmine.Spy;
@@ -292,6 +308,132 @@ describe('Protected chat stream', () => {
     await expectAsync(run([])).toBeRejectedWithError(/Sign in/);
     expect(request).not.toHaveBeenCalled();
   });
+  it('maps failed token retrieval without leaking SDK errors or sending a request', async () => {
+    TestBed.overrideProvider(CHAT_ACCESS_TOKEN, { useValue: async () => { throw new Error('private OIDC detail'); } });
+    await expectAsync(run([])).toBeRejectedWithError('Your sign-in could not be verified. Your message hasn’t been sent. Please sign in again.');
+    expect(request).not.toHaveBeenCalled();
+  });
+  it('maps fetch failures without claiming the request was unsent or replaying it', async () => {
+    request.and.rejectWith(new TypeError('network error with private transport detail'));
+    const events: ChatEvent[] = [];
+    await expectAsync(run(events)).toBeRejectedWithError('The connection failed before a response could be confirmed. You can edit and try the request again.');
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(events).toEqual([]);
+  });
+  it('warns that opted-in writes or Python may have run even when the response never arrives', async () => {
+    for (const [prompt, warning] of [
+      ['Remember: My favorite color is teal.', 'A memory change may already have completed. Check Show saved memories before repeating it.'],
+      ['Forget memory: note-1', 'A memory change may already have completed. Check Show saved memories before repeating it.'],
+      ['Run Python: print(1)', 'Python may already have run. Running it again starts a new execution.'],
+    ]) {
+      request.calls.reset();
+      request.and.rejectWith(new TypeError('network error'));
+      await expectAsync(TestBed.inject(ChatService).stream('gobwen-flash', [{ role: 'user', content: prompt }],
+        new AbortController().signal, () => {}, experimentOptions)).toBeRejectedWithError(new RegExp(warning.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      expect(request).toHaveBeenCalledTimes(1);
+    }
+  });
+  it('keeps partial output incomplete and safely explains an errored reader after tool events', async () => {
+    const stream = controlledResponse(frame('meta', meta) +
+      frame('tool', { name: 'source_lookup', status: 'running' }) +
+      frame('tool', { name: 'source_lookup', status: 'complete', route: 'web' }) +
+      frame('delta', { channel: 'answer', text: 'A partial answer' }),
+      async () => { throw new DOMException('private network error', 'NetworkError'); });
+    request.and.resolveTo(stream.response);
+    const events: ChatEvent[] = [];
+    await expectAsync(run(events)).toBeRejectedWithError('The connection was interrupted before the answer was complete. The partial reply won’t be used in your next message. You can edit and try the request again.');
+    expect(events.some(event => event.type === 'delta')).toBeTrue();
+    expect(events.some(event => event.type === 'done')).toBeFalse();
+    expect(stream.reader.cancel).toHaveBeenCalledTimes(1);
+    expect(stream.reader.releaseLock).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+  it('preserves confirmed operations and warns about unconfirmed ones without replaying a broken stream', async () => {
+    for (const name of ['memory_write', 'python']) {
+      for (const status of ['running', 'complete']) {
+        request.calls.reset();
+        const stream = controlledResponse(frame('meta', meta) + frame('tool', { name, status: 'running' }) +
+          (status === 'complete' ? frame('tool', { name, status }) : ''),
+          async () => { throw new TypeError('network error'); });
+        request.and.resolveTo(stream.response);
+        const events: ChatEvent[] = [];
+        const warning = name === 'memory_write'
+          ? status === 'complete' ? /The memory operation completed/ : /A memory change may already have completed/
+          : status === 'complete' ? /Python completed/ : /Python may already have run/;
+        await expectAsync(run(events, experimentOptions)).toBeRejectedWithError(warning);
+        expect(events.some(event => event.type === 'done')).toBeFalse();
+        expect(stream.reader.cancel).toHaveBeenCalledTimes(1);
+        expect(request).toHaveBeenCalledTimes(1);
+      }
+    }
+  });
+  it('cancels stalled token retrieval immediately and ignores its late result', async () => {
+    let finish!: (token: string) => void;
+    TestBed.overrideProvider(CHAT_ACCESS_TOKEN, { useValue: () => new Promise<string>(resolve => finish = resolve) });
+    const controller = new AbortController();
+    const pending = TestBed.inject(ChatService).stream('gobwen-flash', [{ role: 'user', content: 'Hello' }], controller.signal, () => {});
+    controller.abort();
+    await expectAsync(pending).toBeRejectedWithError(DOMException, 'Request stopped.');
+    finish('late-token');
+    await Promise.resolve();
+    expect(request).not.toHaveBeenCalled();
+  });
+  it('bounds a stalled token SDK to the deadline without sending a late request', fakeAsync(() => {
+    TestBed.overrideProvider(CHAT_ACCESS_TOKEN, { useValue: () => new Promise<string>(() => {}) });
+    let failure: Error | undefined;
+    run([]).catch(error => failure = error);
+    flushMicrotasks();
+    tick(149_999);
+    expect(failure).toBeUndefined();
+    tick(1);
+    flushMicrotasks();
+    expect(failure?.message).toBe('Sign-in took too long. Your message hasn’t been sent. Please sign in again.');
+    expect(request).not.toHaveBeenCalled();
+  }));
+  it('bounds a stalled stream and leaves a running memory operation uncertain', fakeAsync(() => {
+    const stream = controlledResponse(frame('meta', meta) + frame('tool', { name: 'memory_write', status: 'running' }),
+      () => new Promise(() => {}));
+    request.and.resolveTo(stream.response);
+    let failure: Error | undefined;
+    const events: ChatEvent[] = [];
+    run(events, experimentOptions).catch(error => failure = error);
+    flushMicrotasks();
+    tick(150_000);
+    flushMicrotasks();
+    expect(failure?.message).toContain('The request timed out before the answer was complete.');
+    expect(failure?.message).toContain('A memory change may already have completed');
+    expect(events.some(event => event.type === 'done')).toBeFalse();
+    expect(stream.reader.cancel).toHaveBeenCalledTimes(1);
+    expect(stream.reader.releaseLock).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+  }));
+  it('preserves caller cancellation during a stalled read without calling it a network failure', async () => {
+    const controller = new AbortController();
+    const stream = controlledResponse(frame('meta', meta), () => new Promise(() => {}));
+    request.and.resolveTo(stream.response);
+    const pending = TestBed.inject(ChatService).stream('gobwen-flash', [{ role: 'user', content: 'Hello' }], controller.signal,
+      event => { if (event.type === 'ready') controller.abort(); });
+    await expectAsync(pending).toBeRejectedWithError(DOMException, 'Request stopped.');
+    expect(stream.reader.cancel).toHaveBeenCalledTimes(1);
+    expect(stream.reader.releaseLock).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+  it('does not let stalled cleanup hang a verified completion', fakeAsync(() => {
+    const stream = controlledResponse(frame('meta', meta) + frame('done', { outputTokens: 0, decodeMs: null }),
+      () => new Promise(() => {}), () => new Promise(() => {}));
+    request.and.resolveTo(stream.response);
+    const events: ChatEvent[] = [];
+    let finished = false;
+    run(events).then(() => finished = true);
+    flushMicrotasks();
+    expect(events.some(event => event.type === 'done')).toBeTrue();
+    expect(finished).toBeFalse();
+    tick(1000);
+    flushMicrotasks();
+    expect(finished).toBeTrue();
+    expect(stream.reader.releaseLock).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+  }));
   it('uses native engine timing and surfaces response length limits', async () => {
     request.and.resolveTo(response(frame('meta', meta) + frame('done', {
       outputTokens: 128, decodeMs: 5000, engineTokensPerSecond: 35.5, finishReason: 'length',

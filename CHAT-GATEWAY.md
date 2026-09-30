@@ -148,6 +148,19 @@ keep the generic message; arbitrary server error text is never displayed.
 
 Only `done` completes a response. Unexpected EOF marks it incomplete. Stop,
 navigation away and a 150-second request deadline cancel the client connection.
+The same deadline bounds token retrieval and stream reads, even if an underlying
+SDK or transport ignores cancellation. Reader cleanup is best effort and waits
+at most one additional second. A caller's Stop remains a stopped turn.
+
+Token failures show sign-in guidance. Fetch failures and interrupted reads show
+fixed connection messages rather than browser/SDK exception text. Partial replies
+remain incomplete and are excluded from subsequent context. The client never
+automatically replays a POST. **Edit & retry** restores the prompt for a deliberate
+new submission. If an enabled `Remember:`, `Forget memory:` or `Run Python:`
+request loses its response, the UI explains that the operation may already have
+run; a received complete tool receipt is retained as confirmation. Check saved
+memories before repeating a memory change. Repeating Python starts a new execution.
+
 Lambda can keep running after a disconnect: the generation deadline is 75 seconds,
 with a 120-second model Lambda timeout and 130-second gateway timeout. Avoid logging message text
 or private model reasoning; log request IDs, decision codes and timing instead.
@@ -198,8 +211,10 @@ dated 30 September 2026), minus measured model-worker compute. A public read-onl
 `GET /v1/cost-summary` returns metadata-only durable totals; it never exposes
 account IDs or prompts. Request IDs deduplicate writes and completion is sent
 after recording the aggregate. Missing usage remains unpriced, and bypasses do
-not invent counterfactual model tokens. The headline rounds to cents; details
-show exact values, priced/unpriced counts and assumptions. Gateway, tools, search,
+not invent counterfactual model tokens. Headline and detail amounts retain meaningful
+sub-cent digits down to the ledger's nanodollar resolution; larger amounts round
+to cents. A true zero remains `$0.00`. Details also show priced/unpriced counts
+and assumptions. Gateway, tools, search,
 storage and other unmeasured costs are excluded, so this is not net service
 savings or a claim of equivalent answer quality.
 
