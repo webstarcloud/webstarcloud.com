@@ -151,8 +151,14 @@
           <p *ngIf="turn.contextNotice" class="conversation-note" role="status">{{ turn.contextNotice }}</p>
           <p *ngIf="turn.answer" class="assistant-message" [class.is-streaming]="turn.status === 'streaming'">{{ turn.answer }}</p>
           <nav *ngIf="turn.sources?.length && turn.answer" class="answer-sources" aria-label="Sources consulted">
-            <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}<small *ngIf="source.kind">{{ source.kind === 'indexed' ? 'Trusted index' : 'Web search' }}<ng-container *ngIf="source.indexedAt"> · {{ source.indexedAt | date:'d MMM' }}</ng-container></small></a>
+            <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}<small *ngIf="source.kind">{{ source.kind === 'indexed' ? 'Selected index' : source.kind === 'repository' ? 'Repository source' : 'Web search' }}<ng-container *ngIf="source.indexedAt"> · snapshot {{ source.indexedAt | date:'d MMM y' }}</ng-container><ng-container *ngIf="source.revision"> · {{ source.revision.slice(0, 8) }}</ng-container></small></a>
           </nav>
+          <section *ngIf="turn.review as review" class="repository-review" aria-label="Repository review scope">
+            <p><strong>{{ review.status === 'checked' ? 'Guided repository inspection' : 'Guided inspection · model prioritization unavailable' }}</strong> · selected excerpts · tests not run</p>
+            <p>Revision <a [href]="'https://github.com/' + review.repository + '/tree/' + review.revision" target="_blank" rel="noopener noreferrer">{{ review.revision.slice(0, 8) }}</a><ng-container *ngIf="review.attempts"> · {{ review.attempts }} model {{ review.attempts === 1 ? 'attempt' : 'attempts' }}</ng-container></p>
+            <ul><li *ngFor="let file of review.filesRead"><code>{{ file }}</code></li></ul>
+            <p>Explore files and concrete code checks. Structural observations come from server-defined checks; selection and citation checks do not prove a bug. This is a partial review; no repository changes were made.</p>
+          </section>
           <p *ngIf="turn.recordingNotice" class="conversation-note" role="status">{{ turn.recordingNotice }}</p>
           <p *ngIf="turn.status === 'complete' && turn.finishReason === 'length'" class="turn-status">Response reached its length limit.</p>
           <p *ngIf="turn.error" class="turn-error" role="alert">{{ turn.error }}</p>
@@ -179,6 +185,15 @@
             >
             <span *ngIf="turn.metrics as metrics" [title]="(metrics.inputTokens == null ? 'Input token count unavailable' : metrics.inputTokens + ' input tokens') + ' · ' + metrics.outputTokens + ' output tokens (including model reasoning)'">{{ usageLabel(metrics) }}</span>
           </div>
+          <details *ngIf="turn.timeline?.length" class="request-details">
+            <summary>Request details</summary>
+            <p>Browser-observed milestones include transport time; these are not server execution durations.</p>
+            <p *ngIf="turn.memoryRecall === 'skipped_irrelevant'">Personal memory skipped for this question.</p>
+            <p *ngIf="turn.memoryRecall === 'unavailable'">Personal memory lookup was unavailable.</p>
+            <p *ngIf="turn.memoryRecall === 'used'">Personal memory was consulted.</p>
+            <ol><li *ngFor="let step of turn.timeline"><span>{{ step.label }}</span><time>{{ step.elapsedMs / 1000 | number:'1.2-2' }}s</time></li></ol>
+            <p *ngIf="hasIndexedSources(turn)">An index snapshot date describes when a page was indexed, not when it was published or whether its claims remain current.</p>
+          </details>
         </article>
       </div>
       <div class="composer-area" [class.conversation-composer]="turns().length">
@@ -254,6 +269,7 @@
             {{ sample }} <span aria-hidden="true">↗</span>
           </button>
         </div>
+        <p *ngIf="!turns().length && repositoryReviewAvailable" class="conversation-note">Repository inspection explores selected public files and concrete code checks. Tests are not run.</p>
         <aside *ngIf="!turns().length" class="experiment-note" aria-label="About this experiment">
           <strong>This interface is an experiment.</strong>
           <p>I’m rebuilding the AI assistant stack from first principles<br class="wide-break" /> and documenting each layer as I go.</p>

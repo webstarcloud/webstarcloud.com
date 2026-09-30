@@ -4,14 +4,17 @@ import { ChatService, ChatEvent } from '../chat/chat.service';
 import { GoblinHomeComponent } from './goblin-home.component';
 import { AuthService, AuthState } from '../auth/auth.service';
 import { BehaviorSubject } from 'rxjs';
-import { CHAT_MODELS, ChatTurn } from '../chat/chat.models';
+import { CHAT_MODELS, ChatTurn, RepositoryReview } from '../chat/chat.models';
+import { environment } from '../../environments/environment';
 
 describe('Chat homepage', () => {
   let fixture: ComponentFixture<GoblinHomeComponent>;
   let service: { configured: boolean; stream: jasmine.Spy };
   let account: BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email' | 'subject'>>;
   let signOut: jasmine.Spy;
+  const originalReviewEnabled = environment.repositoryReviewEnabled;
   beforeEach(async () => {
+    environment.repositoryReviewEnabled = false;
     service = { configured: false, stream: jasmine.createSpy('stream') };
     account = new BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email' | 'subject'>>({
       isAuthenticated: true, loading: false, email: 'first@example.com', subject: 'account-one',
@@ -32,7 +35,7 @@ describe('Chat homepage', () => {
     await fixture.whenStable();
     fixture.detectChanges();
   });
-  afterEach(() => fixture.destroy());
+  afterEach(() => { fixture.destroy(); environment.repositoryReviewEnabled = originalReviewEnabled; });
   const completeAnswers = () => service.stream.and.callFake(
     async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
       onEvent({ type: 'delta', channel: 'answer', text: 'An answer' });
@@ -56,6 +59,32 @@ describe('Chat homepage', () => {
     page.newChat();
     expect(page.selectedId()).toBe('gobwen-think');
     expect(page.model.mode).toBe('Think');
+  });
+  it('offers a read-only website review draft without changing the model or sending automatically', async () => {
+    let page = fixture.componentInstance;
+    expect(page.samples).not.toContain('Review the website repository');
+    service.configured = true;
+    expect(page.samples).not.toContain('Review the website repository');
+    environment.repositoryReviewEnabled = true;
+    // Environment and endpoint configuration are fixed for each mounted page.
+    fixture.destroy();
+    fixture = TestBed.createComponent(GoblinHomeComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    page = fixture.componentInstance;
+    const el = fixture.nativeElement as HTMLElement;
+    const starter = Array.from(el.querySelectorAll<HTMLButtonElement>('.prompt-suggestions button'))
+      .find(button => button.textContent?.includes('Review the website repository'));
+    expect(page.samples).toContain('Review the website repository');
+    // Filling any starter preserves the normal sign-in and acknowledgement boundary.
+    expect(starter).toBeDefined();
+    starter!.click();
+    expect(page.draft).toBe('Review the website repository');
+    expect(page.selectedId()).toBe('gobwen-think');
+    expect(service.stream).not.toHaveBeenCalled();
+    page.selectModel('goblin');
+    expect(page.samples).not.toContain('Review the website repository');
   });
   it('offers the Goblin nanoGPT experiment alongside the assistant modes', () => {
     const page = fixture.componentInstance;
@@ -462,6 +491,97 @@ describe('Chat homepage', () => {
     expect(el.querySelector('.tool-activity')?.textContent).toContain('Selected sources used');
     expect(el.querySelector('.working')).toBeNull();
   });
+  it('shows a pinned partial inspection and preserves guided fallback observations without claiming tests ran', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(false);
+    const revision = 'a'.repeat(40);
+    const el = fixture.nativeElement as HTMLElement;
+    for (const status of ['checked', 'invalid'] as const) {
+      page.newChat();
+      const review: RepositoryReview = { repository: 'webstarcloud/webstarcloud.com', mode: 'guided', revision,
+        filesRead: ['src/app/app.component.ts'], partial: true, testsRun: false,
+        findingsReported: 1, attempts: 2, status };
+      service.stream.and.callFake(async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
+        onEvent({ type: 'ready', servedModel: 'Qwen2.5-Coder1.5B · Q4_K_M' });
+        onEvent({ type: 'tool', tool: { name: 'repository_read', status: 'running' } });
+        onEvent({ type: 'tool', tool: { name: 'repository_read', status: 'complete' } });
+        onEvent({ type: 'tool', tool: { name: 'review_check', status: 'running' } });
+        onEvent({ type: 'tool', tool: { name: 'review_check', status: status === 'checked' ? 'complete' : 'failed' } });
+        onEvent({ type: 'sources', sources: [{ id: 1, title: 'app.component.ts', kind: 'repository', revision,
+          url: `https://github.com/webstarcloud/webstarcloud.com/blob/${revision}/src/app/app.component.ts#L1-L20` }] });
+        onEvent({ type: 'delta', channel: 'answer', text: 'The selected source contains a structural observation. [1]' });
+        onEvent({ type: 'done', review, metrics: {
+          startState: 'warm', ttftMs: 50, totalMs: 120, outputTokens: 120, inputTokens: 1800, modelCalled: true, tokensPerSecond: null,
+        } });
+      });
+      page.draft = 'Review the website repository';
+      await page.send();
+      fixture.detectChanges();
+      expect(service.stream.calls.mostRecent().args[0]).toBe('gobwen-think');
+      const scope = el.querySelector('.repository-review')!;
+      expect(scope.textContent).toContain(status === 'checked' ? 'Guided repository inspection' : 'Guided inspection · model prioritization unavailable');
+      expect(scope.textContent).toContain('tests not run');
+      expect(scope.textContent).toContain('partial review');
+      expect(scope.textContent).toContain('no repository changes were made');
+      expect(scope.textContent).toContain('2 model attempts');
+      expect(scope.querySelector('code')?.textContent).toBe('src/app/app.component.ts');
+      expect(scope.querySelector('a')?.getAttribute('href')).toBe(`https://github.com/webstarcloud/webstarcloud.com/tree/${revision}`);
+      expect(el.querySelector('.tool-activity')?.textContent).toContain(status === 'checked' ? 'Selection and citations checked' : 'Model prioritization unavailable');
+      expect(el.querySelector('.assistant-message')?.textContent).toContain('structural observation');
+      expect(el.querySelector('.request-details')?.textContent).not.toContain('index snapshot date');
+      const session = page.store.current()!;
+      page.newChat();
+      page.openSession(session);
+      fixture.detectChanges();
+      expect(el.querySelector('.repository-review')?.textContent).toContain('tests not run');
+      expect(page.turns()[0].servedModel).toBe('Qwen2.5-Coder1.5B · Q4_K_M');
+      expect(page.turns()[0].review).toEqual(review);
+    }
+  });
+  it('keeps genuine milestones collapsed, separates output from answer and labels snapshot freshness honestly', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(true);
+    service.stream.and.callFake(async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
+      onEvent({ type: 'ready', servedModel: 'Qwen' });
+      onEvent({ type: 'tool', tool: { name: 'source_lookup', status: 'running' } });
+      onEvent({ type: 'tool', tool: { name: 'source_lookup', status: 'complete', route: 'trusted_index', cached: true } });
+      onEvent({ type: 'sources', sources: [{ id: 1, title: 'Docs', url: 'https://docs.example/',
+        kind: 'indexed', indexedAt: '2026-09-28T12:00:00Z' }] });
+      onEvent({ type: 'delta', channel: 'reasoning', text: 'First thought.' });
+      onEvent({ type: 'delta', channel: 'reasoning', text: 'Second thought.' });
+      onEvent({ type: 'delta', channel: 'answer', text: 'Answer.' });
+      onEvent({ type: 'delta', channel: 'answer', text: ' [1]' });
+      onEvent({ type: 'done', memoryRecall: 'skipped_irrelevant', metrics: {
+        startState: 'warm', ttftMs: 10, totalMs: 20, outputTokens: 5, tokensPerSecond: 30,
+      } });
+    });
+    page.draft = 'A factual question';
+    await page.send();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const details = el.querySelector<HTMLDetailsElement>('.request-details')!;
+    expect(details.open).toBeFalse();
+    expect(details.textContent).toContain('Browser-observed milestones');
+    expect(details.textContent).toContain('Personal memory skipped for this question');
+    expect(details.textContent).toContain('not when it was published');
+    expect(el.querySelector('.answer-sources')?.textContent).toContain('snapshot 28 Sep 2026');
+    expect(el.querySelector('.tool-activity')?.textContent).toContain('Selected sources used · cached lookup');
+    expect(el.querySelector('.tool-activity')?.textContent).not.toContain('Personal memory');
+    const timeline = page.turns()[0].timeline!;
+    expect(timeline.map(step => step.label)).toEqual([
+      'Request started', 'Input protection receipt received', 'Source lookup running…', 'Selected sources used · cached lookup',
+      'Source links received', 'First output received', 'First answer received', 'Completion receipt received',
+    ]);
+    timeline.forEach((step, index) => expect(step.elapsedMs).toBeGreaterThanOrEqual(index ? timeline[index - 1].elapsedMs : 0));
+    const session = page.store.current()!;
+    page.newChat();
+    page.openSession(session);
+    fixture.detectChanges();
+    expect(page.turns()[0].timeline).toEqual(timeline);
+    expect(el.querySelector<HTMLDetailsElement>('.request-details')?.open).toBeFalse();
+  });
   it('streams real service events into a conversation and keeps completed turns in the next request', async () => {
     // Two fast tool completions can share a wall-clock millisecond.
     spyOn(Date, 'now').and.returnValue(1_700_000_000_000);
@@ -525,6 +645,8 @@ describe('Chat homepage', () => {
     expect(el.querySelector('.tool-activity')?.textContent).toContain('Source lookup interrupted');
     expect(el.querySelector('.tool-activity')?.textContent).not.toContain('running');
     expect(el.querySelector('.tool-running')).toBeNull();
+    expect(page.turns()[0].timeline?.at(-1)?.label).toBe('Request interrupted');
+    expect(page.turns()[0].timeline?.some(step => step.label === 'Completion receipt received')).toBeFalse();
   });
   it('stops pending work and retains its stopped state when starting another chat', async () => {
     service.configured = true;

@@ -36,9 +36,10 @@ export const CHAT_MODELS: readonly ChatModel[] = [
 export const DEFAULT_CHAT_MODEL: ChatModelId = 'gobwen-think';
 
 export interface ChatToolActivity {
-  name: 'calculator' | 'source_lookup' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python';
+  name: 'calculator' | 'source_lookup' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python' | 'repository_read' | 'review_check';
   status: 'running' | 'complete' | 'failed' | 'unavailable';
   route?: 'trusted_index' | 'web';
+  cached?: boolean;
 }
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -59,10 +60,23 @@ export interface ChatMetrics {
   inputTokens?: number | null;
   modelCalled?: boolean;
   modelDurationMs?: number;
-  modelBypass?: 'calculator' | 'source_excerpts' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python';
+  modelBypass?: 'calculator' | 'source_excerpts' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python' | 'clarification';
   firstAnswerMs?: number | null;
 }
-export interface ChatSource { id: number; title: string; url: string; kind?: 'indexed' | 'web'; indexedAt?: string }
+export interface ChatSource { id: number; title: string; url: string; kind?: 'indexed' | 'web' | 'repository'; indexedAt?: string; revision?: string }
+export type MemoryRecall = 'off' | 'skipped_irrelevant' | 'used' | 'unavailable';
+export interface RepositoryReview {
+  repository: 'webstarcloud/webstarcloud.com';
+  mode: 'guided';
+  revision: string;
+  filesRead: string[];
+  partial: true;
+  testsRun: false;
+  findingsReported: number;
+  attempts: 0 | 1 | 2;
+  status: 'checked' | 'invalid';
+}
+export interface RequestMilestone { label: string; elapsedMs: number }
 export interface ChatTurn {
   id: number;
   prompt: string;
@@ -81,6 +95,9 @@ export interface ChatTurn {
   recordingNotice?: string;
   contextNotice?: string;
   tools?: ChatToolActivity[];
+  review?: RepositoryReview;
+  memoryRecall?: MemoryRecall;
+  timeline?: RequestMilestone[];
 }
 export function decodeRate(outputTokens: number, decodeMs: number | null): number | null {
   return Number.isSafeInteger(outputTokens) &&

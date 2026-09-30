@@ -1,7 +1,8 @@
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { readHardeningReceipt } from '../particles/chat-hardening';
-import { ChatMessage, ChatMetrics, ChatModelId, ChatRequestOptions, ChatSource, ChatToolActivity, decodeRate } from './chat.models';
+import { ChatMessage, ChatMetrics, ChatModelId, ChatRequestOptions, ChatSource, ChatToolActivity, MemoryRecall, RepositoryReview, decodeRate } from './chat.models';
+import { isRepositoryReview, readMemoryRecall, readRepositoryReview } from './repository-review';
 import { EventStreamParser } from './event-stream';
 import { AuthService } from '../auth/auth.service';
 import { CostSummaryService } from './cost-summary.service';
@@ -27,7 +28,7 @@ export type ChatEvent =
   | { type: 'blocked' }
   | { type: 'sources'; sources: ChatSource[] }
   | { type: 'tool'; tool: ChatToolActivity }
-  | { type: 'done'; metrics: ChatMetrics; finishReason?: string; recordingNotice?: string };
+  | { type: 'done'; metrics: ChatMetrics; finishReason?: string; recordingNotice?: string; review?: RepositoryReview; memoryRecall?: MemoryRecall };
 const asRecord = (value: unknown): Record<string, unknown> => {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error('The chat service returned an invalid event.');
@@ -97,6 +98,7 @@ export class ChatService {
     const lastMessage = messages[messages.length - 1];
     const showSavedMemories = lastMessage?.role === 'user' &&
       /^\s*Show saved memories[.!]?\s*$/i.test(lastMessage.content);
+    const reviewRequested = model !== 'goblin' && lastMessage?.role === 'user' && isRepositoryReview(lastMessage.content);
     const controller = new AbortController();
     const abort = () => controller.abort();
     signal.addEventListener('abort', abort, { once: true });
@@ -111,6 +113,7 @@ export class ChatService {
     let outputLength = 0;
     let phase: 'token' | 'fetch' | 'read' | null = 'token';
     const toolStates = new Map<ChatToolActivity['name'], ChatToolActivity['status']>();
+    const repositoryRevisions = new Set<string>();
     const interruption = (message: string): Error => {
       const notes: string[] = [message];
       if (outputLength) notes.push('The partial reply won’t be used in your next message.');
@@ -152,6 +155,7 @@ export class ChatService {
         const messages: Record<string, string> = {
           daily_limit: 'You’ve used today’s 20 requests. Come back after midnight UTC.',
           preview_capacity: 'Today’s shared preview allowance is used up. Come back after midnight UTC.',
+          review_daily_limit: 'Today’s three shared repository reviews are used up. Come back after midnight UTC.',
           slow_down: 'Please wait a minute before sending another message.',
           preview_busy: 'The shared preview is busy. Please wait a minute.',
         };
@@ -208,12 +212,15 @@ export class ChatService {
             const name = data['name'];
             const status = data['status'];
             const route = data['route'];
+            const cached = data['cached'];
             if (!checked || typeof name !== 'string' || typeof status !== 'string' ||
-                !['calculator', 'source_lookup', 'site_profile', 'memory_lookup', 'memory_write', 'python'].includes(name) ||
+                !['calculator', 'source_lookup', 'site_profile', 'memory_lookup', 'memory_write', 'python', 'repository_read', 'review_check'].includes(name) ||
+                (['repository_read', 'review_check'].includes(name) && !reviewRequested) ||
                 (['memory_lookup', 'memory_write'].includes(name) && recording?.useMemory !== true) ||
                 (name === 'python' && recording?.useSandbox !== true) ||
                 !['running', 'complete', 'failed', 'unavailable'].includes(status) ||
-                Object.keys(data).some(key => !['name', 'status', 'route'].includes(key)) ||
+                Object.keys(data).some(key => !['name', 'status', 'route', 'cached'].includes(key)) ||
+                (cached !== undefined && (name !== 'source_lookup' || status !== 'complete' || typeof cached !== 'boolean')) ||
                 (route !== undefined && (name !== 'source_lookup' || status !== 'complete' ||
                   typeof route !== 'string' || !['trusted_index', 'web'].includes(route))))
               throw new Error('The tool activity receipt is invalid.');
@@ -221,7 +228,8 @@ export class ChatService {
             if (status === 'running' ? toolStates.has(toolName) : toolStates.get(toolName) !== 'running')
               throw new Error('The tool activity sequence is invalid.');
             const tool: ChatToolActivity = { name: toolName, status: status as ChatToolActivity['status'],
-              ...(route !== undefined ? { route: route as ChatToolActivity['route'] } : {}) };
+              ...(route !== undefined ? { route: route as ChatToolActivity['route'] } : {}),
+              ...(cached !== undefined ? { cached: cached as boolean } : {}) };
             toolStates.set(toolName, tool.status);
             onEvent({ type: 'tool', tool });
           } else if (frame.event === 'sources') {
@@ -239,13 +247,26 @@ export class ChatService {
                 throw new Error('The search source URL is invalid.');
               const kind = source['kind'];
               const indexedAt = source['indexedAt'];
-              if (kind !== undefined && kind !== 'indexed' && kind !== 'web')
+              const revision = source['revision'];
+              if (kind !== undefined && kind !== 'indexed' && kind !== 'web' && kind !== 'repository')
                 throw new Error('The search source type is invalid.');
+              const pinnedRevision = kind === 'repository'
+                ? /^\/webstarcloud\/webstarcloud\.com\/blob\/([a-f0-9]{40})\/[^?#]+$/.exec(url.pathname)?.[1]
+                : undefined;
+              if ((kind === 'repository' && (!reviewRequested || url.hostname !== 'github.com' || !pinnedRevision)) ||
+                  (revision !== undefined && (kind !== 'repository' || typeof revision !== 'string' || !/^[a-f0-9]{40}$/.test(revision))))
+                throw new Error('The repository source receipt is invalid.');
+              if (pinnedRevision) {
+                if (revision !== undefined && revision !== pinnedRevision)
+                  throw new Error('The repository source revision is invalid.');
+                repositoryRevisions.add(pinnedRevision);
+              }
               if (kind === 'indexed' && (typeof indexedAt !== 'string' || indexedAt.length > 40 || !Number.isFinite(Date.parse(indexedAt))))
                 throw new Error('The indexed source date is invalid.');
               return { id: index + 1, title: source['title'], url: url.href,
-                ...(kind ? { kind: kind as 'indexed' | 'web' } : {}),
+                ...(kind ? { kind: kind as ChatSource['kind'] } : {}),
                 ...(kind === 'indexed' ? { indexedAt: indexedAt as string } : {}),
+                ...(revision !== undefined ? { revision: revision as string } : {}),
               };
             });
             onEvent({ type: 'sources', sources });
@@ -288,7 +309,7 @@ export class ChatService {
                 (called !== undefined && typeof called !== 'boolean') ||
                 (modelMs !== undefined && (typeof modelMs !== 'number' || !Number.isFinite(modelMs) || modelMs < 0 || modelMs > 120_000)) ||
                 (bypass != null && (typeof bypass !== 'string' ||
-                  !['calculator', 'source_excerpts', 'site_profile', 'memory_lookup', 'memory_write', 'python'].includes(bypass))) ||
+                  !['calculator', 'source_excerpts', 'site_profile', 'memory_lookup', 'memory_write', 'python', 'clarification'].includes(bypass))) ||
                 (bypass === 'memory_lookup' && !showSavedMemories) ||
                 (model === 'goblin' && ['memory_lookup', 'memory_write', 'python'].includes(String(bypass))) ||
                 (bypass != null && called !== false) ||
@@ -299,9 +320,23 @@ export class ChatService {
                 throw new Error('The worker state receipt could not be verified.');
               state = finalState as ChatMetrics['startState'];
             }
+            if (data['review'] !== undefined && (!reviewRequested || typeof called !== 'boolean'))
+              throw new Error('The repository review receipt is invalid.');
+            if (data['review'] === undefined && ((reviewRequested && called !== false) || repositoryRevisions.size || toolStates.get('repository_read') === 'complete'))
+              throw new Error('The service did not confirm a repository review.');
+            const review = data['review'] === undefined ? undefined : readRepositoryReview(data['review'], toolStates);
+            if (review && (called !== (review.attempts > 0) || (!review.attempts && review.findingsReported !== 0)))
+              throw new Error('The repository review model usage is inconsistent.');
+            if (review && [...repositoryRevisions].some(revision => revision !== review.revision))
+              throw new Error('The repository source revision does not match the review.');
+            if (data['memoryRecall'] !== undefined && model === 'goblin')
+              throw new Error('The personal-memory recall receipt is invalid.');
+            const memoryRecall = data['memoryRecall'] === undefined ? undefined : readMemoryRecall(data['memoryRecall'], recording?.useMemory === true, toolStates);
             if (data['costComparison'] !== undefined) this.costs.accept(data['costComparison']);
             onEvent({
               type: 'done',
+              ...(review ? { review } : {}),
+              ...(memoryRecall ? { memoryRecall } : {}),
               finishReason: typeof data['finishReason'] === 'string' ? data['finishReason'] : undefined,
               recordingNotice: recording?.captureConversation
                 ? (data['recording'] && asRecord(data['recording'])['captureSuppressed'] === 'memory_management'

@@ -22,6 +22,7 @@ import { toolActivityLabel } from '../chat/tool-activity';
 import { CostComparisonComponent } from '../cost-comparison/cost-comparison.component';
 import { Subscription } from 'rxjs';
 import { ExperimentPreferencesService } from '../chat/experiment-preferences.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-goblin-home',
@@ -132,7 +133,14 @@ export class GoblinHomeComponent implements OnDestroy {
   get samples(): string[] {
     return this.model.experimental
       ? ['Once upon a time,', 'The experiment began when', 'In the quiet of the forest,']
-      : ['Explain something simply', 'Help me solve a problem', 'Make something with code'];
+      : ['Explain something simply', 'Help me solve a problem', this.repositoryReviewAvailable
+        ? 'Review the website repository' : 'Make something with code'];
+  }
+  get repositoryReviewAvailable(): boolean {
+    return !this.model.experimental && this.chat.configured && environment.repositoryReviewEnabled;
+  }
+  hasIndexedSources(turn: ChatTurn): boolean {
+    return turn.sources?.some(source => source.kind === 'indexed') ?? false;
   }
   @HostListener('document:keydown.escape') escape() {
     this.modelMenu.set(false);
@@ -227,6 +235,7 @@ export class GoblinHomeComponent implements OnDestroy {
       model: this.model,
       status: 'waiting',
       guard: 'waiting',
+      timeline: [{ label: 'Request started', elapsedMs: 0 }],
     };
     this.turns.update((items) => [...items, turn]);
     this.draft = '';
@@ -235,11 +244,19 @@ export class GoblinHomeComponent implements OnDestroy {
     this.resize();
     const controller = new AbortController();
     this.controller = controller;
+    const started = performance.now();
+    let outputSeen = false;
+    let answerSeen = false;
     const update = (patch: Partial<ChatTurn>) => {
       this.turns.update((items) =>
         items.map((item) => (item.id === turn.id ? { ...item, ...patch } : item)),
       );
       this.persist();
+    };
+    const milestone = (label: string) => {
+      const current = this.turns().find(item => item.id === turn.id);
+      if (current && (current.timeline?.length ?? 0) < 24)
+        update({ timeline: [...(current.timeline ?? []), { label, elapsedMs: Math.max(0, performance.now() - started) }] });
     };
     try {
       await this.chat.stream(
@@ -248,14 +265,23 @@ export class GoblinHomeComponent implements OnDestroy {
         controller.signal,
         (event) => {
           if (controller.signal.aborted) return;
-          if (event.type === 'ready') update({ guard: 'checked', servedModel: event.servedModel, contextNotice: event.contextNotice });
-          if (event.type === 'sources') update({ sources: event.sources });
+          if (event.type === 'ready') {
+            milestone('Input protection receipt received');
+            update({ guard: 'checked', servedModel: event.servedModel, contextNotice: event.contextNotice });
+          }
+          if (event.type === 'sources') {
+            milestone('Source links received');
+            update({ sources: event.sources });
+          }
           if (event.type === 'tool') {
+            milestone(toolActivityLabel(event.tool));
             const current = this.turns().find(item => item.id === turn.id)!;
             const activities = current.tools ?? [];
             update({ tools: [...activities.filter(tool => tool.name !== event.tool.name), event.tool] });
           }
           if (event.type === 'delta') {
+            if (!outputSeen) { outputSeen = true; milestone('First output received'); }
+            if (event.channel === 'answer' && !answerSeen) { answerSeen = true; milestone('First answer received'); }
             const current = this.turns().find((item) => item.id === turn.id)!;
             update({
               status: 'streaming',
@@ -265,14 +291,20 @@ export class GoblinHomeComponent implements OnDestroy {
             });
             this.scrollToLatest();
           }
-          if (event.type === 'blocked')
+          if (event.type === 'blocked') {
+            milestone('Input blocked');
             update({
               status: 'blocked',
               guard: 'blocked',
               error:
                 'Input protection stopped this message before it reached the model. Edit your message to try again.',
             });
-          if (event.type === 'done') update({ status: 'complete', metrics: event.metrics, finishReason: event.finishReason, recordingNotice: event.recordingNotice });
+          }
+          if (event.type === 'done') {
+            milestone('Completion receipt received');
+            update({ status: 'complete', metrics: event.metrics, finishReason: event.finishReason, recordingNotice: event.recordingNotice,
+              review: event.review, memoryRecall: event.memoryRecall });
+          }
         },
         { conversationId: this.store.current()!.conversationId, captureConversation: captureRequested,
           useMemory: !this.model.experimental && this.useMemory,
@@ -280,6 +312,7 @@ export class GoblinHomeComponent implements OnDestroy {
         },
       );
     } catch (error) {
+      milestone(controller.signal.aborted ? 'Stopped' : 'Request interrupted');
       if (controller.signal.aborted) update({ status: 'stopped' });
       else
         update({

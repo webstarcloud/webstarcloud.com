@@ -3,4 +3,19 @@
 .tool-activity li span:first-child { font-size: .75rem; }
 .tool-activity .tool-running { color: #c1cfdf; }
 .tool-activity .tool-failed { color: #cebca7; }
+.repository-review, .request-details { margin: 14px 0 18px 34px; color: #a9b4c3; font-size: .75rem; line-height: 1.65; }
+.repository-review { padding: 13px 15px; border: 1px solid #ffffff14; border-radius: 10px; }
+.repository-review p { margin: 0 0 7px; }
+.repository-review p:last-child { margin-bottom: 0; }
+.repository-review strong { color: #d2dbe5; font-weight: 500; }
+.repository-review a { color: #b6d9d5; text-underline-offset: 3px; }
+.repository-review ul { margin: 8px 0; padding-left: 18px; }
+.repository-review code { overflow-wrap: anywhere; }
+.request-details summary { width: fit-content; cursor: pointer; color: #a9b4c3; }
+.request-details summary:focus-visible { outline: 2px solid #b6d9d5; outline-offset: 4px; }
+.request-details p { margin: 9px 0; font-size: .7rem; color: #8997a8; }
+.request-details ol { list-style: none; padding: 0; max-width: 480px; }
+.request-details li { display: flex; gap: 14px; justify-content: space-between; padding: 4px 0; }
+.request-details time { flex-shrink: 0; font-variant-numeric: tabular-nums; color: #c3cdd8; }
 @media (max-width: 760px) { .tool-activity { margin-left: 0; } }
+@media (max-width: 760px) { .repository-review, .request-details { margin-left: 0; } }

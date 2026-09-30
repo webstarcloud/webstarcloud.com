@@ -138,8 +138,11 @@ message. Send `unknown` if the gateway cannot determine this.
 
 After `meta`, an optional `sources` event contains up to three `{id,title,url}`
 records. IDs must be sequential and URLs HTTPS without embedded credentials.
-Optional `kind` is `indexed` or `web`; indexed sources must include a valid
-`indexedAt` date, shown as provenance in the UI. A selected-page index is tried
+Optional `kind` is `indexed`, `web` or `repository`; indexed sources must include a valid
+`indexedAt` date, shown with its year as an index snapshot, not publication or
+freshness evidence. Repository sources are accepted only for an explicit review;
+their GitHub URLs must pin the fixed website repository to the review's revision.
+An optional 40-character `revision` must agree with the URL. A selected-page index is tried
 before the private SearXNG service's configured whole-web engines.
 Search runs automatically for recognized factual questions. Qwen receives checked
 source excerpts as untrusted data and produces a short grounded answer; the UI
@@ -147,8 +150,56 @@ adds validated links separately. Calculator and explicit provider-management
 answers bypass inference with `startState: "unknown"`, zero output tokens and null
 decode timing. Optional typed `tool` events carry only name, execution status and
 an allowed source route; they never include private memories or executed code.
+A completed `source_lookup` may include a strict boolean `cached` receipt. The UI
+labels a confirmed cache hit without implying a new whole-web request. Ordinary
+requests may include `done.memoryRecall: off|skipped_irrelevant|used|unavailable`.
+Skipped recall adds an explanation without invented memory tool events; executed
+recall must agree with real terminal lookup receipts and per-request consent.
 `done.recording` carries `langwatch: sent|unavailable` and
 `archive: saved|off|unavailable`. The UI reports recording failures when opted in.
+
+### Guided public repository inspection
+
+The discoverable **Review the website repository** starter appears only with a
+connected chat endpoint and `environment.repositoryReviewEnabled`. This flag
+defaults off until reviewer quality and live route checks pass. Filling a starter
+only prepares a draft; sending still requires normal sign-in and acknowledgement.
+Explicit `Review repository` and `Review the website repository`, optionally
+followed by `: <focus>` of up to 1,500 characters, use a separate coder worker with Think or Flash; they do
+not add a model-menu option. Goblin stays a text-continuation experiment.
+The command allows case/whitespace variations, optional `the`/`website`, and a
+final period or exclamation mark, matching the gateway and worker parser.
+
+The first version inspects bounded excerpts from the public
+`webstarcloud/webstarcloud.com` repository. The model selects concrete structural
+observations from server-defined checks; freeform bug diagnosis is disabled.
+Only the latest instruction reaches that worker, without previous chat history,
+personal memories or sandbox credentials. There are no GitHub writes or test
+executions. A further shared daily allowance admits three inspections; exhausted
+reviews return `review_daily_limit` and accurate midnight-UTC guidance.
+
+Real `repository_read` and `review_check` events preserve running/terminal order.
+`meta.model` matches the selected Think/Flash alias, while `servedModel` identifies
+the actual coder. `done.review` must carry the fixed repository, `mode: guided`,
+an immutable 40-character revision, up to three unique read paths, `partial: true`,
+`testsRun: false`, zero to three observations in `findingsReported`, zero to two
+attempts, and `status: checked|invalid`. Checked means selection and citations
+were validated, not that a defect was proved. Invalid selection requires a failed
+model-prioritization receipt; fixed server checks can still report up to three
+structural observations. The UI labels this guided fallback as model prioritization
+unavailable, preserves the observations, labels scope and links
+the revision; it rejects unconfirmed reviews or mismatched source revisions.
+Zero attempts means no applicable structural observations and no model call,
+with real repository receipts and zero native tokens; model-backed inspections
+must report their actual attempts. Native token totals include all attempts.
+Backend bounds and provenance are in
+[`REPOSITORY_REVIEW.md`](../davesbrain/model-lambda/REPOSITORY_REVIEW.md).
+
+Every new turn has collapsed **Request details** with at most 24 milestones:
+request start, received protection/tool/source receipts, first output, first
+answer, and completion or interruption. These are monotonic browser observations,
+including transport time; they are not invented server spans or token counts.
+They remain with the local chat during the visit and do not require recording.
 
 Instead of `meta`, a blocked request sends one terminal `blocked` event with an
 enabled hardening receipt, `blocked: true` and `model_called: false`. It must not
@@ -213,7 +264,7 @@ They are not p50/p95 or a latency guarantee; they exclude the new gateway/browse
 Optional `done` fields: `inputTokens` (actual tokenizer count, or null when
 unavailable), `modelCalled` (boolean), `modelDurationMs` (model execution only,
 excluding search and trace delivery), and `modelBypass` (`calculator`,
-`source_excerpts`, `site_profile`, `memory_lookup`, `memory_write`, or `python`). A bypass requires `modelCalled: false`
+`source_excerpts`, `site_profile`, `memory_lookup`, `memory_write`, `python`, or `clarification`). A bypass requires `modelCalled: false`
 and zero input/output tokens and model duration. Failed lookups may skip the
 model but do not carry a successful bypass reason or earn a savings badge.
 Old servers without these fields still render; missing counts are not guessed.

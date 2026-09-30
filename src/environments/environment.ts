@@ -4,6 +4,7 @@
 
 export const environment = {
   chatEndpoint: '', // Protected SSE gateway. No fallback to the older external-model demo.
+  repositoryReviewEnabled: false, // Enable only after reviewer quality and live route checks pass.
   fundingApiUrl: '', // Enable only after the payment service and run dispatcher are deployed.
   production: false,
   api: {

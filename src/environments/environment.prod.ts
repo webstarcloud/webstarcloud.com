@@ -1,5 +1,6 @@
 export const environment = {
   chatEndpoint: 'https://1m35ubpz0i.execute-api.eu-west-1.amazonaws.com/prod/v1/chat',
+  repositoryReviewEnabled: false, // Enable only after reviewer quality and live route checks pass.
   fundingApiUrl: '', // Public service origin only. Never put payment or compute secrets here.
   production: true,
   api: {
