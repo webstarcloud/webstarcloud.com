@@ -99,6 +99,82 @@ describe('Protected chat stream', () => {
     }) + done));
     await expectAsync(run([])).toBeRejectedWithError(/URL/);
   });
+  it('reports genuine ordered tool activity after protection without counting it as model output', async () => {
+    const events: ChatEvent[] = [];
+    request.and.resolveTo(response(frame('meta', meta) +
+      frame('tool', { name: 'source_lookup', status: 'running' }) +
+      frame('tool', { name: 'source_lookup', status: 'complete', route: 'trusted_index' }) +
+      frame('done', { outputTokens: 0, decodeMs: null })));
+    await run(events);
+    expect(events[1]).toEqual({ type: 'tool', tool: { name: 'source_lookup', status: 'running' } });
+    expect(events[2]).toEqual({ type: 'tool', tool: { name: 'source_lookup', status: 'complete', route: 'trusted_index' } });
+    const done = events[3];
+    if (done.type !== 'done') fail('Expected completion');
+    else {
+      expect(done.metrics.ttftMs).toBeNull();
+      expect(done.metrics.firstAnswerMs).toBeNull();
+      expect(done.metrics.tokensPerSecond).toBeNull();
+    }
+  });
+  it('does not display tool activity before the protection receipt', async () => {
+    const events: ChatEvent[] = [];
+    request.and.resolveTo(response(frame('tool', { name: 'calculator', status: 'running' }) + frame('meta', meta)));
+    await expectAsync(run(events)).toBeRejectedWithError(/tool activity receipt/);
+    expect(events).toEqual([]);
+  });
+  it('accepts each tool and terminal status from the bounded contract', async () => {
+    for (const tool of [
+      { name: 'calculator', status: 'complete' },
+      { name: 'calculator', status: 'failed' },
+      { name: 'site_profile', status: 'complete' },
+      { name: 'source_lookup', status: 'unavailable' },
+      { name: 'source_lookup', status: 'failed' },
+      { name: 'source_lookup', status: 'complete', route: 'web' },
+    ] as const) {
+      request.and.resolveTo(response(frame('meta', meta) +
+        frame('tool', { name: tool.name, status: 'running' }) + frame('tool', tool) +
+        frame('done', { outputTokens: 0, decodeMs: null })));
+      const events: ChatEvent[] = [];
+      await run(events);
+      expect(events[2]).toEqual({ type: 'tool', tool });
+    }
+  });
+  it('rejects invented tool labels, extra data and unsupported route claims', async () => {
+    for (const tool of [
+      { name: 'browser', status: 'running' },
+      { name: ['calculator'], status: 'running' },
+      { name: 'calculator', status: 'thinking' },
+      { name: 'calculator', status: ['running'] },
+      { name: 'calculator', status: 'running', input: 'private expression' },
+      { name: 'source_lookup', status: 'running', route: 'web' },
+      { name: 'calculator', status: 'complete', route: 'web' },
+      { name: 'source_lookup', status: 'complete', route: 'google' },
+      { name: 'source_lookup', status: 'complete', route: ['web'] },
+    ]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('tool', tool)));
+      const events: ChatEvent[] = [];
+      await expectAsync(run(events)).toBeRejectedWithError(/tool activity receipt/);
+      expect(events.some(event => event.type === 'tool')).toBeFalse();
+    }
+  });
+  it('rejects terminal tool events without a start and duplicate starts or completions', async () => {
+    const running = { name: 'calculator', status: 'running' };
+    const complete = { name: 'calculator', status: 'complete' };
+    for (const tools of [[complete], [running, running], [running, complete, complete], [running, complete, running]]) {
+      request.and.resolveTo(response(frame('meta', meta) + tools.map(tool => frame('tool', tool)).join('')));
+      const events: ChatEvent[] = [];
+      await expectAsync(run(events)).toBeRejectedWithError(/tool activity sequence/);
+      expect(events.filter(event => event.type === 'tool').length).toBe(tools.length - 1);
+    }
+  });
+  it('rejects completion while a confirmed tool is still running', async () => {
+    request.and.resolveTo(response(frame('meta', meta) +
+      frame('tool', { name: 'source_lookup', status: 'running' }) +
+      frame('done', { outputTokens: 0, decodeMs: null })));
+    const events: ChatEvent[] = [];
+    await expectAsync(run(events)).toBeRejected();
+    expect(events.some(event => event.type === 'done')).toBeFalse();
+  });
   it('preserves indexed provenance and rejects invalid snapshot metadata', async () => {
     const done = frame('done', { outputTokens: 0, decodeMs: null });
     const source = { id: 1, title: 'Docs', url: 'https://docs.example/', kind: 'indexed' as const, indexedAt: '2026-09-28T12:00:00Z' };
@@ -158,6 +234,7 @@ describe('Protected chat stream', () => {
       { hardening: { ...meta.hardening, enabled: false } },
       { hardening: { ...meta.hardening, model_called: true } },
       { hardening: { ...meta.hardening, blocked: true } },
+      { startState: ['warm'] },
     ]) {
       request.and.resolveTo(response(frame('meta', { ...meta, ...change })));
       await expectAsync(run([])).toBeRejectedWithError(/could not be verified/);
@@ -207,6 +284,29 @@ describe('Protected chat stream', () => {
       expect(done.metrics.startState).toBe('unknown');
       expect(done.metrics.tokensPerSecond).toBeNull();
     } else fail('missing completion');
+  });
+  it('uses final worker state to avoid classifying a tool bypass as cold inference', async () => {
+    request.and.resolveTo(response(frame('meta', { ...meta, startState: 'cold' }) +
+      frame('tool', { name: 'calculator', status: 'running' }) +
+      frame('tool', { name: 'calculator', status: 'complete' }) +
+      frame('delta', { text: '4', channel: 'answer' }) +
+      frame('done', { outputTokens: 0, inputTokens: 0, decodeMs: null,
+        modelCalled: false, modelDurationMs: 0, modelBypass: 'calculator', startState: 'unknown' })));
+    const events: ChatEvent[] = [];
+    await run(events);
+    const done = events[events.length - 1];
+    if (done.type === 'done') expect(done.metrics.startState).toBe('unknown');
+    else fail('missing completion');
+  });
+  it('rejects unsupported final worker states before completing a turn', async () => {
+    for (const startState of ['warming', ['warm'], null, 1]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('done', {
+        outputTokens: 0, decodeMs: null, startState,
+      })));
+      const events: ChatEvent[] = [];
+      await expectAsync(run(events)).toBeRejectedWithError(/worker state receipt/);
+      expect(events.some(event => event.type === 'done')).toBeFalse();
+    }
   });
   it('rejects truncated streams instead of marking a partial answer complete', async () => {
     request.and.resolveTo(

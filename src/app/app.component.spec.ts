@@ -4,7 +4,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { AppComponent } from './app.component';
-import { HomeComponent } from './home/home.component';
 import { GoblinChamberComponent } from './goblin-chamber/goblin-chamber.component';
 import { appRoutes } from './app-routing.module';
 import { AuthService } from './auth/auth.service';
@@ -20,10 +19,7 @@ describe('AppComponent', () => {
         RouterTestingModule.withRoutes(appRoutes),
         HttpClientTestingModule
       ],
-      declarations: [
-        AppComponent,
-        HomeComponent
-      ],
+      declarations: [AppComponent],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [{ provide: AuthService, useValue: {
         snapshot: { isAuthenticated: false, loading: false },
@@ -55,28 +51,51 @@ describe('AppComponent', () => {
     expect(brand?.querySelector('.stage-brand__mark')).not.toBeNull();
   });
 
-  it('preserves the career profile, CV and existing demo at its profile route', async () => {
+  it('redirects the former profile to the merged About experience and preserves the selected CV', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     await navigate('/profile');
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h1')?.textContent?.trim()).toBe(
-      'Building agentic AI platforms and unified control planes'
-    );
-    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('TMNL');
-    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('LeasePlan');
-    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('InvestSure');
-    expect(compiled.querySelector('.professional-proof')?.textContent).toContain('$1.5M');
+    expect(TestBed.inject(Router).url).toBe('/about#experience');
+    expect(compiled.querySelector('app-about-page')).not.toBeNull();
+    const experience = compiled.querySelector('#experience');
+    expect(experience?.textContent).toContain('Building agentic AI platforms and unified control planes');
+    const highlights = experience?.querySelector('.career-grid');
+    expect(highlights?.textContent).toContain('TMNL');
+    expect(highlights?.textContent).toContain('LeasePlan');
+    expect(highlights?.textContent).toContain('InvestSure');
+    expect(highlights?.textContent).toContain('$1.5M');
+    expect(experience?.querySelector('.current-work')?.textContent).toContain('Backbase');
+    expect(experience?.querySelector('.career-details')).not.toBeNull();
     expect(compiled.textContent).not.toContain('Customers served');
     expect(compiled.textContent).not.toContain('Billions');
     expect(compiled.querySelector<HTMLAnchorElement>('a[download="David-Webster.pdf"]')?.getAttribute('href'))
       .toBe('/assets/David-Webster.pdf');
     expect(compiled.querySelector<HTMLAnchorElement>('a[href="mailto:dwebster182@gmail.com"]'))
       .not.toBeNull();
-    expect(compiled.querySelector('app-particles')).not.toBeNull();
-    expect(compiled.querySelector('.brain-context')?.textContent).toContain('external model');
+    expect(compiled.querySelector('app-goblin-chamber')).not.toBeNull();
+    expect(compiled.querySelector('app-particles')).toBeNull();
+    expect(compiled.querySelector('.professional-hero')).toBeNull();
+    expect(compiled.querySelector('.brain-context')).toBeNull();
+  });
+
+  it('keeps the About experience link on the same page with its career anchor', async () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    await navigate('/about');
+    fixture.detectChanges();
+    const link = (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLAnchorElement>('.about-links a[href="/about#experience"]');
+
+    expect(link).not.toBeNull();
+    link!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(TestBed.inject(Router).url).toBe('/about#experience');
+    expect(fixture.nativeElement.querySelector('#experience h2')).not.toBeNull();
   });
 
   it('redirects former indexes to the lab without mounting the chat stage', async () => {

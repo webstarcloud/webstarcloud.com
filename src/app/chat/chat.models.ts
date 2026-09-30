@@ -24,7 +24,22 @@ export const CHAT_MODELS: readonly ChatModel[] = [
     source: 'Qwen3.5-0.8B · thinking',
     experimental: false,
   },
+  {
+    id: 'goblin',
+    name: 'Goblin',
+    mode: 'Base',
+    description: 'A nanoGPT experiment. Try a text continuation.',
+    source: '248M parameters · trained from scratch',
+    experimental: true,
+  },
 ];
+export const DEFAULT_CHAT_MODEL: ChatModelId = 'gobwen-think';
+
+export interface ChatToolActivity {
+  name: 'calculator' | 'source_lookup' | 'site_profile';
+  status: 'running' | 'complete' | 'failed' | 'unavailable';
+  route?: 'trusted_index' | 'web';
+}
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -57,6 +72,7 @@ export interface ChatTurn {
   sources?: ChatSource[];
   recordingNotice?: string;
   contextNotice?: string;
+  tools?: ChatToolActivity[];
 }
 export function decodeRate(outputTokens: number, decodeMs: number | null): number | null {
   return Number.isSafeInteger(outputTokens) &&

@@ -132,7 +132,7 @@ footer {
   font-size: 0.67rem;
   color: #8a8c8f;
 }
-footer span {
+footer a:first-child {
   margin-right: auto;
 }
 footer a {

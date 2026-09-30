@@ -1,0 +1,59 @@
+<section class="experience-section" aria-labelledby="experience-heading">
+  <header class="experience-heading">
+    <div>
+      <p class="eyebrow">EXPERIENCE & CV</p>
+      <h2 id="experience-heading">Platforms, products<br />and applied AI.</h2>
+      <p>Building agentic AI platforms and unified control planes, with a background in hands-on engineering and technical delivery.</p>
+    </div>
+    <a class="cv-link" href="/assets/David-Webster.pdf" download="David-Webster.pdf">Download CV ↗</a>
+  </header>
+
+  <div class="career-grid">
+    <article *ngFor="let highlight of highlights" class="career-card">
+      <p class="career-context">{{ highlight.context }}</p>
+      <h3>{{ highlight.name }}</h3>
+      <p>{{ highlight.description }}</p>
+      <p class="career-result">{{ highlight.result }}</p>
+    </article>
+  </div>
+
+  <article class="current-work">
+    <div>
+      <p class="eyebrow">CURRENT ROLE</p>
+      <h3>Backbase</h3>
+      <p class="career-context">Principal Solution Architect · Azure</p>
+    </div>
+    <div>
+      <p>I lead the architecture for Backbase’s new BankOS and build the shared agentic platform, including control and data plane APIs. I turn recurring requirements into reusable platform capabilities.</p>
+      <p class="career-result">Multiple internal and external customer projects are live in production.</p>
+    </div>
+  </article>
+
+  <details class="career-details">
+    <summary>Earlier work & technical focus</summary>
+    <div class="career-grid earlier-work">
+      <article *ngFor="let highlight of earlierWork" class="career-card">
+        <p class="career-context">{{ highlight.context }}</p>
+        <h3>{{ highlight.name }}</h3>
+        <p>{{ highlight.description }}</p>
+        <p class="career-result">{{ highlight.result }}</p>
+      </article>
+    </div>
+    <dl class="technical-focus">
+      <div><dt>Cloud platforms</dt><dd>AWS, Azure, GCP, on-premises; Kubernetes, Terraform, Aviatrix and Linux</dd></div>
+      <div><dt>Python & agents</dt><dd>LangGraph, LangChain, Agno, NeMo Guardrails, MCP; loop and harness engineering</dd></div>
+      <div><dt>ML & acceleration</dt><dd>PyTorch, TensorFlow, Numba; JAX for prototyping</dd></div>
+      <div><dt>Software & delivery</dt><dd>Go, Rust, Java, TypeScript, JavaScript, C++; CI/CD and test automation</dd></div>
+      <div><dt>Identity & access</dt><dd>Okta, Active Directory and WorkOS</dd></div>
+      <div><dt>Data platforms</dt><dd>Kafka, Flink, Spark, EMR, Airflow and SageMaker</dd></div>
+    </dl>
+    <p class="background-note">I started coding on a ZX Spectrum at eight and began learning C++ at thirteen after a Christmas gift. Today I build Python agent systems and cloud platforms.</p>
+  </details>
+
+  <a class="research-link" routerLink="/labs/llm-input-hardening">
+    <span>Recent work</span>
+    <strong>llm-input-hardening</strong>
+    <span>A published Python package with a Rust core for Unicode-aware text hardening.</span>
+    <span aria-hidden="true">↗</span>
+  </a>
+</section>

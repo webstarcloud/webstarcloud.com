@@ -1,0 +1,6 @@
+.tool-activity { display: flex; flex-wrap: wrap; gap: 7px; list-style: none; padding: 0; margin: 8px 0 18px 34px; }
+.tool-activity li { display: flex; align-items: center; gap: 7px; padding: 5px 9px; border: 1px solid #ffffff12; border-radius: 7px; font-size: .68rem; line-height: 1.5; color: #a9b4c3; }
+.tool-activity li span:first-child { font-size: .75rem; }
+.tool-activity .tool-running { color: #c1cfdf; }
+.tool-activity .tool-failed { color: #cebca7; }
+@media (max-width: 760px) { .tool-activity { margin-left: 0; } }

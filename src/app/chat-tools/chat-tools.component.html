@@ -90,19 +90,6 @@
       any first reasoning output; it is not necessarily time to the final answer.
       <ng-container *ngIf="latest?.firstAnswerMs != null">First answer text: {{ latest!.firstAnswerMs! / 1000 | number: '1.2-2' }}s.</ng-container>
     </p>
-    <section class="savings-summary" aria-label="Model usage and estimated savings">
-      <h3>Less model work.</h3>
-      <dl class="metrics">
-        <div><dt>Model calls avoided</dt><dd>{{ savings.calls }}</dd><span>Completed responses that skipped generation</span></div>
-        <div><dt>Est. compute avoided</dt><dd>{{ savingLabel(savings.usd) }}</dd><span>{{ savings.estimatedCalls }} calls with a measured comparison</span></div>
-      </dl>
-      <p class="subtle">{{ savings.outputTokens | number }} output tokens generated, including model reasoning. Skipped calls used zero model tokens.</p>
-      <details class="savings-method">
-        <summary>How the estimate works</summary>
-        <p class="subtle">The dollar estimate uses the median model execution time from warm runs of the same model and version in this conversation. It updates as more runs are measured. Without a warm reference, only the avoided call is shown. The number of tokens a skipped call would have generated is unknown.</p>
-        <p class="subtle">Comparison: {{ comparison.memoryGb }} GB ARM Lambda in Ireland at ${{ comparison.usdPerGbSecond | number:'1.10-10' }} per GB-second, checked {{ comparison.checkedOn }}. Before free credits or discounts. Search, gateway, initialization outside model execution and other costs remain; this is not a billing credit. Different questions need different work. <a [href]="comparison.pricingUrl" target="_blank" rel="noopener noreferrer">AWS pricing ↗</a></p>
-      </details>
-    </section>
     <a class="article-link" routerLink="/research/performance" (click)="close()"
       >How these timings are measured →</a
     ></ng-template

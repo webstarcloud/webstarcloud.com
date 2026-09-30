@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AboutPageComponent } from './about-page/about-page.component';
-import { HomeComponent } from './home/home.component';
 import { AnchorKeepWorkspaceComponent } from './anchorkeep-workspace/anchorkeep-workspace.component';
 import { authGuard } from './auth/auth.guard';
 import { AnchorKeepVentureComponent } from './ventures/anchorkeep-venture/anchorkeep-venture.component';
@@ -18,7 +17,7 @@ export const appRoutes: Routes = [
     pathMatch: 'full'
   },
   { path: 'about', component: AboutPageComponent, title: 'About & support | David Webster' },
-  { path: 'profile', component: HomeComponent, title: 'Experience & CV | David Webster' },
+  { path: 'profile', redirectTo: '/about#experience', pathMatch: 'full' },
   { path: 'research', component: LabNotebookComponent, data: { section: 'articles' }, title: 'Research | David Webster' },
   { path: 'research/runs', component: LabNotebookComponent, data: { section: 'runs' }, title: 'Run journal | David Webster' },
   { path: 'research/roadmap', component: LabNotebookComponent, data: { section: 'roadmap' }, title: 'Roadmap | David Webster' },

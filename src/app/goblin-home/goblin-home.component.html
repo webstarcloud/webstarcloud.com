@@ -16,7 +16,7 @@
         alt="David Webster’s dodecahedron"
         width="31"
         height="31"
-      /><span>David Webster<br /><strong>Independent research</strong></span
+      /><span>David Webster<br /><strong>Experimental assistant</strong></span
       ><button class="icon-button" (click)="sidebarOpen.set(false)" aria-label="Collapse sidebar">
         ⇤
       </button>
@@ -46,13 +46,9 @@
       ><a routerLink="/research"
         ><span aria-hidden="true">⌁</span> Research <span aria-hidden="true">↗</span></a
       ><a routerLink="/about"
-        ><span aria-hidden="true">◌</span> About & support <span aria-hidden="true">↗</span></a
+        ><span aria-hidden="true">◌</span> About <span aria-hidden="true">↗</span></a
       >
     </nav>
-    <div class="sidebar-footer">
-      <span class="owner-avatar">dw</span>
-      <div><strong>David Webster</strong><span>Independent builder & researcher</span></div>
-    </div>
   </aside>
   <div class="chat-main">
     <header class="chat-header">
@@ -119,15 +115,7 @@
             <path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6z" />
             <path d="m8 12 3 3 5-6" /></svg
           ><span>Input protection</span></button
-        ><button
-          class="icon-button metrics-button"
-          (click)="tools.set('performance')"
-          aria-label="View response performance"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 18V12M10 18V6M16 18V9M22 18V3" />
-          </svg>
-        </button>
       </div>
     </header>
     <div class="conversation" #transcript [class.has-turns]="turns().length">
@@ -147,6 +135,15 @@
             }}</strong
             ><span>{{ turn.model.mode }}</span>
           </div>
+          <p *ngIf="!turn.answer && (turn.status === 'waiting' || turn.status === 'streaming')" class="working" role="status" aria-label="Thinking">
+            <span class="thinking-label" aria-hidden="true">Thinking<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>
+          </p>
+          <ul *ngIf="turn.tools?.length" class="tool-activity" aria-label="Tools used" aria-live="polite">
+            <li *ngFor="let tool of turn.tools" [class.tool-running]="tool.status === 'running' && (turn.status === 'waiting' || turn.status === 'streaming')" [class.tool-failed]="tool.status === 'failed' || tool.status === 'unavailable' || (tool.status === 'running' && turn.status !== 'waiting' && turn.status !== 'streaming')">
+              <span aria-hidden="true">{{ tool.status === 'complete' ? '✓' : tool.status === 'running' && (turn.status === 'waiting' || turn.status === 'streaming') ? '◌' : '!' }}</span>
+              <span>{{ toolActivityLabel(tool, turn.status) }}</span>
+            </li>
+          </ul>
           <details *ngIf="turn.reasoning && turn.answer" class="reasoning">
             <summary>Model reasoning</summary>
             <p>{{ turn.reasoning }}</p>
@@ -157,9 +154,6 @@
             <a *ngFor="let source of turn.sources" [href]="source.url" target="_blank" rel="noopener noreferrer">[{{ source.id }}] {{ source.title }}<small *ngIf="source.kind">{{ source.kind === 'indexed' ? 'Trusted index' : 'Web search' }}<ng-container *ngIf="source.indexedAt"> · {{ source.indexedAt | date:'d MMM' }}</ng-container></small></a>
           </nav>
           <p *ngIf="turn.recordingNotice" class="conversation-note" role="status">{{ turn.recordingNotice }}</p>
-          <p *ngIf="!turn.answer && (turn.status === 'waiting' || turn.status === 'streaming')" class="working" role="status" aria-label="Thinking">
-            <span class="thinking-label" aria-hidden="true">Thinking<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>
-          </p>
           <p *ngIf="turn.status === 'complete' && turn.finishReason === 'length'" class="turn-status">Response reached its length limit.</p>
           <p *ngIf="turn.error" class="turn-error" role="alert">{{ turn.error }}</p>
           <p *ngIf="turn.status === 'stopped'" class="turn-status">
@@ -184,7 +178,6 @@
               >{{ turn.metrics.totalMs / 1000 | number: '1.1-1' }}s total</span
             >
             <span *ngIf="turn.metrics as metrics" [title]="(metrics.inputTokens == null ? 'Input token count unavailable' : metrics.inputTokens + ' input tokens') + ' · ' + metrics.outputTokens + ' output tokens (including model reasoning)'">{{ usageLabel(metrics) }}</span>
-            <span *ngIf="turn.status === 'complete' && turn.metrics?.modelBypass" class="saving-badge" [title]="savingsDescription(turn)">{{ savingsLabel(turn) }}</span>
           </div>
         </article>
       </div>
@@ -266,12 +259,7 @@
         </details>
       </div>
     </div>
-    <footer class="chat-footer">
-      <span>An independent experiment by <a routerLink="/about">David Webster</a></span
-      ><button (click)="tools.set('performance')">
-        Built to be measured <span aria-hidden="true">↗</span>
-      </button>
-    </footer>
+    <app-cost-comparison></app-cost-comparison>
   </div>
   <app-chat-tools
     *ngIf="tools() as panel"

@@ -7,7 +7,7 @@
     <details open>
       <summary><span class="step-number">01</span><span><strong>Your question</strong><small>Browser · conversation context</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
-        <p>You choose Flash or Think and send a message. The browser sends the current conversation with your signed-in request. A chat session lives in browser memory; it is not persistent personal memory or a model learning new weights.</p>
+        <p>Think is selected by default. You can switch to Flash for direct answers or Goblin for the experimental base-model continuation. The browser sends the current conversation with your signed-in request. A chat session lives in browser memory; it is not persistent personal memory or a model learning new weights.</p>
         <p>That familiar interface is built on existing model and runtime components. “From first principles” means understanding and rebuilding the stack around them, with each decision made visible.</p>
         <a routerLink="/research/models">Understand the model choice →</a>
       </div>
@@ -30,16 +30,16 @@
     <details>
       <summary><span class="step-number">04</span><span><strong>Choose the answer path</strong><small>Bounded calculator · source lookup · direct generation</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
-        <p>Explicit rules choose one bounded tool step. Simple arithmetic uses a decimal calculator. Questions about this site’s owner use a maintained profile. Those answers skip the model entirely.</p>
+        <p>For the Qwen assistant, explicit rules choose one bounded tool step. Simple arithmetic uses a decimal calculator. Questions about this site’s owner use a maintained profile. Those answers skip the model entirely. Goblin takes the base-model continuation path.</p>
         <p>Recognized factual questions check selected, indexed pages first, then whole-web search through a private SearXNG worker. Only the current question goes to search. If no evidence is available, the system declines to guess. Other questions proceed directly to generation.</p>
-        <p>This is rule-based routing, not a model deciding which tools to call or an ensemble of specialist models.</p>
+        <p>The interface shows tool activity as the service starts and completes a calculator, lookup or profile operation. Those events describe real execution. This is rule-based routing, not an ensemble of specialist models.</p>
         <a routerLink="/research/search">Retrieval changes the trust boundary →</a>
       </div>
     </details>
     <details>
       <summary><span class="step-number">05</span><span><strong>Generate, when needed</strong><small>Qwen3.5-0.8B · llama.cpp · CPU Lambda</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
-        <p>Both assistant modes use the same Qwen checkpoint, quantized to Q8_0, in separate 4 GB ARM64 Lambda workers. Weights load on demand. The prompt must fit a bounded context, and output has token, time and repetition limits.</p>
+        <p>Both assistant modes use the same Qwen checkpoint, quantized to Q8_0, in separate 4 GB ARM64 Lambda workers. Goblin has its own 4 GB CPU worker and PyTorch runtime. Weights load on demand. The prompt must fit a bounded context, and output has token, time and repetition limits.</p>
         <p>Think has a reasoning budget for ordinary generation. Search-backed answers use direct generation in both modes: the model receives untrusted excerpts as context and produces a short answer. The interface adds the source links separately.</p>
         <a routerLink="/research/models">Modes, quantization and their tradeoffs →</a>
       </div>
@@ -48,7 +48,8 @@
       <summary><span class="step-number">06</span><span><strong>Stream and measure</strong><small>Answer deltas · token usage · completion receipt</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
         <p>Server-sent events carry output through the gateway. “Thinking…” stays visible until the first answer text arrives, then the interface displays real answer chunks immediately. It is a waiting indicator, not a measurement of the model’s internal reasoning.</p>
-        <p>The browser measures first output, first answer and completion separately. The worker reports its cold or warm state and engine token usage. The Performance panel shows these observations for completed turns.</p>
+        <p>The browser measures first output, first answer and completion separately. The worker reports its cold or warm state and engine token usage; tool-only answers finish with an unknown model state. Response time and token usage appear beside completed answers, with the measurement method documented here.</p>
+        <p>The gateway records metadata-only totals before sending completion. The chat’s cost comparison uses an assumed frontier API rate of US$3 per million input tokens and US$15 per million output tokens, minus measured model-worker compute. It starts when tracking begins and excludes gateway, search, storage and other unmeasured costs. It is an approximate model-compute comparison, not net service savings or a claim of equal quality.</p>
         <a routerLink="/research/performance">Where the four performance numbers come from →</a>
       </div>
     </details>
@@ -69,7 +70,7 @@
   <section class="entry">
     <p class="eyebrow">A PARALLEL RESEARCH TRACK</p>
     <h2>What if I trained the model too?</h2>
-    <p>Goblin-250M is the separate experiment in training a small base model from scratch. Its checkpoint, loss and capability tests belong in the run journal. It does not power this assistant.</p>
+    <p>Goblin-250M is my nanoGPT-inspired experiment in training a small base model from scratch. Its checkpoint, loss and capability tests belong in the run journal. Choose Goblin in the model menu to try its text continuation; Think and Flash remain the Qwen assistant modes.</p>
     <a class="text-link" routerLink="/research/runs">Explore the training experiment →</a>
   </section>
 </article>

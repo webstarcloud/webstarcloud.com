@@ -1,0 +1,21 @@
+<details class="cost-comparison">
+  <summary>
+    <span>Total model compute</span>
+    <strong>{{ statusLabel }}</strong>
+    <span>vs. estimated API cost <span aria-hidden="true">⌄</span></span>
+  </summary>
+  <ng-container *ngIf="summary as total; else methodology">
+    <p>{{ total.pricedRequests | number }} measured model {{ total.pricedRequests === 1 ? 'reply' : 'replies' }} across the site since {{ total.since | date:'d MMM yyyy' }}. Updated {{ total.updatedAt | date:'d MMM, HH:mm' }}.</p>
+    <dl *ngIf="total.referenceApiUsd !== null">
+      <div><dt>Estimated API cost</dt><dd>{{ costAmount(total.referenceApiUsd!) }}</dd></div>
+      <div><dt>Measured interval · model Lambda estimate</dt><dd>{{ costAmount(total.estimatedModelComputeUsd!) }}</dd></div>
+    </dl>
+    <p>The API approximation uses ${{ total.comparator.inputUsdPerMillion }} per million input tokens and ${{ total.comparator.outputUsdPerMillion }} per million output tokens. These are assumed comparison rates, checked {{ total.comparator.checkedOn }}.</p>
+    <p>{{ total.scope }}</p>
+    <p>{{ total.unpricedRequests | number }} completed {{ total.unpricedRequests === 1 ? 'reply has' : 'replies have' }} no comparable measured model usage and {{ total.unpricedRequests === 1 ? 'is' : 'are' }} excluded from the dollar comparison.</p>
+  </ng-container>
+  <ng-template #methodology>
+    <p>The site compares measured token usage with an approximate API rate, then subtracts estimated model-worker compute. Totals start when this tracking is enabled; unavailable measurements stay blank.</p>
+    <p>This covers completed model replies. Failed and stopped requests, search, gateway, storage and other overhead are excluded. Different models can produce different answers and token counts.</p>
+  </ng-template>
+</details>

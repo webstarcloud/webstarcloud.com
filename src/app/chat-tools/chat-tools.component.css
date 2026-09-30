@@ -187,28 +187,6 @@ dd {
   margin: 16px 0 4px;
   text-decoration: none;
 }
-.savings-summary {
-  border-top: 1px solid #b3c9e522;
-  margin-top: 24px;
-  padding-top: 12px;
-}
-.savings-summary h3 {
-  font-size: 0.9rem;
-  font-weight: 400;
-}
-.savings-summary dd {
-  font-size: 1.15rem;
-  overflow-wrap: anywhere;
-}
-.savings-method summary {
-  color: #a9abae;
-  font-size: 0.71rem;
-  cursor: pointer;
-}
-.savings-method summary:focus-visible {
-  outline: 2px solid #b3c9e5;
-  outline-offset: 4px;
-}
 @media (max-width: 500px) {
   dialog {
     padding: 23px;

@@ -1,9 +1,10 @@
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { readHardeningReceipt } from '../particles/chat-hardening';
-import { ChatMessage, ChatMetrics, ChatModelId, ChatSource, decodeRate } from './chat.models';
+import { ChatMessage, ChatMetrics, ChatModelId, ChatSource, ChatToolActivity, decodeRate } from './chat.models';
 import { EventStreamParser } from './event-stream';
 import { AuthService } from '../auth/auth.service';
+import { CostSummaryService } from './cost-summary.service';
 
 export const CHAT_ENDPOINT = new InjectionToken<string>('Chat gateway endpoint', {
   providedIn: 'root',
@@ -25,6 +26,7 @@ export type ChatEvent =
   | { type: 'delta'; text: string; channel: 'answer' | 'reasoning' }
   | { type: 'blocked' }
   | { type: 'sources'; sources: ChatSource[] }
+  | { type: 'tool'; tool: ChatToolActivity }
   | { type: 'done'; metrics: ChatMetrics; finishReason?: string; recordingNotice?: string };
 const asRecord = (value: unknown): Record<string, unknown> => {
   if (!value || typeof value !== 'object' || Array.isArray(value))
@@ -37,6 +39,7 @@ export class ChatService {
   private readonly endpoint = inject(CHAT_ENDPOINT).trim();
   private readonly request = inject(CHAT_FETCH);
   private readonly accessToken = inject(CHAT_ACCESS_TOKEN);
+  private readonly costs = inject(CostSummaryService);
   get configured(): boolean {
     return Boolean(this.endpoint);
   }
@@ -62,6 +65,7 @@ export class ChatService {
     let checked = false;
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     let outputLength = 0;
+    const toolStates = new Map<ChatToolActivity['name'], ChatToolActivity['status']>();
     try {
       const token = await this.accessToken();
       if (!token) throw new Error('Sign in with Google to chat. Your message hasn’t been sent.');
@@ -113,7 +117,8 @@ export class ChatService {
               !receipt?.enabled ||
               receipt.blocked ||
               receipt.model_called ||
-              !['cold', 'warm', 'unknown'].includes(String(data['startState']))
+              typeof data['startState'] !== 'string' ||
+              !['cold', 'warm', 'unknown'].includes(data['startState'])
             ) {
               throw new Error(
                 'The model identity or input protection receipt could not be verified.',
@@ -127,6 +132,24 @@ export class ChatService {
             onEvent({ type: 'ready', servedModel: data['servedModel'],
               ...(dropped ? { contextNotice: 'Some earlier context was left out because input protection flagged a previous reply.' } : {}),
             });
+          } else if (frame.event === 'tool') {
+            const name = data['name'];
+            const status = data['status'];
+            const route = data['route'];
+            if (!checked || typeof name !== 'string' || typeof status !== 'string' ||
+                !['calculator', 'source_lookup', 'site_profile'].includes(name) ||
+                !['running', 'complete', 'failed', 'unavailable'].includes(status) ||
+                Object.keys(data).some(key => !['name', 'status', 'route'].includes(key)) ||
+                (route !== undefined && (name !== 'source_lookup' || status !== 'complete' ||
+                  typeof route !== 'string' || !['trusted_index', 'web'].includes(route))))
+              throw new Error('The tool activity receipt is invalid.');
+            const toolName = name as ChatToolActivity['name'];
+            if (status === 'running' ? toolStates.has(toolName) : toolStates.get(toolName) !== 'running')
+              throw new Error('The tool activity sequence is invalid.');
+            const tool: ChatToolActivity = { name: toolName, status: status as ChatToolActivity['status'],
+              ...(route !== undefined ? { route: route as ChatToolActivity['route'] } : {}) };
+            toolStates.set(toolName, tool.status);
+            onEvent({ type: 'tool', tool });
           } else if (frame.event === 'sources') {
             if (!checked || !Array.isArray(data['sources']) || data['sources'].length > 3)
               throw new Error('The search sources are invalid.');
@@ -168,12 +191,15 @@ export class ChatService {
               channel: data['channel'] as 'answer' | 'reasoning',
             });
           } else if (frame.event === 'done') {
+            if ([...toolStates.values()].some(status => status === 'running'))
+              throw new Error('The tool activity sequence is incomplete.');
             const count = data['outputTokens'];
             const decodeMs = data['decodeMs'];
             const input = data['inputTokens'];
             const called = data['modelCalled'];
             const modelMs = data['modelDurationMs'];
             const bypass = data['modelBypass'];
+            const finalState = data['startState'];
             if (
               !checked ||
               !Number.isSafeInteger(count) ||
@@ -189,6 +215,12 @@ export class ChatService {
                 (bypass != null && called !== false) ||
                 (called === false && (count !== 0 || input !== 0 || modelMs !== 0)))
               throw new Error('The model usage receipt could not be verified.');
+            if (finalState !== undefined) {
+              if (typeof finalState !== 'string' || !['cold', 'warm', 'unknown'].includes(finalState))
+                throw new Error('The worker state receipt could not be verified.');
+              state = finalState as ChatMetrics['startState'];
+            }
+            if (data['costComparison'] !== undefined) this.costs.accept(data['costComparison']);
             onEvent({
               type: 'done',
               finishReason: typeof data['finishReason'] === 'string' ? data['finishReason'] : undefined,

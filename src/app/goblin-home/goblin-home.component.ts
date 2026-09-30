@@ -11,20 +11,22 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { CHAT_MODELS, ChatModelId, ChatTurn } from '../chat/chat.models';
+import { CHAT_MODELS, DEFAULT_CHAT_MODEL, ChatModelId, ChatTurn } from '../chat/chat.models';
 import { ChatService } from '../chat/chat.service';
 import { ChatSession, ChatStore } from '../chat/chat-store.service';
 import { ChatToolsComponent } from '../chat-tools/chat-tools.component';
 import { AuthService } from '../auth/auth.service';
 import { conversationContext, restoreLoginDraft, saveLoginDraft } from '../chat/chat-context';
-import { inferenceSaving, savingDescription, savingLabel, usageLabel } from '../chat/chat-savings';
+import { usageLabel } from '../chat/chat-savings';
+import { toolActivityLabel } from '../chat/tool-activity';
+import { CostComparisonComponent } from '../cost-comparison/cost-comparison.component';
 
 @Component({
   selector: 'app-goblin-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ChatToolsComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ChatToolsComponent, CostComparisonComponent],
   templateUrl: './goblin-home.component.html',
-  styleUrls: ['./chat-chrome.css', './goblin-home.component.css', './experiment-note.css'],
+  styleUrls: ['./chat-chrome.css', './goblin-home.component.css', './experiment-note.css', './tool-activity.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoblinHomeComponent implements OnDestroy {
@@ -34,22 +36,16 @@ export class GoblinHomeComponent implements OnDestroy {
   readonly chat = inject(ChatService);
   readonly auth = inject(AuthService);
   readonly models = CHAT_MODELS;
-  readonly selectedId = signal<ChatModelId>(this.store.current()?.modelId ?? 'gobwen-flash');
+  readonly selectedId = signal<ChatModelId>(this.store.current()?.modelId ?? DEFAULT_CHAT_MODEL);
   readonly turns = signal<ChatTurn[]>(this.store.current()?.turns ?? []);
   readonly busy = signal(false);
   readonly error = signal('');
   readonly modelMenu = signal(false);
   readonly sidebarOpen = signal(window.innerWidth > 760);
-  readonly tools = signal<'protection' | 'performance' | null>(null);
+  readonly tools = signal<'protection' | null>(null);
   readonly copied = signal<number | null>(null);
   readonly usageLabel = usageLabel;
-  savingsLabel(turn: ChatTurn): string {
-    const saving = inferenceSaving(turn, this.turns());
-    return saving ? savingLabel(saving.usd) : 'Model call avoided';
-  }
-  savingsDescription(turn: ChatTurn): string {
-    return savingDescription(inferenceSaving(turn, this.turns()));
-  }
+  readonly toolActivityLabel = toolActivityLabel;
   draft = this.store.current()?.draft ?? '';
   captureConversation = this.store.current()?.captureConversation ?? false;
   private controller?: AbortController;
@@ -73,7 +69,9 @@ export class GoblinHomeComponent implements OnDestroy {
     return this.models.find((item) => item.id === this.selectedId())!;
   }
   get samples(): string[] {
-    return ['Explain something simply', 'Help me solve a problem', 'Make something with code'];
+    return this.model.experimental
+      ? ['Once upon a time,', 'The experiment began when', 'In the quiet of the forest,']
+      : ['Explain something simply', 'Help me solve a problem', 'Make something with code'];
   }
   @HostListener('document:keydown.escape') escape() {
     this.modelMenu.set(false);
@@ -90,6 +88,7 @@ export class GoblinHomeComponent implements OnDestroy {
   newChat() {
     this.stop();
     this.store.activeId.set(null);
+    this.selectedId.set(DEFAULT_CHAT_MODEL);
     this.turns.set([]);
     this.draft = '';
     this.captureConversation = false;
@@ -178,6 +177,11 @@ export class GoblinHomeComponent implements OnDestroy {
           if (controller.signal.aborted) return;
           if (event.type === 'ready') update({ guard: 'checked', servedModel: event.servedModel, contextNotice: event.contextNotice });
           if (event.type === 'sources') update({ sources: event.sources });
+          if (event.type === 'tool') {
+            const current = this.turns().find(item => item.id === turn.id)!;
+            const activities = current.tools ?? [];
+            update({ tools: [...activities.filter(tool => tool.name !== event.tool.name), event.tool] });
+          }
           if (event.type === 'delta') {
             const current = this.turns().find((item) => item.id === turn.id)!;
             update({

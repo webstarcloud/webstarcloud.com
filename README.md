@@ -5,9 +5,10 @@ This project uses [Angular CLI](https://github.com/angular/angular-cli) 17.
 The repository keeps its historical `webstarcloud.com` name. The canonical live
 domain is `davidwebstar.com`.
 
-The homepage is a minimal research assistant with **Flash** and **Think** modes.
-Public copy uses an independent intelligence research identity, without the fantasy
-persona. The experimental base model is documented in research, outside the chat menu. The original dodecahedron remains the site
+The homepage is a minimal research assistant with **Think** selected by default,
+**Flash** for direct answers, and **Goblin** for experimental base-model continuation.
+Public copy uses an intelligence research identity, without a fantasy assistant
+persona. The original dodecahedron remains the site
 identity. Research articles and the About/support page give the models context
 without crowding the chat. Earlier projects remain paused, with shared demo URLs
 preserved. Chat streams from on-demand 4 GB AWS Lambda functions through
@@ -18,11 +19,12 @@ entitlements are not connected yet.
 The assistant is the entry point to a public architectural notebook. The empty
 chat introduces it as an experiment in rebuilding the assistant stack; a visible
 Architecture link follows the real request through six expandable layers.
-Performance, Input protection and the model menu link to the relevant explanations.
+Input protection and the model menu link to the relevant explanations. Performance
+remains a research article; its two homepage shortcuts have been removed.
 The notes distinguish deployed behavior, diagnostic evidence and planned work.
 Memory, learned model routing, MCP actions and GPU serving are not implemented.
-Goblin-250M remains the name of one base-model training experiment in the research,
-not the assistant persona or site identity.
+Goblin-250M is a nanoGPT-inspired base-model training experiment with a short
+continuation option in the menu. It does not define the assistant persona or site identity.
 
 ## Development server
 
@@ -59,11 +61,13 @@ or push. GitHub Pages publishes the committed `docs/` directory asynchronously.
 The headline is **Building agentic AI platforms and unified control planes**,
 David's preferred LinkedIn wording. Supporting content follows his selected
 `career/cv/targeted/thijs-grond/David-Webster.pdf` in the parent workspace.
-The `/profile` page leads with TMNL, LeasePlan and InvestSure, then current and earlier
-work, technical skills, and the published `llm-input-hardening` package.
+The `/about` page combines the research introduction, support information and
+career profile. Its Experience section leads with TMNL, LeasePlan and InvestSure,
+then current Backbase work, expandable earlier roles and technical skills.
+The old `/profile` route leads to `/about#experience`.
 
 `src/assets/David-Webster.pdf` is an unchanged copy of that selected PDF. The
-profile page links to `/assets/David-Webster.pdf`; the older
+About page links to `/assets/David-Webster.pdf`; the older
 `/assets/David-Webster-AI-Systems-Builder.pdf` URL serves the same bytes for existing
 links. Update both assets together when David selects a replacement CV. The build
 script rejects missing or mismatched copies.
@@ -71,17 +75,19 @@ script rejects missing or mismatched copies.
 ## Pages and retained links
 
 - `/` is the research assistant: mode selection, streamed conversations, stop/copy/
-  retry, in-memory session history, input inspection and a performance panel.
+  retry, in-memory session history, input inspection, real tool activity and an
+  approximate cumulative cost comparison.
   Empty `chatEndpoint` shows a connection-pending state and sends no message.
 - `/research` is the article index. `/research/{runs,roadmap,architecture,questions,
   models,performance,input-protection,search,evaluations}` holds the journal and learning notes. Run results are
   curated dated snapshots, not live telemetry. Old `/notebook` links redirect to
   their corresponding research pages; `/notebook/funding` retains the funding plan.
-- `/about` introduces David and the work. `/about#support` has a compact research
+- `/about` introduces David and the work, with `/about#experience` for the career
+  profile and CV. `/about#support` has a compact research
   funding card with a verified balance and target. Unavailable data never becomes
   simulated money. The cloning chamber has been removed.
-- `/profile` preserves the full career profile, CV and existing Dave's Brain demo,
-  explicitly labeled as using an external model. `HomeComponent` is retained here.
+- `/profile` redirects to the career section on About. The earlier Three.js profile
+  and chat demo remain in source for reference, without a public profile route.
 - `/ventures`, `/labs` and `/projects` redirect to `/`.
 - `/ventures/anchorkeep` is the paused AnchorKeep product cockpit, including interactive push, CI, failure, and recovery flows.
 - `/greenlight` retains a paused playable product walkthrough: choose managed identity
@@ -136,7 +142,7 @@ Use the success and failure scenarios to show that CI status and recoverability 
 
 The research assistant uses the protected SSE contract in
 [CHAT-GATEWAY.md](CHAT-GATEWAY.md). It includes model selection, a real-package
-inspection panel and four measured timing fields. Production uses the authenticated
+inspection panel, server tool events and measured timing fields. Production uses the authenticated
 streaming gateway in `../davesbrain/model-lambda`; see its `LIVE.md` for deployment,
 limits and the emergency stop. The local chat endpoint remains empty to avoid
 accidental production calls from development. The inspector is a separate backend
@@ -158,22 +164,11 @@ Arithmetic-shaped requests use a bounded server calculator. No provider secrets
 are shipped to the browser. Production uses Cognito-authenticated API Gateway
 REST streaming, with shared quotas enforced before model invocation.
 
-Dave's Brain shows a server-provided input-protection receipt with its answer or
-block response, including library version, policy, reasons, and whether the model
-was called. The profile page's **Try Dave's Brain's input protection** examples invoke
-the real configured server guard via `attack_demo`. They stay available after the
-anonymous model preview is consumed, and cannot make a model call. Only a successful
-normal answer consumes that preview. Blocked inputs and network errors do not.
-
-Deploy the matching Dave's Brain backend before publishing this frontend. In local
-development, attack examples use the inspection server; normal chat uses the
-configured existing endpoint. Production sends both to the same Dave's Brain API.
-The standalone lab remains available for detailed policy/report exploration.
-
-The original Three.js hologram is retained on the profile. Its `dave.glb` model uses the
-original framing, additive glow shell, particle assembly, subtle deformation and
-idle rotation. Earlier product and inspector routes retain their existing stage
-modes. The legacy chat dock appears only on `/profile`. The About page uses a research funding card; the homepage has its own chat surface.
+The assistant and standalone inspector display server-provided protection
+receipts. Deploy their matching backends before publishing changes to the client
+contract. The earlier profile demo, chat dock and `dave.glb` hologram remain in
+source; About now contains the career information and research funding card.
+Earlier product and inspector routes retain their existing stage modes.
 
 ## Running unit tests
 
@@ -216,7 +211,7 @@ The endpoint must return the matching USD campaign and target, integer amounts,
 a recent summary timestamp and an allowlisted Stripe checkout URL. Failed reads
 hide stale balances and retry every 30 seconds; leaving the page stops polling.
 
-The original profile chat and avatar share `ParticlesModule`. Supporter allowances
+The retained profile chat and avatar source share `ParticlesModule`. Supporter allowances
 and external Codex / Claude / MCP integrations remain planned. The public assistant
 is already served through its protected gateway.
 
@@ -227,9 +222,25 @@ reasoning. Metadata and source events do not end it. The first answer delta repl
 it immediately, subsequent deltas append without an artificial typing delay, and
 stop/error/completion remove the activity indicator. Reduced-motion preferences
 disable the animation. Source cards and optional reasoning appear with the answer.
+Real server events show calculator, source-lookup and maintained-profile activity
+while the request runs and retain the completed tool receipt. Their fixed labels
+expose neither tool inputs nor private errors. Tool-only responses correct the
+initial cold/warm state to unknown because no model was loaded.
 
 The matching backend replaces excerpt selection with short, source-grounded
 generation. Both modes answer retrieved facts directly; Think still reasons on
 other prompts. Source links are evidence to inspect, not a guarantee of accuracy.
 Calculator/profile bypasses keep their real zero-token usage. Authentication,
 input hardening, shared quotas and opt-in LangWatch capture remain in place.
+
+The homepage cost summary is a durable, metadata-only comparison across completed
+priced model requests from the date tracking begins. It assumes **US$3 per million
+input tokens and US$15 per million output tokens**, with no named comparator,
+and subtracts measured model-worker compute. These are approximate reference
+rates, not a provider quote or net service bill savings. Gateway/search costs,
+initialization/export overhead, storage, failed/stopped requests and discounts
+are excluded. Different tokenizers, reasoning and answer quality limit the proxy.
+Unpriced tool answers, missing data and negative differences remain explicit.
+The existing gateway exposes a read-only summary with a 30-second cache and
+separate throttle; a conditional request marker prevents duplicate increments.
+See [the cost-comparison method](../davesbrain/model-lambda/COST_COMPARISON.md).
