@@ -22,7 +22,8 @@ Architecture link follows the real request through six expandable layers.
 Input protection and the model menu link to the relevant explanations. Performance
 remains a research article; its two homepage shortcuts have been removed.
 The notes distinguish deployed behavior, diagnostic evidence and planned work.
-Memory, learned model routing, MCP actions and GPU serving are not implemented.
+Opt-in personal memory and explicit Python sandbox execution are implemented.
+Learned model routing, MCP actions and GPU serving remain future experiments.
 Goblin-250M is a nanoGPT-inspired base-model training experiment with a short
 continuation option in the menu. It does not define the assistant persona or site identity.
 
@@ -84,8 +85,10 @@ script rejects missing or mismatched copies.
   their corresponding research pages; `/notebook/funding` retains the funding plan.
 - `/about` introduces David and the work, with `/about#experience` for the career
   profile and CV. `/about#support` has a compact research
-  funding card with a verified balance and target. Unavailable data never becomes
-  simulated money. The cloning chamber has been removed.
+  funding card with a reported or verified balance and target. With no payment
+  feed configured, it shows the owner's dated report of **US$24.22 toward US$72**.
+  A future verified feed replaces that report without adding it; failed reads of
+  a configured feed hide unavailable balances. The cloning chamber has been removed.
 - `/profile` redirects to the career section on About. The earlier Three.js profile
   and chat demo remain in source for reference, without a public profile route.
 - `/ventures`, `/labs` and `/projects` redirect to `/`.
@@ -111,6 +114,8 @@ The existing inspector path is unchanged so external links continue to work.
 The favicon and social preview use the original dodecahedron. The older themed
 social artwork is retained as an unused historical asset. Internal component names,
 API aliases and the funding campaign ID remain compatible with existing services.
+About reuses the original `dave.glb` portrait with its hologram shaders and particle
+assembly; the renderer loads when visible and disposes its resources on navigation.
 
 ### Input-hardening lab development
 
@@ -164,10 +169,28 @@ Arithmetic-shaped requests use a bounded server calculator. No provider secrets
 are shipped to the browser. Production uses Cognito-authenticated API Gateway
 REST streaming, with shared quotas enforced before model invocation.
 
+The collapsed **Experiment tools** panel offers personal memory (Mem0) and a
+Python sandbox (E2B) in the Qwen assistant modes. Both are off by default and reset
+on new/reopened chats, sign-out and account changes. Memory saves only explicit
+`Remember: ...` notes and retrieves up to three bounded notes for the current
+question. `Show saved memories` lists notes with IDs; `Forget memory: <id>` removes
+an owned note. Management exchanges are excluded from content recording even
+when research recording is selected. Identity comes from the server-verified
+account, not browser-supplied provider IDs. No automatic transcript ingestion or
+weight updates occur.
+
+`Run Python: ...` executes explicitly supplied code in a fresh E2B sandbox with
+internet access disabled, a 10-second execution limit, a 30-second lifetime and
+bounded text output. There is no automatic model-generated execution loop.
+Server-side free-plan confirmations and shared fail-closed quotas gate provider
+calls; the operator-confirmed Hobby accounts have no paid billing enabled. Keys remain in
+AWS SecureString configuration. See `../davesbrain/model-lambda/PROVIDERS.md` for
+the limits, consent boundaries and deployment controls.
+
 The assistant and standalone inspector display server-provided protection
 receipts. Deploy their matching backends before publishing changes to the client
-contract. The earlier profile demo, chat dock and `dave.glb` hologram remain in
-source; About now contains the career information and research funding card.
+contract. The earlier profile demo and chat dock remain in source; About now
+contains the original `dave.glb` hologram, career information and funding card.
 Earlier product and inspector routes retain their existing stage modes.
 
 ## Running unit tests
@@ -195,10 +218,18 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 
 ## Community-funded research run
 
-The proposed first target is **US$72 for a 20B-token experiment**. The estimate,
-recipe, fees and hard spending limit still require validation. The live funding
-feed defaults to unconfigured, so the site shows “Awaiting payment setup” and a
-funding-plan link, not an active contribution button or fabricated totals.
+The proposed first target is **US$72 for a 20B-token experiment**. The owner
+reported **US$24.22 in existing donations on 30 September 2026**, shown as about
+34% of that target. This is a manual report, explicitly separate from the future
+payment ledger. The estimate, recipe, fees and hard spending limit still require
+validation. The payment feed remains unconfigured, so the card offers a funding-plan
+link rather than checkout or an automatic compute launch.
+
+`REPORTED_DONATIONS` in `src/app/goblin-chamber/funding.service.ts` holds that dated
+report. It is displayed only when `fundingApiUrl` is empty. A future verified
+service feed replaces it rather than adding it; reconcile the existing donations
+before connecting that feed. No fake provider transactions are seeded and no
+real ledger data is overwritten.
 
 The independent [funding service](funding-server/README.md) implements signed
 Stripe webhooks, a durable deduplicated ledger/inbox, refund handling, one launch

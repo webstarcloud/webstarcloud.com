@@ -5,6 +5,15 @@ It is **not deployed**, has no payment account, and does not include a GPU runne
 Collection and dispatch are disabled by default. No real payment or paid run was
 performed during development.
 
+The website separately displays **US$24.22 of existing donations reported by
+the owner on 30 September 2026**, toward the existing US$72 target. This is a
+dated manual report, not a Stripe receipt or transaction in this service. It
+does not enable checkout, queue a job or launch compute. The frontend uses it
+only while `fundingApiUrl` is empty; a future verified service feed replaces it
+rather than adding it, avoiding duplicate counting. Reconcile the existing
+donations and their accounting before connecting that feed. Do not seed fake
+provider transactions or overwrite an existing real payment ledger.
+
 The first proposed campaign is `goblin-20b-01`: **USD 72**, for the proposed 20B
 experiment. This is the owner's initial compute estimate, not a verified quote.
 The final recipe must specify fresh vs cumulative targets, checkpoint/data,

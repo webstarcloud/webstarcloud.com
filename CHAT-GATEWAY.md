@@ -56,6 +56,16 @@ false, and requires an ID when true. Consent enables LangWatch and private archi
 message/answer capture, marked unreviewed for training. Opt-out traces contain
 metadata only. Credentials and raw reasoning are never intentionally recorded.
 
+Optional strict boolean `useMemory` and `useSandbox` fields default false. The
+browser sends only selected flags; provider identity is derived from the verified
+subject in the gateway. The Qwen assistant offers explicit `Remember: ...`,
+`Show saved memories`, `Forget memory: <id>` and `Run Python: ...` routes. Ordinary
+opted-in memory queries retrieve up to three checked notes as untrusted context.
+Memory management suppresses content capture for the whole retained exchange;
+`done.recording.captureSuppressed: "memory_management"` explains this in the UI.
+Provider credentials, free-only activation gates and atomic shared budgets stay
+server-side. Details and limits live in `../davesbrain/model-lambda/PROVIDERS.md`.
+
 Both gateway and model validate roles and input limits: 32 KiB body, 2,000 Unicode
 code points per message, 6,000 total, and at most 21 alternating user/assistant
 messages. The client retains whole recent exchanges within those limits. Each
@@ -101,9 +111,12 @@ records. IDs must be sequential and URLs HTTPS without embedded credentials.
 Optional `kind` is `indexed` or `web`; indexed sources must include a valid
 `indexedAt` date, shown as provenance in the UI. A selected-page index is tried
 before the private SearXNG service's configured whole-web engines.
-Search runs automatically for recognized factual questions. The server renders
-selected source excerpts, not free-form factual prose. Single-source and calculator answers bypass
-inference with `startState: "unknown"`, zero output tokens and null decode timing.
+Search runs automatically for recognized factual questions. Qwen receives checked
+source excerpts as untrusted data and produces a short grounded answer; the UI
+adds validated links separately. Calculator and explicit provider-management
+answers bypass inference with `startState: "unknown"`, zero output tokens and null
+decode timing. Optional typed `tool` events carry only name, execution status and
+an allowed source route; they never include private memories or executed code.
 `done.recording` carries `langwatch: sent|unavailable` and
 `archive: saved|off|unavailable`. The UI reports recording failures when opted in.
 
@@ -157,21 +170,22 @@ They are not p50/p95 or a latency guarantee; they exclude the new gateway/browse
 Optional `done` fields: `inputTokens` (actual tokenizer count, or null when
 unavailable), `modelCalled` (boolean), `modelDurationMs` (model execution only,
 excluding search and trace delivery), and `modelBypass` (`calculator`,
-`source_excerpts`, or `site_profile`). A bypass requires `modelCalled: false`
+`source_excerpts`, `site_profile`, `memory_lookup`, `memory_write`, or `python`). A bypass requires `modelCalled: false`
 and zero input/output tokens and model duration. Failed lookups may skip the
 model but do not carry a successful bypass reason or earn a savings badge.
 Old servers without these fields still render; missing counts are not guessed.
 
-The footer shows actual input + output tokens and a successful model call
-avoided. A dollar estimate appears only after a measured warm run of the exact
-same model alias and artifact in this conversation. It compares each bypass to
-the median warm model duration, multiplied by 4 GB and $0.0000133334/GB-second
-(eu-west-1 ARM tier-one list rate, checked 2026-09-28). Cold and incomplete turns
-are excluded. Later samples update estimates; the Performance panel totals only
-the selected alias. These are reference-compute estimates, not measured savings,
-billing credits, or hypothetical token counts. Other request costs remain, and
-questions differ in required work. Recheck `chat-savings.ts` whenever the model
-memory size, region, architecture, or pricing changes.
+The footer shows actual input + output tokens. A compact dollar icon and cumulative
+estimate compare completed website requests against an unnamed frontier API at
+US$3 per million input tokens and US$15 per million output tokens (assumption
+dated 30 September 2026), minus measured model-worker compute. A public read-only
+`GET /v1/cost-summary` returns metadata-only durable totals; it never exposes
+account IDs or prompts. Request IDs deduplicate writes and completion is sent
+after recording the aggregate. Missing usage remains unpriced, and bypasses do
+not invent counterfactual model tokens. The headline rounds to cents; details
+show exact values, priced/unpriced counts and assumptions. Gateway, tools, search,
+storage and other unmeasured costs are excluded, so this is not net service
+savings or a claim of equivalent answer quality.
 
 Price source: [AWS regional price list](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/eu-west-1/index.json),
 SKU `KXNSA7NBRHBHXXPS`, usage type `EU-Lambda-GB-Second-ARM`, first tier.

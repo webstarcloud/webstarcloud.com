@@ -1,0 +1,31 @@
+.experiment-tools {
+  max-width: 680px;
+  margin: 12px auto;
+  color: #96989b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.experiment-tools summary {
+  cursor: pointer;
+  text-align: center;
+}
+.experiment-tools label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  color: #c7c9cc;
+  cursor: pointer;
+}
+.experiment-tools input {
+  accent-color: #b3c9e5;
+}
+.experiment-tools input:disabled {
+  cursor: not-allowed;
+}
+.experiment-tools code {
+  color: #b3c9e5;
+}
+.experiment-tools p {
+  margin: 10px 0;
+}

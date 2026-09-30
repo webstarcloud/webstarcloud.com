@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { CHAT_ACCESS_TOKEN, CHAT_ENDPOINT, CHAT_FETCH, ChatEvent, ChatService } from './chat.service';
-import { decodeRate } from './chat.models';
+import { ChatRequestOptions, decodeRate } from './chat.models';
 import { EventStreamParser } from './event-stream';
 
 const meta = {
@@ -42,12 +42,13 @@ describe('Protected chat stream', () => {
       ],
     });
   });
-  const run = (events: ChatEvent[]) =>
+  const run = (events: ChatEvent[], options?: ChatRequestOptions) =>
     TestBed.inject(ChatService).stream(
       'gobwen-flash',
       [{ role: 'user', content: 'Hello' }],
       new AbortController().signal,
       (event) => events.push(event),
+      options,
     );
   it('does not send or fabricate an answer without a connected endpoint', async () => {
     TestBed.overrideProvider(CHAT_ENDPOINT, { useValue: '' });
@@ -85,6 +86,33 @@ describe('Protected chat stream', () => {
     expect(JSON.parse(request.calls.mostRecent().args[1].body).model).toBe('gobwen-flash');
     expect(request.calls.mostRecent().args[1].headers.Authorization).toBe('Bearer test-access-token');
     expect(JSON.parse(request.calls.mostRecent().args[1].body).captureConversation).toBeUndefined();
+    expect(JSON.parse(request.calls.mostRecent().args[1].body).useMemory).toBeUndefined();
+    expect(JSON.parse(request.calls.mostRecent().args[1].body).useSandbox).toBeUndefined();
+  });
+  const experimentOptions: ChatRequestOptions = {
+    conversationId: 'd6f009db-3715-45ca-86e1-7b2c10150640', captureConversation: false,
+    useMemory: true, useSandbox: true,
+  };
+  it('sends explicit tool choices independently of research capture and never sends a provider identity', async () => {
+    request.and.callFake(async () => response(frame('meta', meta) + frame('done', { outputTokens: 0, decodeMs: null })));
+    await run([], { ...experimentOptions, providerUserId: 'must-not-leave-browser' } as ChatRequestOptions);
+    expect(JSON.parse(request.calls.mostRecent().args[1].body)).toEqual({
+      model: 'gobwen-flash', messages: [{ role: 'user', content: 'Hello' }], stream: true,
+      ...experimentOptions,
+    });
+    await run([], { ...experimentOptions, useMemory: false, useSandbox: false });
+    const body = JSON.parse(request.calls.mostRecent().args[1].body);
+    expect(body.useMemory).toBeUndefined();
+    expect(body.useSandbox).toBeUndefined();
+  });
+  it('rejects non-boolean experiment choices and enabled tools for the base model before fetching', async () => {
+    for (const choices of [{ useMemory: 'true' }, { useSandbox: 1 }, { useMemory: null }]) {
+      await expectAsync(run([], { ...experimentOptions, ...choices } as unknown as ChatRequestOptions))
+        .toBeRejectedWithError(/must be true or false/);
+    }
+    await expectAsync(TestBed.inject(ChatService).stream('goblin', [{ role: 'user', content: 'Continue' }],
+      new AbortController().signal, () => {}, experimentOptions)).toBeRejectedWithError(/assistant modes/);
+    expect(request).not.toHaveBeenCalled();
   });
   it('accepts bounded source links only after protection and rejects executable URLs', async () => {
     const done = frame('done', { outputTokens: 0, decodeMs: null });
@@ -137,6 +165,34 @@ describe('Protected chat stream', () => {
       const events: ChatEvent[] = [];
       await run(events);
       expect(events[2]).toEqual({ type: 'tool', tool });
+    }
+  });
+  it('accepts provider activity only with matching per-request consent and preserves unavailable outcomes', async () => {
+    for (const name of ['memory_lookup', 'memory_write', 'python']) {
+      for (const status of ['complete', 'failed', 'unavailable']) {
+        request.and.resolveTo(response(frame('meta', meta) + frame('tool', { name, status: 'running' }) +
+          frame('tool', { name, status }) + frame('done', { outputTokens: 0, decodeMs: null })));
+        const events: ChatEvent[] = [];
+        await run(events, experimentOptions);
+        expect(events[2]).toEqual({ type: 'tool', tool: { name, status } } as ChatEvent);
+      }
+      for (const choices of [undefined, { ...experimentOptions, useMemory: false, useSandbox: false }]) {
+        request.and.resolveTo(response(frame('meta', meta) + frame('tool', { name, status: 'running' })));
+        const events: ChatEvent[] = [];
+        await expectAsync(run(events, choices)).toBeRejectedWithError(/tool activity receipt/);
+        expect(events.some(event => event.type === 'tool')).toBeFalse();
+      }
+    }
+  });
+  it('rejects provider tool receipts containing private data or unsupported routes', async () => {
+    for (const tool of [
+      { name: 'memory_lookup', status: 'running', userId: 'private' },
+      { name: 'memory_write', status: 'running', text: 'private fact' },
+      { name: 'python', status: 'running', code: 'private code' },
+      { name: 'python', status: 'complete', route: 'web' },
+    ]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('tool', tool)));
+      await expectAsync(run([], experimentOptions)).toBeRejectedWithError(/tool activity receipt/);
     }
   });
   it('rejects invented tool labels, extra data and unsupported route claims', async () => {
@@ -200,6 +256,36 @@ describe('Protected chat stream', () => {
       expect(done.recordingNotice).toBe('Conversation recording failed');
       expect(done.metrics.firstAnswerMs).not.toBeNull();
     }
+  });
+  it('accepts a zero-token memory-list completion only for the explicit management command', async () => {
+    for (const useMemory of [false, true]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('done', {
+        inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0,
+        modelBypass: 'memory_lookup', decodeMs: null,
+      })));
+      const events: ChatEvent[] = [];
+      await TestBed.inject(ChatService).stream('gobwen-flash', [{ role: 'user', content: ' Show saved memories. ' }],
+        new AbortController().signal, event => events.push(event), { ...experimentOptions, useMemory });
+      const done = events[events.length - 1];
+      if (done.type !== 'done') fail('Expected memory-list completion');
+      else expect(done.metrics.modelBypass).toBe('memory_lookup');
+    }
+    request.and.resolveTo(response(frame('meta', meta) + frame('done', {
+      inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0,
+      modelBypass: 'memory_lookup', decodeMs: null,
+    })));
+    await expectAsync(run([], experimentOptions)).toBeRejectedWithError(/usage receipt/);
+  });
+  it('explains explicitly suppressed memory-management recording without claiming a save failure', async () => {
+    request.and.resolveTo(response(frame('meta', meta) + frame('done', {
+      outputTokens: 0, decodeMs: null,
+      recording: { archive: 'off', langwatch: 'sent', captureSuppressed: 'memory_management' },
+    })));
+    const events: ChatEvent[] = [];
+    await run(events, { ...experimentOptions, captureConversation: true });
+    const done = events[events.length - 1];
+    if (done.type !== 'done') fail('Expected completion');
+    else expect(done.recordingNotice).toBe('Memory management content excluded from research recording');
   });
   it('does not invoke the gateway without a signed-in token', async () => {
     TestBed.overrideProvider(CHAT_ACCESS_TOKEN, { useValue: async () => '' });
@@ -317,6 +403,8 @@ describe('Protected chat stream', () => {
   it('accepts explicit zero-token bypass receipts and actual model usage', async () => {
     for (const usage of [
       {inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0, modelBypass: 'calculator'},
+      {inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0, modelBypass: 'memory_write'},
+      {inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0, modelBypass: 'python'},
       {inputTokens: 100, outputTokens: 20, modelCalled: true, modelDurationMs: 1500},
     ]) {
       request.and.resolveTo(response(frame('meta', meta) + frame('done', {...usage, decodeMs: null})));
@@ -329,7 +417,8 @@ describe('Protected chat stream', () => {
   });
   it('rejects contradictory or invalid savings receipts', async () => {
     for (const patch of [{outputTokens: 1}, {inputTokens: null}, {modelDurationMs: 1},
-      {modelCalled: true}, {modelBypass: 'invented'}, {inputTokens: -1}, {modelDurationMs: -1}]) {
+      {modelCalled: true}, {modelBypass: 'invented'}, {modelBypass: 'memory_lookup'}, {modelBypass: ['python']},
+      {inputTokens: -1}, {modelDurationMs: -1}]) {
       request.and.resolveTo(response(frame('meta', meta) + frame('done', {
         inputTokens: 0, outputTokens: 0, modelCalled: false, modelDurationMs: 0,
         modelBypass: 'calculator', decodeMs: null, ...patch,

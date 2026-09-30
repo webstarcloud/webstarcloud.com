@@ -2,26 +2,34 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatService, ChatEvent } from '../chat/chat.service';
 import { GoblinHomeComponent } from './goblin-home.component';
-import { AuthService } from '../auth/auth.service';
-import { of } from 'rxjs';
+import { AuthService, AuthState } from '../auth/auth.service';
+import { BehaviorSubject } from 'rxjs';
 import { CHAT_MODELS, ChatTurn } from '../chat/chat.models';
 
 describe('Chat homepage', () => {
   let fixture: ComponentFixture<GoblinHomeComponent>;
   let service: { configured: boolean; stream: jasmine.Spy };
+  let account: BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email'>>;
+  let signOut: jasmine.Spy;
   beforeEach(async () => {
     service = { configured: false, stream: jasmine.createSpy('stream') };
+    account = new BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email'>>({
+      isAuthenticated: true, loading: false, email: 'first@example.com',
+    });
+    signOut = jasmine.createSpy('signOut');
     await TestBed.configureTestingModule({
       imports: [GoblinHomeComponent, RouterTestingModule],
       providers: [
         { provide: ChatService, useValue: service },
         { provide: AuthService, useValue: {
-          snapshot: { isAuthenticated: true, loading: false },
-          state$: of({ isAuthenticated: true, loading: false }), signIn: jasmine.createSpy('signIn'),
+          get snapshot() { return account.value; },
+          state$: account.asObservable(), signIn: jasmine.createSpy('signIn'), signOut,
         } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(GoblinHomeComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
   });
   afterEach(() => fixture.destroy());
@@ -51,6 +59,120 @@ describe('Chat homepage', () => {
     expect(page.model.name).toBe('Goblin');
     expect(page.model.experimental).toBeTrue();
     expect(page.model.mode).toBe('Base');
+  });
+  it('keeps tools off by default, hides them for Goblin and disables consent while signed out or busy', async () => {
+    let page = fixture.componentInstance;
+    let el = fixture.nativeElement as HTMLElement;
+    const tools = () => el.querySelectorAll<HTMLInputElement>('.experiment-tools input');
+    expect(page.useMemory).toBeFalse();
+    expect(page.useSandbox).toBeFalse();
+    expect(tools().length).toBe(2);
+    expect(Array.from(tools()).every(input => !input.checked && input.disabled)).toBeTrue();
+    service.configured = true;
+    // Endpoint configuration is fixed for a component's lifetime in production.
+    fixture.destroy();
+    fixture = TestBed.createComponent(GoblinHomeComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    page = fixture.componentInstance;
+    el = fixture.nativeElement as HTMLElement;
+    expect(Array.from(tools()).every(input => !input.disabled)).toBeTrue();
+    page.busy.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(Array.from(tools()).every(input => input.disabled)).toBeTrue();
+    page.busy.set(false);
+    account.next({ isAuthenticated: false, loading: false, email: null });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(Array.from(tools()).every(input => input.disabled)).toBeTrue();
+    account.next({ isAuthenticated: true, loading: false, email: 'first@example.com' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(Array.from(tools()).every(input => !input.disabled)).toBeTrue();
+    page.selectModel('goblin');
+    fixture.detectChanges();
+    expect(el.querySelector('.experiment-tools')).toBeNull();
+  });
+  it('sends separate per-request tool consent without persisting it in a chat', async () => {
+    service.configured = true;
+    service.stream.and.resolveTo();
+    const page = fixture.componentInstance;
+    page.useMemory = true;
+    page.useSandbox = true;
+    page.draft = 'Remember: I prefer short answers.';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[4]).toEqual({
+      conversationId: page.store.current()!.conversationId, captureConversation: false,
+      useMemory: true, useSandbox: true,
+    });
+    expect(page.store.current()).not.toEqual(jasmine.objectContaining({ useMemory: true }));
+    expect(page.store.current()).not.toEqual(jasmine.objectContaining({ useSandbox: true }));
+    const session = page.store.current()!;
+    page.newChat();
+    expect(page.useMemory).toBeFalse();
+    expect(page.useSandbox).toBeFalse();
+    page.useMemory = true;
+    page.useSandbox = true;
+    page.openSession(session);
+    expect(page.useMemory).toBeFalse();
+    expect(page.useSandbox).toBeFalse();
+  });
+  it('resets tools for account changes, sign out and the base model', () => {
+    const page = fixture.componentInstance;
+    const enable = () => { page.useMemory = true; page.useSandbox = true; };
+    const off = () => { expect(page.useMemory).toBeFalse(); expect(page.useSandbox).toBeFalse(); };
+    enable();
+    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com' });
+    off();
+    enable();
+    account.next({ isAuthenticated: false, loading: false, email: null });
+    off();
+    enable();
+    page.signOut();
+    off();
+    expect(signOut).toHaveBeenCalled();
+    enable();
+    page.selectModel('goblin');
+    off();
+  });
+  it('stops a pending opted-in request when the signed-in account changes', async () => {
+    service.configured = true;
+    let finish!: () => void;
+    service.stream.and.callFake(() => new Promise<void>(resolve => finish = resolve));
+    const page = fixture.componentInstance;
+    page.useMemory = true;
+    page.draft = 'Use my preferences';
+    const sending = page.send();
+    const signal = service.stream.calls.mostRecent().args[2] as AbortSignal;
+    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com' });
+    expect(signal.aborted).toBeTrue();
+    expect(page.useMemory).toBeFalse();
+    finish();
+    await sending;
+    expect(page.turns()[0].status).toBe('stopped');
+  });
+  it('shows provider availability from receipts without claiming success for a failed attempt', async () => {
+    service.configured = true;
+    service.stream.and.callFake(async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
+      onEvent({ type: 'ready', servedModel: 'Qwen' });
+      onEvent({ type: 'tool', tool: { name: 'memory_write', status: 'running' } });
+      onEvent({ type: 'tool', tool: { name: 'memory_write', status: 'unavailable' } });
+      onEvent({ type: 'tool', tool: { name: 'python', status: 'running' } });
+      onEvent({ type: 'tool', tool: { name: 'python', status: 'complete' } });
+      onEvent({ type: 'delta', channel: 'answer', text: 'Memory is unavailable. Python returned 2.' });
+      onEvent({ type: 'done', metrics: { startState: 'unknown', ttftMs: 10, totalMs: 20, outputTokens: 0, tokensPerSecond: null } });
+    });
+    const page = fixture.componentInstance;
+    page.useMemory = true;
+    page.useSandbox = true;
+    page.draft = 'Run Python: print(1 + 1)';
+    await page.send();
+    fixture.detectChanges();
+    const receipt = fixture.nativeElement.querySelector('.tool-activity')?.textContent;
+    expect(receipt).toContain('Memory update unavailable');
+    expect(receipt).toContain('Python sandbox used');
+    expect(receipt).not.toContain('Memory saved');
   });
   it('selects Think and preserves a draft when the endpoint is absent', async () => {
     const page = fixture.componentInstance;
@@ -118,6 +240,8 @@ describe('Chat homepage', () => {
     expect(el.querySelector('.working')).toBeNull();
   });
   it('streams real service events into a conversation and keeps completed turns in the next request', async () => {
+    // Two fast tool completions can share a wall-clock millisecond.
+    spyOn(Date, 'now').and.returnValue(1_700_000_000_000);
     service.configured = true;
     service.stream.and.callFake(
       async (
@@ -146,6 +270,8 @@ describe('Chat homepage', () => {
     page.draft = 'Follow up';
     await page.send();
     expect(page.turns()[0].answer).toBe('An answer');
+    expect(page.turns()[1].answer).toBe('An answer');
+    expect(page.turns()[0].id).not.toBe(page.turns()[1].id);
     expect(page.turns()[0].guard).toBe('checked');
     expect(service.stream.calls.mostRecent().args[1]).toEqual([
       { role: 'user', content: 'First question' },

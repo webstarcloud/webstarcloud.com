@@ -1,0 +1,9 @@
+<figure class="portrait" role="img" aria-label="David Webster’s original 3D portrait" [attr.aria-busy]="loading">
+  <div #viewport class="portrait-viewport" aria-hidden="true"></div>
+  <p *ngIf="loading" class="portrait-status">Loading portrait…</p>
+  <p *ngIf="unavailable" class="portrait-status">The 3D portrait is unavailable on this device.</p>
+</figure>
+<button *ngIf="!loading && !unavailable && !reducedMotion" class="portrait-control" type="button"
+  [attr.aria-pressed]="paused" (click)="toggleAnimation()">
+  {{ paused ? 'Resume animation' : 'Pause animation' }}
+</button>

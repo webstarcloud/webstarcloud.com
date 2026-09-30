@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FIRST_RUN, FundingService, FundingState } from './funding.service';
+import { FIRST_RUN, FundingService, FundingState, REPORTED_DONATIONS } from './funding.service';
 
 @Component({
   selector: 'app-goblin-chamber',
@@ -13,12 +13,18 @@ import { FIRST_RUN, FundingService, FundingState } from './funding.service';
 })
 export class GoblinChamberComponent {
   readonly campaign = FIRST_RUN;
+  readonly reportedDonations = REPORTED_DONATIONS;
   readonly funding$ = inject(FundingService).state$;
+  received(state: FundingState): number | null {
+    return state.kind === 'ready' ? state.snapshot.receivedMinor
+      : state.kind === 'setup' ? this.reportedDonations.receivedMinor : null;
+  }
   fill(state: FundingState): number {
-    return state.kind === 'ready' ? Math.min(100, state.snapshot.receivedMinor / state.snapshot.targetMinor * 100) : 0;
+    const received = this.received(state);
+    return received === null ? 0 : Math.min(100, received / this.campaign.targetMinor * 100);
   }
   label(state: FundingState): string {
-    if (state.kind === 'setup') return 'Awaiting payment setup';
+    if (state.kind === 'setup') return 'Reported donations';
     if (state.kind === 'loading') return 'Checking funding';
     if (state.kind === 'unavailable') return 'Funding status unavailable';
     if (state.kind !== 'ready') return 'Checking funding';

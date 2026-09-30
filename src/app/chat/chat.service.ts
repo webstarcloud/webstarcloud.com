@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { readHardeningReceipt } from '../particles/chat-hardening';
-import { ChatMessage, ChatMetrics, ChatModelId, ChatSource, ChatToolActivity, decodeRate } from './chat.models';
+import { ChatMessage, ChatMetrics, ChatModelId, ChatRequestOptions, ChatSource, ChatToolActivity, decodeRate } from './chat.models';
 import { EventStreamParser } from './event-stream';
 import { AuthService } from '../auth/auth.service';
 import { CostSummaryService } from './cost-summary.service';
@@ -49,10 +49,17 @@ export class ChatService {
     messages: ChatMessage[],
     signal: AbortSignal,
     onEvent: (event: ChatEvent) => void,
-    recording?: { conversationId: string; captureConversation: boolean },
+    recording?: ChatRequestOptions,
   ): Promise<void> {
     if (!this.configured)
       throw new Error('The model isn’t connected yet. Your message hasn’t been sent.');
+    if ([recording?.useMemory, recording?.useSandbox].some(value => value !== undefined && typeof value !== 'boolean'))
+      throw new Error('Experiment tool choices must be true or false. Your message hasn’t been sent.');
+    if (model === 'goblin' && (recording?.useMemory || recording?.useSandbox))
+      throw new Error('Experiment tools are available with the assistant modes. Your message hasn’t been sent.');
+    const lastMessage = messages[messages.length - 1];
+    const showSavedMemories = lastMessage?.role === 'user' &&
+      /^\s*Show saved memories[.!]?\s*$/i.test(lastMessage.content);
     const controller = new AbortController();
     const abort = () => controller.abort();
     signal.addEventListener('abort', abort, { once: true });
@@ -72,7 +79,12 @@ export class ChatService {
       const response = await this.request(this.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ model, messages, stream: true, ...recording }),
+        body: JSON.stringify({ model, messages, stream: true,
+          ...(recording ? { conversationId: recording.conversationId, captureConversation: recording.captureConversation,
+            ...(recording.useMemory === true ? { useMemory: true } : {}),
+            ...(recording.useSandbox === true ? { useSandbox: true } : {}),
+          } : {}),
+        }),
         signal: controller.signal,
         credentials: 'omit',
         redirect: 'error',
@@ -137,7 +149,9 @@ export class ChatService {
             const status = data['status'];
             const route = data['route'];
             if (!checked || typeof name !== 'string' || typeof status !== 'string' ||
-                !['calculator', 'source_lookup', 'site_profile'].includes(name) ||
+                !['calculator', 'source_lookup', 'site_profile', 'memory_lookup', 'memory_write', 'python'].includes(name) ||
+                (['memory_lookup', 'memory_write'].includes(name) && recording?.useMemory !== true) ||
+                (name === 'python' && recording?.useSandbox !== true) ||
                 !['running', 'complete', 'failed', 'unavailable'].includes(status) ||
                 Object.keys(data).some(key => !['name', 'status', 'route'].includes(key)) ||
                 (route !== undefined && (name !== 'source_lookup' || status !== 'complete' ||
@@ -211,7 +225,10 @@ export class ChatService {
             if ((input != null && (!Number.isSafeInteger(input) || (input as number) < 0)) ||
                 (called !== undefined && typeof called !== 'boolean') ||
                 (modelMs !== undefined && (typeof modelMs !== 'number' || !Number.isFinite(modelMs) || modelMs < 0 || modelMs > 120_000)) ||
-                (bypass != null && !['calculator', 'source_excerpts', 'site_profile'].includes(String(bypass))) ||
+                (bypass != null && (typeof bypass !== 'string' ||
+                  !['calculator', 'source_excerpts', 'site_profile', 'memory_lookup', 'memory_write', 'python'].includes(bypass))) ||
+                (bypass === 'memory_lookup' && !showSavedMemories) ||
+                (model === 'goblin' && ['memory_lookup', 'memory_write', 'python'].includes(String(bypass))) ||
                 (bypass != null && called !== false) ||
                 (called === false && (count !== 0 || input !== 0 || modelMs !== 0)))
               throw new Error('The model usage receipt could not be verified.');
@@ -225,7 +242,9 @@ export class ChatService {
               type: 'done',
               finishReason: typeof data['finishReason'] === 'string' ? data['finishReason'] : undefined,
               recordingNotice: recording?.captureConversation
-                ? (data['recording'] && asRecord(data['recording'])['archive'] === 'saved'
+                ? (data['recording'] && asRecord(data['recording'])['captureSuppressed'] === 'memory_management'
+                  ? 'Memory management content excluded from research recording'
+                  : data['recording'] && asRecord(data['recording'])['archive'] === 'saved'
                   ? 'Saved for research · awaiting review'
                   : data['recording'] && asRecord(data['recording'])['langwatch'] === 'sent'
                     ? 'Saved in LangWatch · archive unavailable'
@@ -242,7 +261,7 @@ export class ChatService {
                 ...(input !== undefined ? { inputTokens: input as number | null } : {}),
                 ...(called !== undefined ? { modelCalled: called as boolean } : {}),
                 ...(modelMs !== undefined ? { modelDurationMs: modelMs as number } : {}),
-                ...(bypass != null ? { modelBypass: bypass as 'calculator' | 'source_excerpts' | 'site_profile' } : {}),
+                ...(bypass != null ? { modelBypass: bypass as ChatMetrics['modelBypass'] } : {}),
               },
             });
             return;

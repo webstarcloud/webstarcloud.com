@@ -28,11 +28,13 @@
       </div>
     </details>
     <details>
-      <summary><span class="step-number">04</span><span><strong>Choose the answer path</strong><small>Bounded calculator · source lookup · direct generation</small></span><span class="expand" aria-hidden="true">+</span></summary>
+      <summary><span class="step-number">04</span><span><strong>Choose the answer path</strong><small>Calculator · sources · optional memory and Python</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
         <p>For the Qwen assistant, explicit rules choose one bounded tool step. Simple arithmetic uses a decimal calculator. Questions about this site’s owner use a maintained profile. Those answers skip the model entirely. Goblin takes the base-model continuation path.</p>
         <p>Recognized factual questions check selected, indexed pages first, then whole-web search through a private SearXNG worker. Only the current question goes to search. If no evidence is available, the system declines to guess. Other questions proceed directly to generation.</p>
-        <p>The interface shows tool activity as the service starts and completes a calculator, lookup or profile operation. Those events describe real execution. This is rule-based routing, not an ensemble of specialist models.</p>
+        <p>Personal memory and Python are separate, optional tools. Mem0 stores only explicit <code>Remember:</code> notes under your verified account and retrieves up to three relevant notes. You can inspect and delete them. Retrieved notes are untrusted historical data; memory does not train the model.</p>
+        <p><code>Run Python:</code> executes code you supply in a fresh E2B sandbox with internet access disabled, a 10-second execution limit and a 30-second lifetime. Both tools require your selection and a shared free-credit allowance. The assistant does not automatically write memories or generate code to execute.</p>
+        <p>The interface shows tool activity as the service starts and completes an operation. Those events describe real execution. This is rule-based routing, not an ensemble of specialist models.</p>
         <a routerLink="/research/search">Retrieval changes the trust boundary →</a>
       </div>
     </details>
@@ -64,7 +66,7 @@
   <section class="entry">
     <span class="tag tag--planned">Not implemented yet</span>
     <h2>The next layers need their own evidence.</h2>
-    <p>Persistent memory, learned model routing, MCP actions and GPU serving are future experiments. Each needs a working implementation, a useful test and a write-up of what changed.</p>
+    <p>Memory conflict resolution, learned model routing, MCP actions and GPU serving are future experiments. Each needs a working implementation, a useful test and a write-up of what changed.</p>
     <a class="text-link" routerLink="/research/roadmap">See the build questions →</a>
   </section>
   <section class="entry">

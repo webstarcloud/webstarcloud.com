@@ -20,14 +20,24 @@ export class CostComparisonComponent implements OnInit {
   }
   get label(): string {
     const difference = this.summary?.estimatedDifferenceUsd;
-    return difference == null ? 'Awaiting measured model replies' :
-      `${costAmount(Math.abs(difference))} ${difference >= 0 ? 'est. saved' : 'est. extra compute'}`;
+    if (difference == null) return 'Savings pending';
+    // Round the headline to cents; exact small amounts stay in the details.
+    const amount = Math.abs(difference).toFixed(2);
+    return difference >= 0 ? `−$${amount} saved` : `+$${amount} extra cost`;
+  }
+  get requests(): number | null {
+    const total = this.summary;
+    return total ? total.pricedRequests + total.unpricedRequests : null;
+  }
+  get exactDifference(): string {
+    const difference = this.summary?.estimatedDifferenceUsd;
+    return difference == null ? '—' : costAmount(Math.abs(difference));
   }
   get statusLabel(): string {
-    if (this.costs.loading()) return 'Checking estimate…';
     const report = this.costs.report();
+    if (this.costs.loading() && !report.available) return 'Checking savings…';
     return report.available ? this.label : report.reason === 'not_started'
-      ? 'Awaiting measured replies' : 'Estimate unavailable';
+      ? 'Savings pending' : 'Savings unavailable';
   }
   ngOnInit(): void { void this.costs.refresh(); }
 }

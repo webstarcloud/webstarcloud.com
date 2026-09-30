@@ -8,12 +8,12 @@
     <div><dt>Initial compute estimate</dt><dd>US$72</dd></div>
     <div><dt>Research output</dt><dd>Methods & findings</dd></div>
   </dl>
-  <div class="funding-amount"><strong>{{ funding.kind === 'ready' ? (funding.snapshot.receivedMinor / 100 | currency:'USD':'symbol':'1.0-2') : '—' }}</strong><span>of US$72 {{ funding.kind === 'setup' ? 'proposed target' : 'target' }}</span><span *ngIf="funding.kind === 'ready'" class="funding-percent">{{ fill(funding) | number:'1.0-0' }}%</span></div>
-  <progress *ngIf="funding.kind === 'ready'" [value]="funding.snapshot.receivedMinor" [max]="funding.snapshot.targetMinor" aria-label="Verified funding toward the 72 US dollar target"></progress>
-  <div *ngIf="funding.kind !== 'ready'" class="empty-meter" aria-hidden="true"></div>
+  <div class="funding-amount"><strong>{{ received(funding) !== null ? (received(funding)! / 100 | currency:'USD':'symbol':'1.2-2') : '—' }}</strong><span>of US$72 {{ funding.kind === 'setup' ? 'proposed target' : 'target' }}</span><span *ngIf="received(funding) !== null" class="funding-percent">{{ fill(funding) | number:'1.0-0' }}%</span></div>
+  <progress *ngIf="received(funding) !== null" [value]="received(funding)" [max]="campaign.targetMinor" [attr.aria-label]="funding.kind === 'setup' ? 'Owner-reported donations toward the 72 US dollar target' : 'Verified funding toward the 72 US dollar target'"></progress>
+  <div *ngIf="received(funding) === null" class="empty-meter" aria-hidden="true"></div>
   <a *ngIf="funding.kind === 'ready' && funding.snapshot.status === 'collecting' && funding.snapshot.checkoutUrl; else setupLink" class="funding-action" [href]="funding.snapshot.checkoutUrl" rel="noreferrer">Contribute to this run <span aria-hidden="true">↗</span></a>
   <ng-template #setupLink><a class="funding-action" routerLink="/notebook/funding">{{ funding.kind === 'setup' ? 'Read the funding plan' : 'Run & funding details' }} <span aria-hidden="true">↗</span></a></ng-template>
-  <p class="funding-note" *ngIf="funding.kind === 'setup'">Contributions aren’t open yet. The training recipe, payment fees, and spending limit still need validation.</p>
+  <p class="funding-note" *ngIf="funding.kind === 'setup'">Owner-reported donations · <time [attr.datetime]="reportedDonations.reportedOn">{{ reportedDonations.reportedOn | date:'d MMM yyyy' }}</time>. Online checkout isn’t connected. The training recipe, payment fees, and spending limit still need validation; this balance does not launch compute.</p>
   <p class="funding-note" *ngIf="funding.kind === 'unavailable'">We can’t verify the balance right now. Contributions are unavailable until the connection recovers.</p>
   <p class="funding-note" *ngIf="funding.kind === 'ready'">Verified payments · refreshed {{ funding.snapshot.updatedAt | date:'shortTime' }} · <a routerLink="/notebook/funding">How funding works</a></p>
 </section>

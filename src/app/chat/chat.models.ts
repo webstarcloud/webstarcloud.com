@@ -36,13 +36,19 @@ export const CHAT_MODELS: readonly ChatModel[] = [
 export const DEFAULT_CHAT_MODEL: ChatModelId = 'gobwen-think';
 
 export interface ChatToolActivity {
-  name: 'calculator' | 'source_lookup' | 'site_profile';
+  name: 'calculator' | 'source_lookup' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python';
   status: 'running' | 'complete' | 'failed' | 'unavailable';
   route?: 'trusted_index' | 'web';
 }
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+}
+export interface ChatRequestOptions {
+  conversationId: string;
+  captureConversation: boolean;
+  useMemory?: boolean;
+  useSandbox?: boolean;
 }
 export interface ChatMetrics {
   startState: 'cold' | 'warm' | 'unknown';
@@ -53,7 +59,7 @@ export interface ChatMetrics {
   inputTokens?: number | null;
   modelCalled?: boolean;
   modelDurationMs?: number;
-  modelBypass?: 'calculator' | 'source_excerpts' | 'site_profile';
+  modelBypass?: 'calculator' | 'source_excerpts' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python';
   firstAnswerMs?: number | null;
 }
 export interface ChatSource { id: number; title: string; url: string; kind?: 'indexed' | 'web'; indexedAt?: string }

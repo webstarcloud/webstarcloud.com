@@ -101,7 +101,7 @@
       <div class="header-tools">
         <ng-container *ngIf="auth.state$ | async as account">
           <button class="account-button" [disabled]="account.loading || busy()"
-            (click)="account.isAuthenticated ? auth.signOut() : signIn()"
+            (click)="account.isAuthenticated ? signOut() : signIn()"
             [attr.title]="account.isAuthenticated ? account.email : 'Sign in with Google'">
             {{ account.loading ? 'Connecting…' : account.isAuthenticated ? 'Sign out' : 'Sign in' }}
           </button>
@@ -248,13 +248,28 @@
           <span></span> Model connection coming next.
           <a routerLink="/research/models">How the models work</a>
         </p>
-        <p class="conversation-note" *ngIf="chat.configured">
-          Small models can make big mistakes. Check important answers.
-        </p>
+        <details class="experiment-tools" *ngIf="!model.experimental">
+          <summary>Experiment tools{{ useMemory || useSandbox ? ' · selected' : '' }}</summary>
+          <p>Off by default. These external tools use a shared free-credit allowance. If the allowance is unavailable, the tool stays off.</p>
+          <label>
+            <input type="checkbox" role="switch" [(ngModel)]="useMemory" [attr.aria-checked]="useMemory"
+              [disabled]="experimentToolsDisabled" aria-describedby="memory-description" />
+            <span>Personal memory</span>
+          </label>
+          <p id="memory-description">Mem0 saves only text you explicitly start with <code>Remember:</code>. With this on, your current question may be sent to Mem0 to look up saved preferences. Earlier conversation and reasoning are not sent.</p>
+          <p>Inspect notes with <code>Show saved memories</code>. Delete one with <code>Forget memory: ID</code>, using an ID from the list.</p>
+          <label>
+            <input type="checkbox" role="switch" [(ngModel)]="useSandbox" [attr.aria-checked]="useSandbox"
+              [disabled]="experimentToolsDisabled" aria-describedby="sandbox-description" />
+            <span>Python sandbox</span>
+          </label>
+          <p id="sandbox-description">E2B runs only code you explicitly provide after <code>Run Python:</code>, as plain text or a fenced Python block. The assistant does not generate code to run automatically.</p>
+          <p>Selections reset when you start or reopen a chat, sign out, or change accounts. These choices are separate from research recording.</p>
+        </details>
         <details class="research-recording" *ngIf="chat.configured">
           <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
           <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="busy()" /> Save this conversation for research and future model training</label>
-          <p>When enabled, messages and answers are saved in LangWatch and a private research archive. They need review before training. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
+          <p>When enabled, messages, answers and any saved notes used as model context can enter LangWatch and a private research archive. They need review before training. Memory inspection and deletion exchanges are excluded. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
           <p>The assistant checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
         </details>
       </div>

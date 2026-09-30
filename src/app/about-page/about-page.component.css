@@ -59,21 +59,7 @@ a:focus-visible {
   outline-offset: 5px;
 }
 .about-intro aside {
-  text-align: center;
-  padding: 45px 15px;
-  background: radial-gradient(ellipse, #b3c9e50b, transparent 67%);
-}
-.about-intro img {
-  filter: drop-shadow(0 0 45px #b3c9e51a);
-  margin-bottom: 35px;
-}
-.about-intro aside p {
-  font: 400 1.1rem/1.6 var(--accent-font);
-  letter-spacing: -0.03em;
-  color: #c6c8cb;
-}
-.about-intro aside span {
-  color: #818386;
+  min-width: 0;
 }
 .support-section {
   display: grid;
@@ -145,7 +131,8 @@ footer a {
     gap: 30px;
   }
   .about-intro aside {
-    display: none;
+    width: min(100%, 340px);
+    justify-self: center;
   }
   .support-section {
     grid-template-columns: 1fr;

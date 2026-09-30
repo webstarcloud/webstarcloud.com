@@ -17,17 +17,25 @@ describe('Research funding card', () => {
   });
   afterEach(() => fixture.destroy());
   const funded = (amount: number, status: 'collecting'|'funded'): FundingState => ({kind:'ready', snapshot:{campaignId:FIRST_RUN.id, currency:'USD', targetMinor:7200, receivedMinor:amount, status, updatedAt:new Date().toISOString(), checkoutUrl:'https://buy.stripe.com/test_example'}});
-  it('shows pending setup without a pretend balance or checkout', () => {
+  it('shows the dated owner-reported donations while checkout is unconfigured', () => {
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.textContent).toContain('Awaiting payment setup');
+    expect(element.textContent).toContain('Reported donations');
+    expect(element.textContent).toContain('$24.22');
     expect(element.textContent).toContain('US$72');
-    expect(element.querySelector('progress')).toBeNull();
+    expect(element.textContent).toContain('Owner-reported donations');
+    expect(element.textContent).toContain('30 Sep 2026');
+    expect(element.querySelector<HTMLProgressElement>('progress')?.value).toBe(2422);
+    expect(element.querySelector('.funding-percent')?.textContent).toBe('34%');
+    expect(element.querySelector('progress')?.getAttribute('aria-label')).toContain('Owner-reported');
     expect(element.querySelector('a[href^="https://buy.stripe.com"]')).toBeNull();
   });
   it('fills from verified amounts and closes checkout at the target; failed reads hide the balance', () => {
     const element = fixture.nativeElement as HTMLElement;
     states.next(funded(1800, 'collecting')); fixture.detectChanges();
     expect(element.querySelector<HTMLProgressElement>('progress')?.value).toBe(1800);
+    expect(element.textContent).toContain('$18.00');
+    expect(element.textContent).not.toContain('$24.22');
+    expect(element.textContent).not.toContain('Owner-reported donations');
     expect(element.querySelector('.funding-percent')?.textContent).toBe('25%');
     expect(element.querySelector('a[href^="https://buy.stripe.com"]')).not.toBeNull();
     states.next(funded(7500, 'funded')); fixture.detectChanges();

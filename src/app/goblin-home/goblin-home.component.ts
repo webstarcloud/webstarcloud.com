@@ -20,13 +20,14 @@ import { conversationContext, restoreLoginDraft, saveLoginDraft } from '../chat/
 import { usageLabel } from '../chat/chat-savings';
 import { toolActivityLabel } from '../chat/tool-activity';
 import { CostComparisonComponent } from '../cost-comparison/cost-comparison.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-goblin-home',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ChatToolsComponent, CostComparisonComponent],
   templateUrl: './goblin-home.component.html',
-  styleUrls: ['./chat-chrome.css', './goblin-home.component.css', './experiment-note.css', './tool-activity.css'],
+  styleUrls: ['./chat-chrome.css', './goblin-home.component.css', './experiment-note.css', './tool-activity.css', './experiment-tools.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoblinHomeComponent implements OnDestroy {
@@ -48,10 +49,27 @@ export class GoblinHomeComponent implements OnDestroy {
   readonly toolActivityLabel = toolActivityLabel;
   draft = this.store.current()?.draft ?? '';
   captureConversation = this.store.current()?.captureConversation ?? false;
+  useMemory = false;
+  useSandbox = false;
+  private consentAccount: string | null = null;
+  private readonly authSubscription: Subscription;
+  private nextTurnId = this.store.sessions().reduce(
+    (latest, session) => session.turns.reduce((id, turn) => Math.max(id, turn.id), latest),
+    Date.now(),
+  );
   private controller?: AbortController;
   private copyTimer?: ReturnType<typeof setTimeout>;
   private scrollFrame?: number;
   constructor() {
+    this.authSubscription = this.auth.state$.subscribe(account => {
+      // This only invalidates client consent. Provider identity comes from the verified server token.
+      const identity = account.isAuthenticated ? account.email ?? null : null;
+      if (!account.isAuthenticated || account.loading || identity !== this.consentAccount) {
+        this.resetExperimentTools();
+        if (this.busy()) this.stop();
+      }
+      this.consentAccount = identity;
+    });
     const saved = restoreLoginDraft();
     if (saved) {
       this.draft = saved.draft;
@@ -64,6 +82,15 @@ export class GoblinHomeComponent implements OnDestroy {
       return;
     }
     this.auth.signIn('/');
+  }
+  signOut() {
+    this.resetExperimentTools();
+    this.stop();
+    this.auth.signOut();
+  }
+  get experimentToolsDisabled(): boolean {
+    return this.busy() || !this.chat.configured || this.auth.snapshot.loading ||
+      !this.auth.snapshot.isAuthenticated || this.model.experimental;
   }
   get model() {
     return this.models.find((item) => item.id === this.selectedId())!;
@@ -81,6 +108,7 @@ export class GoblinHomeComponent implements OnDestroy {
   selectModel(id: ChatModelId) {
     if (this.busy() || !this.models.some(model => model.id === id)) return;
     this.selectedId.set(id);
+    if (id === 'goblin') this.resetExperimentTools();
     this.modelMenu.set(false);
     this.persist();
     this.error.set('');
@@ -92,6 +120,7 @@ export class GoblinHomeComponent implements OnDestroy {
     this.turns.set([]);
     this.draft = '';
     this.captureConversation = false;
+    this.resetExperimentTools();
     this.error.set('');
     this.modelMenu.set(false);
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
@@ -103,6 +132,7 @@ export class GoblinHomeComponent implements OnDestroy {
     this.turns.set(session.turns);
     this.draft = session.draft;
     this.captureConversation = session.captureConversation;
+    this.resetExperimentTools();
     this.selectedId.set(session.modelId);
     this.error.set('');
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
@@ -147,7 +177,7 @@ export class GoblinHomeComponent implements OnDestroy {
     const messages = conversationContext(this.turns(), prompt, this.selectedId());
     if (!this.store.current()) this.store.newSession(this.selectedId());
     const turn: ChatTurn = {
-      id: Date.now(),
+      id: ++this.nextTurnId,
       prompt,
       answer: '',
       reasoning: '',
@@ -201,7 +231,10 @@ export class GoblinHomeComponent implements OnDestroy {
             });
           if (event.type === 'done') update({ status: 'complete', metrics: event.metrics, finishReason: event.finishReason, recordingNotice: event.recordingNotice });
         },
-        { conversationId: this.store.current()!.conversationId, captureConversation: this.captureConversation },
+        { conversationId: this.store.current()!.conversationId, captureConversation: this.captureConversation,
+          useMemory: !this.model.experimental && this.useMemory,
+          useSandbox: !this.model.experimental && this.useSandbox,
+        },
       );
     } catch (error) {
       if (controller.signal.aborted) update({ status: 'stopped' });
@@ -260,6 +293,10 @@ export class GoblinHomeComponent implements OnDestroy {
         title: this.turns()[0]?.prompt.slice(0, 48) || 'New chat',
       });
   }
+  private resetExperimentTools(): void {
+    this.useMemory = false;
+    this.useSandbox = false;
+  }
   private scrollToLatest() {
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);
     this.scrollFrame = requestAnimationFrame(() => {
@@ -270,6 +307,7 @@ export class GoblinHomeComponent implements OnDestroy {
   }
   ngOnDestroy() {
     this.stop();
+    this.authSubscription.unsubscribe();
     this.persist();
     clearTimeout(this.copyTimer);
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);

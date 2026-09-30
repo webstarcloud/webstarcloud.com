@@ -6,6 +6,11 @@ import { environment } from '../../environments/environment';
 export const FIRST_RUN = {
   id: 'goblin-20b-01', title: 'The 20B-token experiment', currency: 'USD', targetMinor: 7200
 } as const;
+/** Owner-reported existing donations, separate from the future payment ledger. */
+export const REPORTED_DONATIONS = {
+  campaignId: FIRST_RUN.id, currency: FIRST_RUN.currency, receivedMinor: 2422,
+  reportedOn: '2026-09-30', source: 'owner-reported'
+} as const;
 export const FUNDING_API = new InjectionToken<string>('Funding API', {
   providedIn: 'root', factory: () => environment.fundingApiUrl
 });
