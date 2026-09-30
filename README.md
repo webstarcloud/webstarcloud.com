@@ -150,14 +150,23 @@ The research assistant uses the protected SSE contract in
 inspection panel, server tool events and measured timing fields. Production uses the authenticated
 streaming gateway in `../davesbrain/model-lambda`; see its `LIVE.md` for deployment,
 limits and the emergency stop. The local chat endpoint remains empty to avoid
-accidental production calls from development. The inspector is a separate backend
+accidental production calls from development; the preview explains this and links
+to the connected live site. The inspector is a separate backend
 operation and does not call the chat models.
 
-Chat now displays validated source links, first-answer latency and an optional
-research-recording notice. The collapsed privacy panel defaults conversation
-capture off; opting in sends messages/answers to LangWatch and a private archive
-for review before future training. Basic timing/error metadata is still recorded
-when capture is off. Turning capture off does not delete previous records.
+Chat displays validated source links, first-answer latency and a research-recording
+receipt. After Google sign-in, an experiment notice must be acknowledged before
+sending. **Agree and continue** enables personal memory, Python and research
+recording together. The alternative continues with all three optional features
+off; individual switches remain editable afterward.
+
+Research recording sends messages, answers and any saved notes used as model
+context to LangWatch and a private archive for review before future training.
+Records are not automatically approved for training. Redaction is imperfect;
+avoid sharing sensitive information. Basic timing/error metadata is still
+recorded when capture is off. Turning capture off stops new captures and does not
+delete previous records. Input protection, calculator routing and automatic
+source lookup operate independently of these optional settings.
 Automatic source lookup checks a configured trusted-page index first, then uses
 a private SearXNG Lambda with Google, Bing and DuckDuckGo. Sources show whether
 they came from the index or web search, including snapshot dates. The backend
@@ -169,9 +178,19 @@ Arithmetic-shaped requests use a bounded server calculator. No provider secrets
 are shipped to the browser. Production uses Cognito-authenticated API Gateway
 REST streaming, with shared quotas enforced before model invocation.
 
+The cost comparison shows the same estimated amount in its summary and details.
+Sub-cent values retain meaningful digits down to the backend ledger's nanodollar
+resolution; a real zero stays `$0.00` and is labelled as a difference. Larger
+values round to cents. This is the measured model-compute comparison described in
+`../davesbrain/model-lambda/COST_COMPARISON.md`, not total AWS billing savings.
+
 The collapsed **Experiment tools** panel offers personal memory (Mem0) and a
-Python sandbox (E2B) in the Qwen assistant modes. Both are off by default and reset
-on new/reopened chats, sign-out and account changes. Memory saves only explicit
+Python sandbox (E2B) in the Qwen assistant modes. Acknowledgement and selections
+are bound to the signed-in Cognito subject and kept only in runtime memory.
+They survive navigation and new/reopened chats, and reset on sign-out, account
+switch or reload. Definitive sign-out/account changes also clear browser chat
+history. No email, provider key or acknowledgement is saved in browser storage.
+Backend flags still default false when absent. Memory saves only explicit
 `Remember: ...` notes and retrieves up to three bounded notes for the current
 question. `Show saved memories` lists notes with IDs; `Forget memory: <id>` removes
 an owned note. Management exchanges are excluded from content recording even

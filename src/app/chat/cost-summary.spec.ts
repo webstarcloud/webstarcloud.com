@@ -29,10 +29,21 @@ describe('Cost comparison receipts', () => {
     fractional.summary.outputTokens = 1.5;
     expect(readCostReport(fractional)).toBeNull();
   });
-  it('renders small real estimates without rounding them to zero', () => {
+  it('preserves the ledger resolution for real sub-cent amounts without erasing true zero', () => {
     expect(costAmount(0)).toBe('$0.00');
-    expect(costAmount(0.00001)).toBe('<$0.0001');
+    expect(costAmount(-0)).toBe('$0.00');
+    expect(costAmount(0.000019537000000000065)).toBe('$0.000019537');
+    expect(costAmount(0.00001)).toBe('$0.00001');
+    expect(costAmount(0.000000001)).toBe('$0.000000001');
+    expect(costAmount(0.0000000001)).toBe('<$0.000000001');
     expect(costAmount(0.0012)).toBe('$0.0012');
+    expect(costAmount(0.009999999)).toBe('$0.009999999');
+    expect(costAmount(0.01)).toBe('$0.01');
+    expect(costAmount(3)).toBe('$3.00');
     expect(costAmount(3.14)).toBe('$3.14');
+    expect(costAmount(3.146)).toBe('$3.15');
+  });
+  it('does not turn unavailable or invalid amounts into a dollar estimate', () => {
+    for (const amount of [NaN, Infinity, -Infinity, -1]) expect(costAmount(amount)).toBe('—');
   });
 });

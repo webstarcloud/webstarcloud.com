@@ -33,7 +33,7 @@
         <p>For the Qwen assistant, explicit rules choose one bounded tool step. Simple arithmetic uses a decimal calculator. Questions about this site’s owner use a maintained profile. Those answers skip the model entirely. Goblin takes the base-model continuation path.</p>
         <p>Recognized factual questions check selected, indexed pages first, then whole-web search through a private SearXNG worker. Only the current question goes to search. If no evidence is available, the system declines to guess. Other questions proceed directly to generation.</p>
         <p>Personal memory and Python are separate, optional tools. Mem0 stores only explicit <code>Remember:</code> notes under your verified account and retrieves up to three relevant notes. You can inspect and delete them. Retrieved notes are untrusted historical data; memory does not train the model.</p>
-        <p><code>Run Python:</code> executes code you supply in a fresh E2B sandbox with internet access disabled, a 10-second execution limit and a 30-second lifetime. Both tools require your selection and a shared free-credit allowance. The assistant does not automatically write memories or generate code to execute.</p>
+        <p><code>Run Python:</code> executes code you supply in a fresh E2B sandbox with internet access disabled, a 10-second execution limit and a 30-second lifetime. After sign-in, “Agree and continue” enables these tools and research recording together. You can instead continue with optional features off, or change each setting later. Shared free-credit limits still apply. The assistant does not automatically write memories or generate code to execute.</p>
         <p>The interface shows tool activity as the service starts and completes an operation. Those events describe real execution. This is rule-based routing, not an ensemble of specialist models.</p>
         <a routerLink="/research/search">Retrieval changes the trust boundary →</a>
       </div>
@@ -59,7 +59,8 @@
   <aside class="observation">
     <span class="eyebrow">ALONGSIDE THE REQUEST</span>
     <h2>Observe first. Learn from evidence.</h2>
-    <p>LangWatch records performance and outcomes. Conversation capture is off by default. If you opt in, messages and answers are redacted and saved to LangWatch and a private research archive for review. They are not automatically approved for training. Redaction is imperfect; avoid sharing sensitive information.</p>
+    <p>LangWatch records performance and outcomes. The notice after sign-in asks you to choose before sending. “Agree and continue” enables personal memory, Python and research recording; the alternative keeps all three off. Recording can include messages, answers and retrieved notes in LangWatch and a private research archive for review. Memory inspection and deletion exchanges are excluded. Records are not automatically approved for training. Redaction is imperfect; avoid sharing sensitive information.</p>
+    <p>Your choices remain editable and follow your signed-in account across chats and navigation during this visit. They reset on sign-out, account switch or reload; sign-out and account changes also clear browser chat history. Turning recording off stops new captures and does not delete previous records. Input protection and automatic search work independently of these optional settings.</p>
     <p>These records are observations, not proof of answer quality. Small diagnostic probes already catch failures; a broader held-out evaluation suite is still work to do.</p>
     <a routerLink="/research/evaluations">Why “it feels smarter” is not an evaluation →</a>
   </aside>

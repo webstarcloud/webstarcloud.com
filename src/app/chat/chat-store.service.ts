@@ -24,6 +24,10 @@ export class ChatStore {
   current(): ChatSession | undefined {
     return this.sessions().find((item) => item.id === this.activeId());
   }
+  clear(): void {
+    this.sessions.set([]);
+    this.activeId.set(null);
+  }
   save(session: ChatSession): void {
     this.sessions.update((items) =>
       items.map((item) => (item.id === session.id ? { ...session } : item)),

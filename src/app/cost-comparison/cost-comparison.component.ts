@@ -21,9 +21,9 @@ export class CostComparisonComponent implements OnInit {
   get label(): string {
     const difference = this.summary?.estimatedDifferenceUsd;
     if (difference == null) return 'Savings pending';
-    // Round the headline to cents; exact small amounts stay in the details.
-    const amount = Math.abs(difference).toFixed(2);
-    return difference >= 0 ? `−$${amount} saved` : `+$${amount} extra cost`;
+    const amount = costAmount(Math.abs(difference));
+    if (difference === 0) return `${amount} difference`;
+    return difference > 0 ? `−${amount} saved` : `+${amount} extra cost`;
   }
   get requests(): number | null {
     const total = this.summary;

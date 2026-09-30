@@ -9,12 +9,12 @@ import { CHAT_MODELS, ChatTurn } from '../chat/chat.models';
 describe('Chat homepage', () => {
   let fixture: ComponentFixture<GoblinHomeComponent>;
   let service: { configured: boolean; stream: jasmine.Spy };
-  let account: BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email'>>;
+  let account: BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email' | 'subject'>>;
   let signOut: jasmine.Spy;
   beforeEach(async () => {
     service = { configured: false, stream: jasmine.createSpy('stream') };
-    account = new BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email'>>({
-      isAuthenticated: true, loading: false, email: 'first@example.com',
+    account = new BehaviorSubject<Pick<AuthState, 'isAuthenticated' | 'loading' | 'email' | 'subject'>>({
+      isAuthenticated: true, loading: false, email: 'first@example.com', subject: 'account-one',
     });
     signOut = jasmine.createSpy('signOut');
     await TestBed.configureTestingModule({
@@ -60,7 +60,7 @@ describe('Chat homepage', () => {
     expect(page.model.experimental).toBeTrue();
     expect(page.model.mode).toBe('Base');
   });
-  it('keeps tools off by default, hides them for Goblin and disables consent while signed out or busy', async () => {
+  it('unlocks checked tools after acknowledgement, and explains disconnected or unsigned states', async () => {
     let page = fixture.componentInstance;
     let el = fixture.nativeElement as HTMLElement;
     const tools = () => el.querySelectorAll<HTMLInputElement>('.experiment-tools input');
@@ -68,6 +68,7 @@ describe('Chat homepage', () => {
     expect(page.useSandbox).toBeFalse();
     expect(tools().length).toBe(2);
     expect(Array.from(tools()).every(input => !input.checked && input.disabled)).toBeTrue();
+    expect(el.textContent).toContain('This preview isn’t connected to a model');
     service.configured = true;
     // Endpoint configuration is fixed for a component's lifetime in production.
     fixture.destroy();
@@ -76,26 +77,48 @@ describe('Chat homepage', () => {
     await fixture.whenStable();
     page = fixture.componentInstance;
     el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.experiment-consent')).not.toBeNull();
+    expect(Array.from(tools()).every(input => input.disabled)).toBeTrue();
+    const agree = el.querySelector<HTMLButtonElement>('.experiment-consent-actions button')!;
+    agree.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('.experiment-consent')).toBeNull();
+    expect(Array.from(tools()).every(input => input.checked && !input.disabled)).toBeTrue();
+    expect(page.captureConversation).toBeTrue();
+    // Exercise the actual switch binding after acknowledgement.
+    tools()[0].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(page.useMemory).toBeFalse();
+    tools()[0].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(page.useMemory).toBeTrue();
     expect(Array.from(tools()).every(input => !input.disabled)).toBeTrue();
     page.busy.set(true);
     fixture.detectChanges();
     await fixture.whenStable();
     expect(Array.from(tools()).every(input => input.disabled)).toBeTrue();
     page.busy.set(false);
-    account.next({ isAuthenticated: false, loading: false, email: null });
+    account.next({ isAuthenticated: false, loading: false, email: null, subject: null });
     fixture.detectChanges();
     await fixture.whenStable();
     expect(Array.from(tools()).every(input => input.disabled)).toBeTrue();
-    account.next({ isAuthenticated: true, loading: false, email: 'first@example.com' });
+    account.next({ isAuthenticated: true, loading: false, email: 'first@example.com', subject: 'account-one' });
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(Array.from(tools()).every(input => !input.disabled)).toBeTrue();
+    expect(Array.from(tools()).every(input => input.disabled && !input.checked)).toBeTrue();
+    expect(el.querySelector('.experiment-consent')).not.toBeNull();
+    page.acknowledgeExperiments(true);
     page.selectModel('goblin');
     fixture.detectChanges();
     expect(el.querySelector('.experiment-tools')).toBeNull();
   });
-  it('sends separate per-request tool consent without persisting it in a chat', async () => {
+  it('sends all acknowledged defaults and keeps choices across new and reopened chats', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(true);
     service.stream.and.resolveTo();
     const page = fixture.componentInstance;
     page.useMemory = true;
@@ -103,41 +126,79 @@ describe('Chat homepage', () => {
     page.draft = 'Remember: I prefer short answers.';
     await page.send();
     expect(service.stream.calls.mostRecent().args[4]).toEqual({
-      conversationId: page.store.current()!.conversationId, captureConversation: false,
+      conversationId: page.store.current()!.conversationId, captureConversation: true,
       useMemory: true, useSandbox: true,
     });
     expect(page.store.current()).not.toEqual(jasmine.objectContaining({ useMemory: true }));
     expect(page.store.current()).not.toEqual(jasmine.objectContaining({ useSandbox: true }));
     const session = page.store.current()!;
     page.newChat();
-    expect(page.useMemory).toBeFalse();
-    expect(page.useSandbox).toBeFalse();
-    page.useMemory = true;
-    page.useSandbox = true;
+    expect(page.useMemory).toBeTrue();
+    expect(page.useSandbox).toBeTrue();
+    expect(page.captureConversation).toBeTrue();
+    page.captureConversation = false;
     page.openSession(session);
-    expect(page.useMemory).toBeFalse();
-    expect(page.useSandbox).toBeFalse();
+    expect(page.useMemory).toBeTrue();
+    expect(page.useSandbox).toBeTrue();
+    // Reopening an old recorded chat cannot silently re-enable recording.
+    expect(session.captureConversation).toBeTrue();
+    expect(page.captureConversation).toBeFalse();
   });
-  it('resets tools for account changes, sign out and the base model', () => {
+  it('resets every optional feature for account changes and sign out', () => {
+    service.configured = true;
     const page = fixture.componentInstance;
-    const enable = () => { page.useMemory = true; page.useSandbox = true; };
-    const off = () => { expect(page.useMemory).toBeFalse(); expect(page.useSandbox).toBeFalse(); };
+    const enable = () => page.acknowledgeExperiments(true);
+    const off = () => {
+      expect(page.useMemory).toBeFalse(); expect(page.useSandbox).toBeFalse();
+      expect(page.captureConversation).toBeFalse();
+    };
     enable();
-    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com' });
+    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com', subject: 'account-two' });
     off();
     enable();
-    account.next({ isAuthenticated: false, loading: false, email: null });
+    account.next({ isAuthenticated: false, loading: false, email: null, subject: null });
     off();
+    account.next({ isAuthenticated: true, loading: false, email: 'first@example.com', subject: 'account-one' });
     enable();
     page.signOut();
     off();
     expect(signOut).toHaveBeenCalled();
-    enable();
+  });
+  it('does not send or lose the draft until a signed-in user chooses how to continue', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.draft = 'Keep this question';
+    await page.send();
+    expect(service.stream).not.toHaveBeenCalled();
+    expect(page.draft).toBe('Keep this question');
+    expect(page.error()).toContain('notice');
+    page.acknowledgeExperiments(false);
+    service.stream.and.resolveTo();
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[4]).toEqual({
+      conversationId: page.store.current()!.conversationId, captureConversation: false,
+      useMemory: false, useSandbox: false,
+    });
+  });
+  it('does not send provider flags to the base experiment or discard settings when switching back', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(true);
     page.selectModel('goblin');
-    off();
+    page.draft = 'Once upon a time,';
+    service.stream.and.resolveTo();
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[4]).toEqual({
+      conversationId: page.store.current()!.conversationId, captureConversation: true,
+      useMemory: false, useSandbox: false,
+    });
+    page.selectModel('gobwen-think');
+    expect(page.useMemory).toBeTrue();
+    expect(page.useSandbox).toBeTrue();
   });
   it('stops a pending opted-in request when the signed-in account changes', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     let finish!: () => void;
     service.stream.and.callFake(() => new Promise<void>(resolve => finish = resolve));
     const page = fixture.componentInstance;
@@ -145,15 +206,17 @@ describe('Chat homepage', () => {
     page.draft = 'Use my preferences';
     const sending = page.send();
     const signal = service.stream.calls.mostRecent().args[2] as AbortSignal;
-    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com' });
+    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com', subject: 'account-two' });
     expect(signal.aborted).toBeTrue();
     expect(page.useMemory).toBeFalse();
     finish();
     await sending;
-    expect(page.turns()[0].status).toBe('stopped');
+    expect(page.turns()).toEqual([]);
+    expect(page.store.sessions()).toEqual([]);
   });
   it('shows provider availability from receipts without claiming success for a failed attempt', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     service.stream.and.callFake(async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
       onEvent({ type: 'ready', servedModel: 'Qwen' });
       onEvent({ type: 'tool', tool: { name: 'memory_write', status: 'running' } });
@@ -187,6 +250,7 @@ describe('Chat homepage', () => {
   });
   it('shows confirmed tool activity while Thinking, then retains it with the completed answer', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     let emit!: (event: ChatEvent) => void;
     let finish!: () => void;
     service.stream.and.callFake((_model, _messages, _signal, onEvent) => {
@@ -243,6 +307,7 @@ describe('Chat homepage', () => {
     // Two fast tool completions can share a wall-clock millisecond.
     spyOn(Date, 'now').and.returnValue(1_700_000_000_000);
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     service.stream.and.callFake(
       async (
         _model: unknown,
@@ -285,6 +350,7 @@ describe('Chat homepage', () => {
   });
   it('reports interrupted tool activity when the request fails instead of implying ongoing work', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     service.stream.and.callFake(async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
       onEvent({ type: 'ready', servedModel: 'Qwen' });
       onEvent({ type: 'tool', tool: { name: 'source_lookup', status: 'running' } });
@@ -303,6 +369,7 @@ describe('Chat homepage', () => {
   });
   it('stops pending work and retains its stopped state when starting another chat', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     let finish!: () => void;
     service.stream.and.callFake(() => new Promise<void>((resolve) => (finish = resolve)));
     const page = fixture.componentInstance;
@@ -317,6 +384,7 @@ describe('Chat homepage', () => {
   });
   it('preserves the draft and makes no request when signed out', async () => {
     service.configured = true;
+    fixture.componentInstance.acknowledgeExperiments(false);
     const page = fixture.componentInstance;
     page.auth.snapshot.isAuthenticated = false;
     page.draft = 'Keep my draft';

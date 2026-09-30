@@ -73,7 +73,11 @@ export function readCostReport(value: unknown): CostReport | null {
 }
 
 export function costAmount(usd: number): string {
+  if (!Number.isFinite(usd) || usd < 0) return '—';
   if (usd === 0) return '$0.00';
-  if (usd < 0.0001) return '<$0.0001';
-  return '$' + usd.toFixed(usd < 0.01 ? 4 : 2);
+  // The ledger stores integer nanodollars. Keep meaningful sub-cent digits,
+  // without inventing precision below that resolution or rounding them to zero.
+  if (usd < 0.000000001) return '<$0.000000001';
+  const amount = usd.toFixed(usd < 0.01 ? 9 : 2);
+  return '$' + amount.replace(/(\.\d{2,}?)0+$/, '$1');
 }

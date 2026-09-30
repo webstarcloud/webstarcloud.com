@@ -21,6 +21,7 @@ import { usageLabel } from '../chat/chat-savings';
 import { toolActivityLabel } from '../chat/tool-activity';
 import { CostComparisonComponent } from '../cost-comparison/cost-comparison.component';
 import { Subscription } from 'rxjs';
+import { ExperimentPreferencesService } from '../chat/experiment-preferences.service';
 
 @Component({
   selector: 'app-goblin-home',
@@ -33,9 +34,11 @@ import { Subscription } from 'rxjs';
 export class GoblinHomeComponent implements OnDestroy {
   @ViewChild('composer') composer?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('transcript') transcript?: ElementRef<HTMLElement>;
+  @ViewChild('experimentNotice') experimentNotice?: ElementRef<HTMLElement>;
   readonly store = inject(ChatStore);
   readonly chat = inject(ChatService);
   readonly auth = inject(AuthService);
+  readonly experiments = inject(ExperimentPreferencesService);
   readonly models = CHAT_MODELS;
   readonly selectedId = signal<ChatModelId>(this.store.current()?.modelId ?? DEFAULT_CHAT_MODEL);
   readonly turns = signal<ChatTurn[]>(this.store.current()?.turns ?? []);
@@ -48,9 +51,6 @@ export class GoblinHomeComponent implements OnDestroy {
   readonly usageLabel = usageLabel;
   readonly toolActivityLabel = toolActivityLabel;
   draft = this.store.current()?.draft ?? '';
-  captureConversation = this.store.current()?.captureConversation ?? false;
-  useMemory = false;
-  useSandbox = false;
   private consentAccount: string | null = null;
   private readonly authSubscription: Subscription;
   private nextTurnId = this.store.sessions().reduce(
@@ -62,11 +62,13 @@ export class GoblinHomeComponent implements OnDestroy {
   private scrollFrame?: number;
   constructor() {
     this.authSubscription = this.auth.state$.subscribe(account => {
-      // This only invalidates client consent. Provider identity comes from the verified server token.
-      const identity = account.isAuthenticated ? account.email ?? null : null;
-      if (!account.isAuthenticated || account.loading || identity !== this.consentAccount) {
-        this.resetExperimentTools();
-        if (this.busy()) this.stop();
+      if (account.loading || (account.isAuthenticated && !account.subject)) return;
+      const identity = account.isAuthenticated ? account.subject : null;
+      if (this.consentAccount && identity !== this.consentAccount) {
+        this.stop();
+        this.turns.set([]);
+        this.draft = '';
+        this.selectedId.set(DEFAULT_CHAT_MODEL);
       }
       this.consentAccount = identity;
     });
@@ -84,13 +86,34 @@ export class GoblinHomeComponent implements OnDestroy {
     this.auth.signIn('/');
   }
   signOut() {
-    this.resetExperimentTools();
+    this.experiments.reset();
     this.stop();
     this.auth.signOut();
   }
   get experimentToolsDisabled(): boolean {
+    return this.experimentChoicesDisabled || this.model.experimental;
+  }
+  get experimentChoicesDisabled(): boolean {
     return this.busy() || !this.chat.configured || this.auth.snapshot.loading ||
-      !this.auth.snapshot.isAuthenticated || this.model.experimental;
+      !this.auth.snapshot.isAuthenticated || !this.auth.snapshot.subject || !this.experiments.state().acknowledged;
+  }
+  get showExperimentNotice(): boolean {
+    const account = this.auth.snapshot;
+    return this.chat.configured && account.isAuthenticated && !account.loading &&
+      !!account.subject && !this.experiments.state().acknowledged;
+  }
+  get useMemory(): boolean { return this.experiments.state().memory; }
+  set useMemory(enabled: boolean) { this.experiments.set('memory', enabled); }
+  get useSandbox(): boolean { return this.experiments.state().sandbox; }
+  set useSandbox(enabled: boolean) { this.experiments.set('sandbox', enabled); }
+  get captureConversation(): boolean { return this.experiments.state().recording; }
+  set captureConversation(enabled: boolean) { this.experiments.set('recording', enabled); }
+  acknowledgeExperiments(enabled: boolean): void {
+    if (!this.chat.configured || this.busy()) return;
+    this.experiments.acknowledge(enabled);
+    this.persist();
+    this.error.set('');
+    this.composer?.nativeElement.focus();
   }
   get model() {
     return this.models.find((item) => item.id === this.selectedId())!;
@@ -108,7 +131,6 @@ export class GoblinHomeComponent implements OnDestroy {
   selectModel(id: ChatModelId) {
     if (this.busy() || !this.models.some(model => model.id === id)) return;
     this.selectedId.set(id);
-    if (id === 'goblin') this.resetExperimentTools();
     this.modelMenu.set(false);
     this.persist();
     this.error.set('');
@@ -119,8 +141,6 @@ export class GoblinHomeComponent implements OnDestroy {
     this.selectedId.set(DEFAULT_CHAT_MODEL);
     this.turns.set([]);
     this.draft = '';
-    this.captureConversation = false;
-    this.resetExperimentTools();
     this.error.set('');
     this.modelMenu.set(false);
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
@@ -131,8 +151,6 @@ export class GoblinHomeComponent implements OnDestroy {
     this.store.activeId.set(session.id);
     this.turns.set(session.turns);
     this.draft = session.draft;
-    this.captureConversation = session.captureConversation;
-    this.resetExperimentTools();
     this.selectedId.set(session.modelId);
     this.error.set('');
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
@@ -167,6 +185,13 @@ export class GoblinHomeComponent implements OnDestroy {
     }
     if (this.auth.snapshot.loading || !this.auth.snapshot.isAuthenticated) {
       this.error.set(this.auth.snapshot.loading ? 'Checking your sign-in…' : 'Sign in with Google to chat. Your draft is ready when you return.');
+      return;
+    }
+    if (!this.auth.snapshot.subject || !this.experiments.state().acknowledged) {
+      this.error.set(this.auth.snapshot.subject
+        ? 'Review the experimental-features notice before sending. Your draft is still here.'
+        : 'Finishing your sign-in… Your draft is still here.');
+      this.experimentNotice?.nativeElement.focus();
       return;
     }
     const prompt = this.draft.trim();
@@ -292,10 +317,6 @@ export class GoblinHomeComponent implements OnDestroy {
         captureConversation: this.captureConversation,
         title: this.turns()[0]?.prompt.slice(0, 48) || 'New chat',
       });
-  }
-  private resetExperimentTools(): void {
-    this.useMemory = false;
-    this.useSandbox = false;
   }
   private scrollToLatest() {
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);

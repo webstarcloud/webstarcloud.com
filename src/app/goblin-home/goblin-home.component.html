@@ -182,6 +182,20 @@
         </article>
       </div>
       <div class="composer-area" [class.conversation-composer]="turns().length">
+        <section *ngIf="showExperimentNotice" class="experiment-consent" aria-labelledby="experiment-consent-title">
+          <h2 id="experiment-consent-title" #experimentNotice tabindex="-1">Before you start</h2>
+          <p>This assistant is an experiment. Agreeing enables these optional features:</p>
+          <ul>
+            <li><strong>Personal memory:</strong> Mem0 can look up preferences using your question. It saves only notes you explicitly start with <code>Remember:</code>.</li>
+            <li><strong>Python sandbox:</strong> E2B runs code you explicitly provide with <code>Run Python:</code>, within our shared free-credit limit.</li>
+            <li><strong>Research recording:</strong> messages, answers and retrieved notes may be saved in LangWatch and a private archive for research and future training. Training requires a separate review; redaction can miss sensitive details.</li>
+          </ul>
+          <p>Source lookup may send your question to search engines. Avoid secrets or sensitive information. You can switch optional features off below; this stops new activity, without deleting earlier records.</p>
+          <div class="experiment-consent-actions">
+            <button type="button" (click)="acknowledgeExperiments(true)">Agree and continue</button>
+            <button type="button" class="consent-secondary" (click)="acknowledgeExperiments(false)">Continue without optional features</button>
+          </div>
+        </section>
         <form class="composer" (ngSubmit)="send()">
           <label class="sr-only" for="chat-message">Message {{ model.name }}</label
           ><textarea
@@ -245,12 +259,15 @@
           <a routerLink="/research/architecture">Explore the architecture <span aria-hidden="true">→</span></a>
         </aside>
         <p class="connection-note" *ngIf="!chat.configured">
-          <span></span> Model connection coming next.
-          <a routerLink="/research/models">How the models work</a>
+          <span></span> This preview isn’t connected to a model.
+          <a href="https://davidwebstar.com/">Try the live assistant →</a>
         </p>
         <details class="experiment-tools" *ngIf="!model.experimental">
-          <summary>Experiment tools{{ useMemory || useSandbox ? ' · selected' : '' }}</summary>
-          <p>Off by default. These external tools use a shared free-credit allowance. If the allowance is unavailable, the tool stays off.</p>
+          <summary>Experiment tools{{ useMemory || useSandbox ? ' · on' : '' }}</summary>
+          <p *ngIf="!chat.configured">Personal memory and Python are available in the live assistant after sign-in.</p>
+          <p *ngIf="chat.configured && !auth.snapshot.isAuthenticated">Sign in to enable these experimental features.</p>
+          <p *ngIf="showExperimentNotice">Choose how to continue in the notice above to unlock these controls.</p>
+          <p>Enabled together when you agree after sign-in. These external tools use a shared free-credit allowance. If the allowance is unavailable, the tool stays off.</p>
           <label>
             <input type="checkbox" role="switch" [(ngModel)]="useMemory" [attr.aria-checked]="useMemory"
               [disabled]="experimentToolsDisabled" aria-describedby="memory-description" />
@@ -264,11 +281,11 @@
             <span>Python sandbox</span>
           </label>
           <p id="sandbox-description">E2B runs only code you explicitly provide after <code>Run Python:</code>, as plain text or a fenced Python block. The assistant does not generate code to run automatically.</p>
-          <p>Selections reset when you start or reopen a chat, sign out, or change accounts. These choices are separate from research recording.</p>
+          <p>Your choices apply across chats while this page is open. Signing out, changing accounts or reloading resets them and shows the notice again.</p>
         </details>
         <details class="research-recording" *ngIf="chat.configured">
           <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
-          <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="busy()" /> Save this conversation for research and future model training</label>
+          <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="experimentChoicesDisabled" /> Save new messages for research and future model training</label>
           <p>When enabled, messages, answers and any saved notes used as model context can enter LangWatch and a private research archive. They need review before training. Memory inspection and deletion exchanges are excluded. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
           <p>The assistant checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
         </details>

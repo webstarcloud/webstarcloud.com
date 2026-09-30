@@ -10,7 +10,7 @@
     <dl *ngIf="total.referenceApiUsd !== null">
       <div><dt>Estimated API cost</dt><dd>{{ costAmount(total.referenceApiUsd!) }}</dd></div>
       <div><dt>Measured interval · model Lambda estimate</dt><dd>{{ costAmount(total.estimatedModelComputeUsd!) }}</dd></div>
-      <div><dt>{{ total.estimatedDifferenceUsd! >= 0 ? 'Estimated savings' : 'Estimated extra cost' }}</dt><dd>{{ exactDifference }}</dd></div>
+      <div><dt>{{ total.estimatedDifferenceUsd! === 0 ? 'Estimated difference' : total.estimatedDifferenceUsd! > 0 ? 'Estimated savings' : 'Estimated extra cost' }}</dt><dd>{{ exactDifference }}</dd></div>
     </dl>
     <p>The API approximation uses ${{ total.comparator.inputUsdPerMillion }} per million input tokens and ${{ total.comparator.outputUsdPerMillion }} per million output tokens. These are assumed comparison rates, checked {{ total.comparator.checkedOn }}.</p>
     <p>{{ total.scope }}</p>

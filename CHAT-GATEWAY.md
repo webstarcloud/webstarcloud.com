@@ -6,7 +6,8 @@ ARM64 CPUs, one concurrent request each and no provisioned concurrency. A 256 MB
 Node.js gateway verifies Cognito access tokens and streams the selected model.
 The public edge is a Cognito-authorized API Gateway REST streaming route; the
 former public Function URL has been removed.
-Development keeps `chatEndpoint` empty. There is no fallback to the older Dave's
+Development keeps `chatEndpoint` empty; the disconnected preview explains the
+limitation and links to the connected live website. There is no fallback to the older Dave's
 Brain model. No AWS credentials or shared chat secrets belong in the Angular build.
 
 ## Model aliases
@@ -56,8 +57,23 @@ false, and requires an ID when true. Consent enables LangWatch and private archi
 message/answer capture, marked unreviewed for training. Opt-out traces contain
 metadata only. Credentials and raw reasoning are never intentionally recorded.
 
+The frontend displays a notice after sign-in and blocks sending until the visitor
+chooses. **Agree and continue** turns on personal memory, Python and research
+recording together; the alternative keeps all three optional features off.
+The notice explains that research capture can include messages, answers and
+retrieved notes in LangWatch and a private archive. Records require review before
+training, and redaction is imperfect. Each setting remains editable.
+
+Acknowledgement and preferences are bound to the Cognito subject in runtime
+memory, persist across navigation/new/reopened chats, and reset on definitive
+sign-out, account switch or reload. Browser chat history is cleared on definitive
+sign-out/account switch. A session's recording preference cannot be inherited by
+another account. These client defaults do not change the backend's missing-flag
+defaults or shared quotas. Input protection, calculator and automatic search
+remain independent of optional-feature acknowledgement.
+
 Optional strict boolean `useMemory` and `useSandbox` fields default false. The
-browser sends only selected flags; provider identity is derived from the verified
+browser sends only enabled flags after acknowledgement; provider identity is derived from the verified
 subject in the gateway. The Qwen assistant offers explicit `Remember: ...`,
 `Show saved memories`, `Forget memory: <id>` and `Run Python: ...` routes. Ordinary
 opted-in memory queries retrieve up to three checked notes as untrusted context.

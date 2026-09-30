@@ -21,13 +21,13 @@ describe('CostComparisonComponent', () => {
     const fixture = TestBed.createComponent(CostComparisonComponent);
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent;
-    expect(fixture.nativeElement.querySelector('summary').textContent).toContain('+$0.00 extra cost');
+    expect(fixture.nativeElement.querySelector('summary').textContent).toContain('+$0.0012 extra cost');
     expect(text).toContain('$0.0012');
     expect(text).toContain('$3 per million input tokens');
     expect(text).toContain('$15 per million output tokens');
     expect(text).not.toContain('Model calls avoided');
   });
-  it('shows one rounded site total and counts all completed requests', () => {
+  it('shows a nonzero site total at nanodollar resolution and counts all completed requests', () => {
     TestBed.configureTestingModule({ imports: [CostComparisonComponent], providers: [{ provide: COST_ENDPOINT, useValue: '' }] });
     const report = costReport(0.00179999);
     report.summary.unpricedRequests = 7;
@@ -35,10 +35,21 @@ describe('CostComparisonComponent', () => {
     const fixture = TestBed.createComponent(CostComparisonComponent);
     fixture.detectChanges();
     const headline = fixture.nativeElement.querySelector('summary').textContent;
-    expect(headline).toContain('−$0.00 saved');
+    expect(headline).toContain('−$0.00000001 saved');
     expect(headline).toContain('8 requests');
     expect(headline).not.toContain('<$');
     expect(headline).not.toContain('Total model compute');
     expect(fixture.nativeElement.querySelector('svg')).toBeTruthy();
+  });
+  it('keeps an actual zero neutral and consistent with its detail amount', () => {
+    TestBed.configureTestingModule({ imports: [CostComparisonComponent], providers: [{ provide: COST_ENDPOINT, useValue: '' }] });
+    TestBed.inject(CostSummaryService).accept(costReport(0.0018));
+    const fixture = TestBed.createComponent(CostComparisonComponent);
+    fixture.detectChanges();
+    const headline = fixture.nativeElement.querySelector('summary').textContent;
+    expect(headline).toContain('$0.00 difference');
+    expect(headline).not.toContain('−$');
+    expect(headline).not.toContain('extra cost');
+    expect(fixture.nativeElement.querySelectorAll('dd')[2].textContent).toContain('$0.00');
   });
 });

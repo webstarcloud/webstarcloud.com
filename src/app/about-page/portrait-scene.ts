@@ -34,6 +34,7 @@ export class PortraitScene {
     this.renderer.domElement.style.width = '100%';
     this.renderer.domElement.style.height = '100%';
     this.container.appendChild(this.renderer.domElement);
+    this.camera.zoom = 1.7;
     this.avatar.rotation.set(0, THREE.MathUtils.degToRad(-10), Math.PI / 2);
     this.scene.add(this.avatar);
   }
@@ -69,8 +70,11 @@ export class PortraitScene {
     originalMaterials.forEach(material => material.dispose());
     this.avatar.add(core, this.shell);
     const bounds = new THREE.Box3().setFromObject(core.getObjectByName('me') ?? core);
-    this.avatar.position.sub(bounds.getCenter(new THREE.Vector3()));
     this.bounds = bounds.getSize(new THREE.Vector3());
+    const focus = bounds.getCenter(new THREE.Vector3());
+    // Restore the original head-and-shoulders crop instead of fitting the torso.
+    focus.y -= this.bounds.y * 0.06;
+    this.avatar.position.sub(focus);
     meshes.forEach(mesh => this.createAssemblyCloud(mesh));
     this.resize();
   }

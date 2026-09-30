@@ -9,6 +9,7 @@ export interface AuthState {
   loading: boolean;
   isAuthenticated: boolean;
   email: string | null;
+  subject: string | null;
   statusMessage: string | null;
   errorMessage: string | null;
 }
@@ -20,6 +21,7 @@ export class AuthService {
     loading: false,
     isAuthenticated: false,
     email: null,
+    subject: null,
     statusMessage: null,
     errorMessage: null
   });
@@ -95,6 +97,7 @@ export class AuthService {
         loading: false,
         isAuthenticated: false,
         email: null,
+        subject: null,
         statusMessage: null,
         errorMessage: null
       });
@@ -142,6 +145,7 @@ export class AuthService {
         configured: true,
         loading: false,
         isAuthenticated,
+        ...(!isAuthenticated ? { email: null, subject: null } : {}),
         statusMessage: isAuthenticated ? 'Signed in.' : null,
         errorMessage: null
       });
@@ -149,7 +153,8 @@ export class AuthService {
 
     this.oidcSecurityService.userData$.subscribe(({ userData }) => {
       const email = typeof userData?.email === 'string' ? userData.email : null;
-      this.setState({ email });
+      const subject = typeof userData?.sub === 'string' ? userData.sub : null;
+      this.setState({ email, subject });
     });
   }
 
@@ -168,6 +173,7 @@ export class AuthService {
           loading: false,
           isAuthenticated: response.isAuthenticated,
           email: typeof response.userData?.email === 'string' ? response.userData.email : null,
+          subject: typeof response.userData?.sub === 'string' ? response.userData.sub : null,
           statusMessage: response.isAuthenticated ? 'Signed in.' : null,
           errorMessage: response.errorMessage ?? null
         });
@@ -179,6 +185,7 @@ export class AuthService {
           loading: false,
           isAuthenticated: false,
           email: null,
+          subject: null,
           statusMessage: null,
           errorMessage: this.getErrorMessage(error)
         });
