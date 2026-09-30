@@ -72,6 +72,20 @@ another account. These client defaults do not change the backend's missing-flag
 defaults or shared quotas. Input protection, calculator and automatic search
 remain independent of optional-feature acknowledgement.
 
+Turning research recording on in a chat with earlier messages starts a fresh
+chat and conversation ID. Earlier turns remain available in the previous chat
+during the visit; they are not added to the newly recorded request. The draft and
+model choice are preserved. Turning recording off still stops new captures and
+does not delete existing records.
+
+Each local turn remembers whether content capture was requested when it was
+sent; this is consent provenance, not confirmation of a successful save. An older
+chat can be reopened for reading. If recording is on and its history contains an
+opted-out turn or unknown provenance, the UI explains that the next message will
+start a fresh chat before constructing its request context. Chats whose turns
+were all sent with recording consent can continue normally. This boundary also
+applies after navigation and does not override account-bound preferences.
+
 Optional strict boolean `useMemory` and `useSandbox` fields default false. The
 browser sends only enabled flags after acknowledgement; provider identity is derived from the verified
 subject in the gateway. The Qwen assistant offers explicit `Remember: ...`,

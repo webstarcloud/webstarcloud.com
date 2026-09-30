@@ -44,6 +44,7 @@ export class GoblinHomeComponent implements OnDestroy {
   readonly turns = signal<ChatTurn[]>(this.store.current()?.turns ?? []);
   readonly busy = signal(false);
   readonly error = signal('');
+  readonly recordingBoundaryNotice = signal('');
   readonly modelMenu = signal(false);
   readonly sidebarOpen = signal(window.innerWidth > 760);
   readonly tools = signal<'protection' | null>(null);
@@ -69,6 +70,7 @@ export class GoblinHomeComponent implements OnDestroy {
         this.turns.set([]);
         this.draft = '';
         this.selectedId.set(DEFAULT_CHAT_MODEL);
+        this.recordingBoundaryNotice.set('');
       }
       this.consentAccount = identity;
     });
@@ -77,6 +79,7 @@ export class GoblinHomeComponent implements OnDestroy {
       this.draft = saved.draft;
       this.selectedId.set(saved.model);
     }
+    this.explainRecordingBoundary();
   }
   signIn() {
     if (!saveLoginDraft(this.draft, this.selectedId()) && this.draft) {
@@ -87,6 +90,7 @@ export class GoblinHomeComponent implements OnDestroy {
   }
   signOut() {
     this.experiments.reset();
+    this.recordingBoundaryNotice.set('');
     this.stop();
     this.auth.signOut();
   }
@@ -107,10 +111,17 @@ export class GoblinHomeComponent implements OnDestroy {
   get useSandbox(): boolean { return this.experiments.state().sandbox; }
   set useSandbox(enabled: boolean) { this.experiments.set('sandbox', enabled); }
   get captureConversation(): boolean { return this.experiments.state().recording; }
-  set captureConversation(enabled: boolean) { this.experiments.set('recording', enabled); }
+  set captureConversation(enabled: boolean) {
+    const previous = this.captureConversation;
+    this.experiments.set('recording', enabled);
+    if (!previous && this.captureConversation) this.startRecordingChat();
+    else if (!this.captureConversation) this.recordingBoundaryNotice.set('');
+  }
   acknowledgeExperiments(enabled: boolean): void {
     if (!this.chat.configured || this.busy()) return;
+    const previous = this.captureConversation;
     this.experiments.acknowledge(enabled);
+    if (!previous && this.captureConversation) this.startRecordingChat();
     this.persist();
     this.error.set('');
     this.composer?.nativeElement.focus();
@@ -142,6 +153,7 @@ export class GoblinHomeComponent implements OnDestroy {
     this.turns.set([]);
     this.draft = '';
     this.error.set('');
+    this.recordingBoundaryNotice.set('');
     this.modelMenu.set(false);
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
     this.composer?.nativeElement.focus();
@@ -153,6 +165,7 @@ export class GoblinHomeComponent implements OnDestroy {
     this.draft = session.draft;
     this.selectedId.set(session.modelId);
     this.error.set('');
+    this.explainRecordingBoundary();
     if (window.innerWidth <= 760) this.sidebarOpen.set(false);
   }
   fillPrompt(sample: string) {
@@ -199,11 +212,16 @@ export class GoblinHomeComponent implements OnDestroy {
       this.error.set('Please keep your message to 2,000 characters for this first version.');
       return;
     }
+    const captureRequested = this.captureConversation;
+    // Old or mixed-consent history can be viewed, but must never be replayed
+    // into a newly recorded request, including after navigation/reopening.
+    if (captureRequested && this.hasUnrecordedHistory()) this.startRecordingChat();
     const messages = conversationContext(this.turns(), prompt, this.selectedId());
     if (!this.store.current()) this.store.newSession(this.selectedId());
     const turn: ChatTurn = {
       id: ++this.nextTurnId,
       prompt,
+      captureRequested,
       answer: '',
       reasoning: '',
       model: this.model,
@@ -256,7 +274,7 @@ export class GoblinHomeComponent implements OnDestroy {
             });
           if (event.type === 'done') update({ status: 'complete', metrics: event.metrics, finishReason: event.finishReason, recordingNotice: event.recordingNotice });
         },
-        { conversationId: this.store.current()!.conversationId, captureConversation: this.captureConversation,
+        { conversationId: this.store.current()!.conversationId, captureConversation: captureRequested,
           useMemory: !this.model.experimental && this.useMemory,
           useSandbox: !this.model.experimental && this.useSandbox,
         },
@@ -317,6 +335,23 @@ export class GoblinHomeComponent implements OnDestroy {
         captureConversation: this.captureConversation,
         title: this.turns()[0]?.prompt.slice(0, 48) || 'New chat',
       });
+  }
+  private hasUnrecordedHistory(): boolean {
+    return this.turns().some(turn => turn.captureRequested !== true);
+  }
+  private explainRecordingBoundary(): void {
+    this.recordingBoundaryNotice.set(this.captureConversation && this.hasUnrecordedHistory()
+      ? 'Recording is on. Your next message will start a fresh chat so the earlier messages in this chat are not included in its recording.'
+      : '');
+  }
+  private startRecordingChat(): void {
+    if (!this.turns().length) return;
+    const draft = this.draft;
+    const model = this.selectedId();
+    this.newChat();
+    this.draft = draft;
+    this.selectedId.set(model);
+    this.recordingBoundaryNotice.set('Research recording starts in a fresh chat. Your earlier messages stay in the previous chat and are not included in this chat’s recording.');
   }
   private scrollToLatest() {
     if (this.scrollFrame) cancelAnimationFrame(this.scrollFrame);

@@ -33,6 +33,14 @@ describe('Chat homepage', () => {
     fixture.detectChanges();
   });
   afterEach(() => fixture.destroy());
+  const completeAnswers = () => service.stream.and.callFake(
+    async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
+      onEvent({ type: 'delta', channel: 'answer', text: 'An answer' });
+      onEvent({ type: 'done', metrics: {
+        startState: 'warm', ttftMs: 10, totalMs: 20, outputTokens: 3, tokensPerSecond: 20,
+      } });
+    },
+  );
   it('uses the original logo and keeps the chamber off the main page', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('img')?.getAttribute('src')).toBe('/assets/favicon.ico');
@@ -163,6 +171,157 @@ describe('Chat homepage', () => {
     page.signOut();
     off();
     expect(signOut).toHaveBeenCalled();
+  });
+  it('starts a fresh recorded chat without replaying opted-out history or losing its draft', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(false);
+    page.useMemory = true;
+    page.selectModel('gobwen-flash');
+    completeAnswers();
+    page.draft = 'Private earlier question';
+    await page.send();
+    const previous = page.store.current()!;
+    expect(previous.turns[0].captureRequested).toBeFalse();
+    page.draft = 'New question I want recorded';
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const recording = fixture.nativeElement.querySelector('.research-recording input') as HTMLInputElement;
+    expect(recording.checked).toBeFalse();
+    expect(recording.disabled).toBeFalse();
+    recording.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(page.turns()).toEqual([]);
+    expect(page.store.sessions()[0].turns).toEqual(previous.turns);
+    expect(page.draft).toBe('New question I want recorded');
+    expect(page.selectedId()).toBe('gobwen-flash');
+    expect(page.useMemory).toBeTrue();
+    expect(page.useSandbox).toBeFalse();
+    expect(fixture.nativeElement.querySelector('.recording-boundary')?.textContent).toContain('previous chat');
+    await page.send();
+    const request = service.stream.calls.mostRecent().args;
+    expect(request[1]).toEqual([{ role: 'user', content: 'New question I want recorded' }]);
+    expect(request[4].captureConversation).toBeTrue();
+    expect(request[4].conversationId).not.toBe(previous.conversationId);
+    expect(page.store.current()!.turns[0].captureRequested).toBeTrue();
+    expect(page.store.sessions().length).toBe(2);
+    expect(page.store.sessions().find(session => session.id === previous.id)!.turns[0].prompt).toBe('Private earlier question');
+  });
+  it('excludes messages sent during an off interval when recording is enabled again', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(true);
+    completeAnswers();
+    page.draft = 'Initially recorded';
+    await page.send();
+    page.captureConversation = false;
+    page.draft = 'Private off interval';
+    await page.send();
+    const previous = page.store.current()!;
+    expect(previous.turns.map(turn => turn.captureRequested)).toEqual([true, false]);
+    expect(service.stream.calls.mostRecent().args[4].captureConversation).toBeFalse();
+    page.captureConversation = true;
+    page.draft = 'Record from here';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[1]).toEqual([{ role: 'user', content: 'Record from here' }]);
+    expect(page.store.current()!.conversationId).not.toBe(previous.conversationId);
+    expect(page.store.sessions().find(session => session.id === previous.id)!.turns.length).toBe(2);
+  });
+  it('lets an opted-out chat be read but starts fresh before a recorded follow-up', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(false);
+    completeAnswers();
+    page.draft = 'Older private question';
+    await page.send();
+    const privateChat = page.store.current()!;
+    page.newChat();
+    page.captureConversation = true;
+    page.draft = 'Separate recorded question';
+    await page.send();
+    page.openSession(privateChat);
+    fixture.detectChanges();
+    expect(page.turns()[0].prompt).toBe('Older private question');
+    expect(page.captureConversation).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.recording-boundary')?.textContent).toContain('next message');
+    page.draft = 'Follow-up with recording on';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[1]).toEqual([{ role: 'user', content: 'Follow-up with recording on' }]);
+    expect(service.stream.calls.mostRecent().args[4].conversationId).not.toBe(privateChat.conversationId);
+    expect(page.store.sessions().find(session => session.id === privateChat.id)!.turns[0].prompt).toBe('Older private question');
+  });
+  it('continues an all-consented reopened chat with its original context and ID', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(true);
+    completeAnswers();
+    page.draft = 'Recorded earlier question';
+    await page.send();
+    const recordedChat = page.store.current()!;
+    page.newChat();
+    page.openSession(recordedChat);
+    page.draft = 'Recorded follow-up';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[1]).toEqual([
+      { role: 'user', content: 'Recorded earlier question' },
+      { role: 'assistant', content: 'An answer' },
+      { role: 'user', content: 'Recorded follow-up' },
+    ]);
+    expect(service.stream.calls.mostRecent().args[4].conversationId).toBe(recordedChat.conversationId);
+    expect(page.store.sessions().length).toBe(1);
+    expect(page.recordingBoundaryNotice()).toBe('');
+  });
+  it('checks unknown recording provenance after reopening rather than trusting the last session preference', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(true);
+    completeAnswers();
+    page.draft = 'Legacy question';
+    await page.send();
+    const recordedChat = page.store.current()!;
+    const legacy = { ...recordedChat, turns: recordedChat.turns.map(turn => {
+      const withoutProvenance = { ...turn };
+      delete withoutProvenance.captureRequested;
+      return withoutProvenance;
+    }) };
+    page.newChat();
+    page.store.save(legacy);
+    page.openSession(legacy);
+    expect(legacy.captureConversation).toBeTrue();
+    page.draft = 'New consenting question';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[1]).toEqual([{ role: 'user', content: 'New consenting question' }]);
+    expect(service.stream.calls.mostRecent().args[4].conversationId).not.toBe(legacy.conversationId);
+  });
+  it('enforces the recording boundary after navigation and clears it for a different account', async () => {
+    service.configured = true;
+    let page = fixture.componentInstance;
+    page.acknowledgeExperiments(false);
+    completeAnswers();
+    page.draft = 'Private before navigation';
+    await page.send();
+    const previous = page.store.current()!;
+    // A preference update elsewhere must not bypass the send-time boundary.
+    page.experiments.set('recording', true);
+    fixture.destroy();
+    fixture = TestBed.createComponent(GoblinHomeComponent);
+    fixture.detectChanges();
+    page = fixture.componentInstance;
+    expect(page.recordingBoundaryNotice()).toContain('next message');
+    page.draft = 'New recorded question after navigation';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[1]).toEqual([{ role: 'user', content: 'New recorded question after navigation' }]);
+    expect(page.store.current()!.conversationId).not.toBe(previous.conversationId);
+    account.next({ isAuthenticated: true, loading: false, email: 'second@example.com', subject: 'account-two' });
+    expect(page.recordingBoundaryNotice()).toBe('');
+    expect(page.captureConversation).toBeFalse();
+    expect(page.store.sessions()).toEqual([]);
+    page.acknowledgeExperiments(true);
+    page.draft = 'New account question';
+    await page.send();
+    expect(service.stream.calls.mostRecent().args[1]).toEqual([{ role: 'user', content: 'New account question' }]);
   });
   it('does not send or lose the draft until a signed-in user chooses how to continue', async () => {
     service.configured = true;

@@ -196,6 +196,7 @@
             <button type="button" class="consent-secondary" (click)="acknowledgeExperiments(false)">Continue without optional features</button>
           </div>
         </section>
+        <p *ngIf="recordingBoundaryNotice()" class="conversation-note recording-boundary" role="status">{{ recordingBoundaryNotice() }}</p>
         <form class="composer" (ngSubmit)="send()">
           <label class="sr-only" for="chat-message">Message {{ model.name }}</label
           ><textarea
@@ -286,7 +287,7 @@
         <details class="research-recording" *ngIf="chat.configured">
           <summary>{{ captureConversation ? 'Research recording on' : 'Chat privacy & research' }}</summary>
           <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="experimentChoicesDisabled" /> Save new messages for research and future model training</label>
-          <p>When enabled, messages, answers and any saved notes used as model context can enter LangWatch and a private research archive. They need review before training. Memory inspection and deletion exchanges are excluded. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
+          <p>When enabled, messages, answers and any saved notes used as model context can enter LangWatch and a private research archive. They need review before training. Memory inspection and deletion exchanges are excluded. Turning this on starts a fresh chat if messages already exist; earlier messages stay in the previous chat. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
           <p>The assistant checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
         </details>
       </div>

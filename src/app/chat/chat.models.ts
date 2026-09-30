@@ -66,6 +66,8 @@ export interface ChatSource { id: number; title: string; url: string; kind?: 'in
 export interface ChatTurn {
   id: number;
   prompt: string;
+  /** Consent at send time, not confirmation that a provider saved the turn. */
+  captureRequested?: boolean;
   answer: string;
   reasoning: string;
   model: ChatModel;
