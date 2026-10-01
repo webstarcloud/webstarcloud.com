@@ -214,7 +214,8 @@ export class ChatService {
             const route = data['route'];
             const cached = data['cached'];
             if (!checked || typeof name !== 'string' || typeof status !== 'string' ||
-                !['calculator', 'source_lookup', 'site_profile', 'memory_lookup', 'memory_write', 'python', 'repository_read', 'review_check'].includes(name) ||
+                !['calculator', 'source_lookup', 'site_profile', 'memory_lookup', 'memory_write', 'python', 'repository_read', 'review_check', 'intent_routing', 'source_ranking', 'answer_check'].includes(name) ||
+                (['intent_routing', 'source_ranking', 'answer_check'].includes(name) && model === 'goblin') ||
                 (['repository_read', 'review_check'].includes(name) && !reviewRequested) ||
                 (['memory_lookup', 'memory_write'].includes(name) && recording?.useMemory !== true) ||
                 (name === 'python' && recording?.useSandbox !== true) ||
@@ -277,6 +278,8 @@ export class ChatService {
               !['answer', 'reasoning'].includes(String(data['channel']))
             )
               throw new Error('The service sent output before a valid protection check.');
+            if (data['channel'] === 'answer' && toolStates.get('answer_check') === 'running')
+              throw new Error('The service sent an answer before its support check finished.');
             if (!data['text']) continue;
             outputLength += data['text'].length;
             if (outputLength > 100_000) throw new Error('The response exceeded the display limit.');

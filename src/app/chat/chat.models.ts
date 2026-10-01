@@ -36,7 +36,7 @@ export const CHAT_MODELS: readonly ChatModel[] = [
 export const DEFAULT_CHAT_MODEL: ChatModelId = 'gobwen-think';
 
 export interface ChatToolActivity {
-  name: 'calculator' | 'source_lookup' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python' | 'repository_read' | 'review_check';
+  name: 'calculator' | 'source_lookup' | 'site_profile' | 'memory_lookup' | 'memory_write' | 'python' | 'repository_read' | 'review_check' | 'intent_routing' | 'source_ranking' | 'answer_check';
   status: 'running' | 'complete' | 'failed' | 'unavailable';
   route?: 'trusted_index' | 'web';
   cached?: boolean;

@@ -205,7 +205,8 @@
             <li><strong>Python sandbox:</strong> E2B runs code you explicitly provide with <code>Run Python:</code>, within our shared free-credit limit.</li>
             <li><strong>Research recording:</strong> messages, answers and retrieved notes may be saved in LangWatch and a private archive for research and future training. Training requires a separate review; redaction can miss sensitive details.</li>
           </ul>
-          <p>Source lookup may send your question to search engines. Avoid secrets or sensitive information. You can switch optional features off below; this stops new activity, without deleting earlier records.</p>
+          <p>Core assistant features may send your latest protected question to TypeSafe for intent routing, and public source excerpts and a draft answer for source ranking and answer support checks. Saved personal-memory text and earlier conversation are excluded. Source lookup may send your question to search engines.</p>
+          <p>Avoid secrets or sensitive information. You can switch optional features off below; this stops new activity, without deleting earlier records.</p>
           <div class="experiment-consent-actions">
             <button type="button" (click)="acknowledgeExperiments(true)">Agree and continue</button>
             <button type="button" class="consent-secondary" (click)="acknowledgeExperiments(false)">Continue without optional features</button>
@@ -305,6 +306,7 @@
           <label><input type="checkbox" [(ngModel)]="captureConversation" (ngModelChange)="persist()" [disabled]="experimentChoicesDisabled" /> Save new messages for research and future model training</label>
           <p>When enabled, messages, answers and any saved notes used as model context can enter LangWatch and a private research archive. They need review before training. Memory inspection and deletion exchanges are excluded. Turning this on starts a fresh chat if messages already exist; earlier messages stay in the previous chat. Turning this off stops new captures; it does not delete earlier records. Avoid sharing secrets or sensitive personal information.</p>
           <p>The assistant checks a small index of selected websites first. When more evidence is needed, your question may be sent through our private SearXNG service to Google, Bing and DuckDuckGo. Sources are linked below the answer; indexed pages show their snapshot date. Basic performance and error information is recorded without conversation text when research recording is off.</p>
+          <p>TypeSafe’s Jev helps route the latest protected question, rank public source excerpts and check a draft answer against those sources. Source-backed drafts use only that question and public excerpts. These core stages do not receive saved personal-memory text or earlier conversation, and run independently of optional features. A completed answer check does not guarantee that the sources are true.</p>
         </details>
       </div>
     </div>

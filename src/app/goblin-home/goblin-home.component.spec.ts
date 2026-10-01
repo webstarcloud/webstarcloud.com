@@ -115,6 +115,8 @@ describe('Chat homepage', () => {
     page = fixture.componentInstance;
     el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.experiment-consent')).not.toBeNull();
+    expect(el.querySelector('.experiment-consent')?.textContent).toContain('TypeSafe');
+    expect(el.querySelector('.experiment-consent')?.textContent).toContain('Saved personal-memory text and earlier conversation are excluded');
     expect(Array.from(tools()).every(input => input.disabled)).toBeTrue();
     const agree = el.querySelector<HTMLButtonElement>('.experiment-consent-actions button')!;
     agree.click();
@@ -538,6 +540,57 @@ describe('Chat homepage', () => {
       expect(page.turns()[0].servedModel).toBe('Qwen2.5-Coder1.5B · Q4_K_M');
       expect(page.turns()[0].review).toEqual(review);
     }
+  });
+  it('keeps Thinking visible through decision stages, then streams the released answer and preserves milestones', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(false);
+    let emit!: (event: ChatEvent) => void;
+    let finish!: () => void;
+    service.stream.and.callFake((_model, _messages, _signal, onEvent) => {
+      emit = onEvent;
+      return new Promise<void>(resolve => finish = resolve);
+    });
+    page.draft = 'Who is the king of the Netherlands?';
+    const sending = page.send();
+    const el = fixture.nativeElement as HTMLElement;
+    emit({ type: 'ready', servedModel: 'Qwen' });
+    for (const name of ['intent_routing', 'source_ranking', 'answer_check'] as const) {
+      emit({ type: 'tool', tool: { name, status: 'running' } });
+      fixture.detectChanges();
+      expect(el.querySelector('.working')?.textContent).toContain('Thinking');
+      expect(el.querySelector('.assistant-message')).toBeNull();
+      emit({ type: 'tool', tool: { name, status: 'complete' } });
+    }
+    fixture.detectChanges();
+    const activity = el.querySelector('.tool-activity')?.textContent;
+    expect(activity).toContain('Intent routing completed');
+    expect(activity).toContain('Source ranking completed');
+    expect(activity).toContain('Answer support check completed');
+    expect(activity).not.toContain('verified');
+    expect(el.querySelector('.working')).not.toBeNull();
+    emit({ type: 'delta', channel: 'answer', text: 'Willem' });
+    fixture.detectChanges();
+    expect(el.querySelector('.working')).toBeNull();
+    expect(el.querySelector('.assistant-message.is-streaming')?.textContent).toBe('Willem');
+    emit({ type: 'delta', channel: 'answer', text: '-Alexander.' });
+    emit({ type: 'done', metrics: { startState: 'warm', ttftMs: 25, firstAnswerMs: 25, totalMs: 30,
+      outputTokens: 5, tokensPerSecond: 30 } });
+    finish();
+    await sending;
+    fixture.detectChanges();
+    expect(el.querySelector('.assistant-message')?.textContent).toBe('Willem-Alexander.');
+    expect(page.turns()[0].timeline!.map(step => step.label)).toEqual([
+      'Request started', 'Input protection receipt received', 'Intent routing running…', 'Intent routing completed',
+      'Source ranking running…', 'Source ranking completed', 'Answer support check running…', 'Answer support check completed',
+      'First output received', 'First answer received', 'Completion receipt received',
+    ]);
+    const session = page.store.current()!;
+    page.newChat();
+    page.openSession(session);
+    fixture.detectChanges();
+    expect(el.querySelector('.tool-activity')?.textContent).toContain('Answer support check completed');
+    expect(el.querySelector('.working')).toBeNull();
   });
   it('keeps genuine milestones collapsed, separates output from answer and labels snapshot freshness honestly', async () => {
     service.configured = true;

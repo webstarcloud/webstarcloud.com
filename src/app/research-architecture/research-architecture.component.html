@@ -1,5 +1,5 @@
 <article>
-  <p class="eyebrow">INSIDE THE ASSISTANT · 30 SEP 2026</p>
+  <p class="eyebrow">INSIDE THE ASSISTANT · 1 OCT 2026</p>
   <h1>A question goes in.<br />What happens next?</h1>
   <p class="lede">The chat is the experiment. Open a layer to see what it does, where its boundary is, and what I’m learning by building it.</p>
   <div class="path-heading"><span class="tag">Implemented today</span><span>One request, end to end</span></div>
@@ -30,11 +30,12 @@
     <details>
       <summary><span class="step-number">04</span><span><strong>Choose the answer path</strong><small>Calculator · sources · optional memory and Python</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
-        <p>For the Qwen assistant, explicit rules choose bounded tool operations. Simple arithmetic and recognized constant-power energy conversions use a decimal calculator. Explicit calculations, memory management and Python requests run in a 512 MB worker that cannot load a model. Questions about this site’s owner use a maintained profile. Those answers skip inference. Goblin takes the base-model continuation path.</p>
+        <p>For the Qwen assistant, explicit rules enforce bounded tool operations. Jev, a small decision model from TypeSafe, helps classify the latest protected question when a semantic routing decision is useful. Its typed output is a suggestion; server rules still control the permitted route. It does not authorize actions or generate code. Simple arithmetic and recognized constant-power energy conversions use a decimal calculator. Explicit calculations, memory management and Python requests run in a 512 MB worker that cannot load a model. Questions about this site’s owner use a maintained profile. Those answers skip inference. Goblin takes the base-model continuation path.</p>
         <p>Recognized factual questions check selected, indexed pages first, then whole-web search through a private SearXNG worker. Indexed snapshots must be no more than seven days old; lexical relevance checks reject some unrelated excerpts. Checked public excerpts can be reused for 60 seconds within a warm worker. This cache excludes recognized personal queries and never stores memories or answers. Neither a recent snapshot nor matching words proves a fact is correct.</p>
+        <p>Jev also ranks bounded public excerpts for relevance to the question. This is a second opinion on retrieved evidence, not a security boundary. Accepted excerpts remain untrusted data. The latest protected question and relevant public excerpts can reach TypeSafe; saved personal-memory text and earlier conversation are excluded from these decision calls.</p>
         <p>Personal memory and Python are separate, optional tools. Mem0 stores only explicit <code>Remember:</code> notes under your verified account. Clear personal-recall questions retrieve up to three relevant notes; ordinary public questions skip memory. You can inspect and delete saved notes. Retrieved notes are untrusted historical data; memory does not train the model.</p>
         <p><code>Run Python:</code> executes code you supply in a fresh E2B sandbox with internet access disabled, a 10-second execution limit and a 30-second lifetime. After sign-in, “Agree and continue” enables these tools and research recording together. You can instead continue with optional features off, or change each setting later. Shared free-credit limits still apply. The assistant does not automatically write memories or generate code to execute.</p>
-        <p>The interface shows tool activity as the service starts and completes an operation. Those events describe real execution. This is rule-based routing, not an ensemble of specialist models.</p>
+        <p>The interface shows tool activity as the service starts and completes an operation, including intent routing, source ranking and answer support checks. Those events describe real execution. A completed decision check means it ran; it does not certify the answer’s truth.</p>
         <p><code>Review the website repository</code> reads a pinned public revision and up to two source excerpts. Structural checks produce observations; the existing Qwen worker selects their IDs. It gets only the latest instruction and those observations. An invalid selection permits one repair, with at most two 128-token calls inside 75 seconds. A shared allowance permits three inspections daily. The result is partial, does not run tests and cannot change the repository. <a routerLink="/research/evaluations" fragment="wrong-review">Why freeform bug review failed →</a></p>
         <a routerLink="/research/search">Retrieval changes the trust boundary →</a>
       </div>
@@ -43,16 +44,16 @@
       <summary><span class="step-number">05</span><span><strong>Generate, when needed</strong><small>Qwen3.5-0.8B · llama.cpp · CPU Lambda</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
         <p>Both assistant modes use the same Qwen checkpoint, quantized to Q8_0, in separate 4 GB ARM64 Lambda workers. Goblin has its own 4 GB CPU worker and PyTorch runtime. Weights load on demand. The prompt must fit a bounded context, and output has token, time and repetition limits.</p>
-        <p>Think has a reasoning budget for ordinary generation. Search-backed answers use direct generation in both modes: the model receives untrusted excerpts as context and produces a short answer. The interface adds the source links separately.</p>
+        <p>Think has a reasoning budget for ordinary generation. Search-backed answers use direct generation in both modes: the model receives only the latest protected question and untrusted public excerpts, then produces a short draft. Earlier conversation and saved personal-memory text are excluded from this path. Before that draft reaches the browser, Jev checks whether the public excerpts support it. An unsupported or insufficiently supported draft becomes a fixed abstention. The check assesses support from the supplied sources, not whether those sources are true. The interface adds source links separately.</p>
         <a routerLink="/research/models">Modes, quantization and their tradeoffs →</a>
       </div>
     </details>
     <details>
       <summary><span class="step-number">06</span><span><strong>Stream and measure</strong><small>Answer deltas · token usage · completion receipt</small></span><span class="expand" aria-hidden="true">+</span></summary>
       <div class="layer-content">
-        <p>Server-sent events carry output through the gateway. “Thinking…” stays visible until the first answer text arrives, then the interface displays real answer chunks immediately. It is a waiting indicator, not a measurement of the model’s internal reasoning.</p>
-        <p>The browser measures first output, first answer and completion separately. The worker reports its cold or warm state and engine token usage; tool-only answers finish with an unknown model state. Response time and token usage appear beside completed answers, with the measurement method documented here.</p>
-        <p>The gateway records metadata-only totals before sending completion. The chat’s cost comparison uses an assumed frontier API rate of US$3 per million input tokens and US$15 per million output tokens, minus measured model-worker compute. It starts when tracking begins and excludes gateway, search, storage and other unmeasured costs. It is an approximate model-compute comparison, not net service savings or a claim of equal quality.</p>
+        <p>Server-sent events carry output through the gateway. “Thinking…” stays visible until the first answer text arrives, then the interface displays real answer chunks immediately. Source-backed drafts are buffered while their support is checked, so first-answer latency includes that check. It is a waiting indicator, not a measurement of the model’s internal reasoning.</p>
+        <p>The browser measures first output, first answer and completion separately. The worker reports its cold or warm state and engine token usage; tool-only answers finish with an unknown model state. Native token counts and decode rate describe the generated draft, including when the displayed response is an abstention. They do not measure how quickly buffered chunks reach the browser. Response time and token usage appear beside completed answers, with the measurement method documented here.</p>
+        <p>The gateway records metadata-only totals before sending completion. The chat’s cost comparison uses an assumed frontier API rate of US$3 per million input tokens and US$15 per million output tokens, minus measured model-worker compute. It starts when tracking begins and excludes gateway, search, TypeSafe decision API fees, storage and other unmeasured costs. It is an approximate model-compute comparison, not net service savings or a claim of equal quality.</p>
         <a routerLink="/research/performance">Where the four performance numbers come from →</a>
       </div>
     </details>
@@ -61,14 +62,14 @@
     <span class="eyebrow">ALONGSIDE THE REQUEST</span>
     <h2>Observe first. Learn from evidence.</h2>
     <p>LangWatch records performance and outcomes. The notice after sign-in asks you to choose before sending. “Agree and continue” enables personal memory, Python and research recording; the alternative keeps all three off. Recording can include messages, answers and retrieved notes in LangWatch and a private research archive for review. Memory inspection and deletion exchanges are excluded. Records are not automatically approved for training. Redaction is imperfect; avoid sharing sensitive information.</p>
-    <p>Your choices remain editable and follow your signed-in account across chats and navigation during this visit. They reset on sign-out, account switch or reload; sign-out and account changes also clear browser chat history. Turning recording off stops new captures and does not delete previous records. Input protection and automatic search work independently of these optional settings.</p>
+    <p>Your choices remain editable and follow your signed-in account across chats and navigation during this visit. They reset on sign-out, account switch or reload; sign-out and account changes also clear browser chat history. Turning recording off stops new captures and does not delete previous records. Input protection, automatic search and Jev’s decision stages work independently of these optional settings.</p>
     <p>These records are observations, not proof of answer quality. Small diagnostic probes already catch failures; a broader held-out evaluation suite is still work to do.</p>
     <a routerLink="/research/evaluations">Why “it feels smarter” is not an evaluation →</a>
   </aside>
   <section class="entry">
     <span class="tag tag--planned">Not implemented yet</span>
     <h2>The next layers need their own evidence.</h2>
-    <p>Memory conflict resolution, learned model routing, MCP actions and GPU serving are future experiments. Each needs a working implementation, a useful test and a write-up of what changed.</p>
+    <p>Memory conflict resolution, broader model routing, MCP actions and GPU serving are future experiments. Each needs a working implementation, a useful test and a write-up of what changed.</p>
     <a class="text-link" routerLink="/research/roadmap">See the build questions →</a>
   </section>
   <section class="entry">

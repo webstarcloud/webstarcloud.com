@@ -72,6 +72,14 @@ another account. These client defaults do not change the backend's missing-flag
 defaults or shared quotas. Input protection, calculator and automatic search
 remain independent of optional-feature acknowledgement.
 
+The sign-in notice and privacy details disclose TypeSafe's Jev decision stages.
+These core stages may receive the latest protected question plus bounded public
+source excerpts and a draft answer for intent routing, source ranking and answer
+support checking. Source-backed drafts use only that question and public excerpts;
+saved personal-memory text and earlier conversation are excluded from generation
+on this path and from those decision calls. They run independently of optional memory, sandbox and research
+recording settings. Provider credentials remain server-side.
+
 Turning research recording on in a chat with earlier messages starts a fresh
 chat and conversation ID. Earlier turns remain available in the previous chat
 during the visit; they are not added to the newly recorded request. The draft and
@@ -158,6 +166,16 @@ recall must agree with real terminal lookup receipts and per-request consent.
 `done.recording` carries `langwatch: sent|unavailable` and
 `archive: saved|off|unavailable`. The UI reports recording failures when opted in.
 
+The Qwen assistant may emit `intent_routing`, `source_ranking` and `answer_check`
+tool receipts, with the same `running` then `complete|failed|unavailable` sequence.
+The client rejects extra fields such as scores, confidence or verdicts, and rejects
+these stages for Goblin. A completed check says that the operation ran; it does
+not certify factual accuracy. Source-backed drafts are buffered on the server
+until their answer support check finishes. Unsupported or insufficiently supported
+drafts are replaced with a fixed abstention. Once released, answer deltas render
+immediately; first-answer latency includes buffering and support checking. The
+client rejects answer deltas received while a confirmed support check is running.
+
 ### Guided public repository inspection
 
 The discoverable **Review the website repository** starter appears only with a
@@ -242,8 +260,11 @@ or private model reasoning; log request IDs, decision codes and timing instead.
 - **Total response time:** client submit to receipt of `done`.
 
 For Think, TTFT includes visible reasoning output; `firstAnswerMs` separately
-measures submission to first visible answer. Search selection is buffered until
-validated, so its first visible output follows model selection. `decodeMs: null`,
+measures submission to first visible answer. Source-backed drafts are buffered
+until answer support checking finishes, so their first visible output includes
+that delay. Native output token counts and decode rate measure the original model
+generation, even when the public response becomes a fixed abstention. They do not
+count the displayed abstention or describe its delivery speed. `decodeMs: null`,
 fewer than two tokens, or a zero duration produces an unavailable decode rate.
 The performance panel shows the latest measured turn per selected model, keeps
 cold/warm separate, and leaves missing measurements blank. It is not an aggregate
@@ -279,7 +300,7 @@ after recording the aggregate. Missing usage remains unpriced, and bypasses do
 not invent counterfactual model tokens. Headline and detail amounts retain meaningful
 sub-cent digits down to the ledger's nanodollar resolution; larger amounts round
 to cents. A true zero remains `$0.00`. Details also show priced/unpriced counts
-and assumptions. Gateway, tools, search,
+and assumptions. Gateway, tools, search, TypeSafe decision API fees,
 storage and other unmeasured costs are excluded, so this is not net service
 savings or a claim of equivalent answer quality.
 

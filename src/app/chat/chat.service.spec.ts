@@ -361,6 +361,52 @@ describe('Protected chat stream', () => {
       }
     }
   });
+  it('accepts core decision stages without optional feature flags and preserves each terminal outcome', async () => {
+    for (const name of ['intent_routing', 'source_ranking', 'answer_check'] as const) {
+      for (const status of ['complete', 'failed', 'unavailable'] as const) {
+        request.and.resolveTo(response(frame('meta', meta) + frame('tool', { name, status: 'running' }) +
+          frame('tool', { name, status }) + frame('delta', { channel: 'answer', text: 'Released response.' }) +
+          frame('done', { outputTokens: 0, decodeMs: null })));
+        const events: ChatEvent[] = [];
+        await run(events);
+        expect(events[2]).toEqual({ type: 'tool', tool: { name, status } });
+        expect(events[3]).toEqual({ type: 'delta', channel: 'answer', text: 'Released response.' });
+        const body = JSON.parse(request.calls.mostRecent().args[1].body);
+        expect(body.useMemory).toBeUndefined();
+        expect(body.useSandbox).toBeUndefined();
+      }
+    }
+  });
+  it('rejects public decision receipts containing private state, scores or verdicts', async () => {
+    for (const tool of [
+      { name: 'intent_routing', status: 'running', question: 'private prompt' },
+      { name: 'source_ranking', status: 'running', scores: [0.9] },
+      { name: 'answer_check', status: 'running', verdict: 'supported' },
+      { name: 'answer_check', status: 'running', confidence: 0.95 },
+      { name: 'source_ranking', status: 'complete', route: 'web' },
+    ]) {
+      request.and.resolveTo(response(frame('meta', meta) + frame('tool', tool)));
+      const events: ChatEvent[] = [];
+      await expectAsync(run(events)).toBeRejectedWithError(/tool activity receipt/);
+      expect(events.some(event => event.type === 'tool')).toBeFalse();
+    }
+  });
+  it('rejects decision stages on the base continuation model', async () => {
+    for (const name of ['intent_routing', 'source_ranking', 'answer_check']) {
+      request.and.resolveTo(response(frame('meta', { ...meta, model: 'goblin' }) + frame('tool', { name, status: 'running' })));
+      const events: ChatEvent[] = [];
+      await expectAsync(TestBed.inject(ChatService).stream('goblin', [{ role: 'user', content: 'Continue' }],
+        new AbortController().signal, event => events.push(event))).toBeRejectedWithError(/tool activity receipt/);
+      expect(events.some(event => event.type === 'tool')).toBeFalse();
+    }
+  });
+  it('does not display a draft received while its confirmed support check is running', async () => {
+    request.and.resolveTo(response(frame('meta', meta) + frame('tool', { name: 'answer_check', status: 'running' }) +
+      frame('delta', { channel: 'answer', text: 'Unchecked draft.' })));
+    const events: ChatEvent[] = [];
+    await expectAsync(run(events)).toBeRejectedWithError(/support check finished/);
+    expect(events.some(event => event.type === 'delta' || event.type === 'done')).toBeFalse();
+  });
   it('rejects provider tool receipts containing private data or unsupported routes', async () => {
     for (const tool of [
       { name: 'memory_lookup', status: 'running', userId: 'private' },

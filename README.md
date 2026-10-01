@@ -167,6 +167,15 @@ avoid sharing sensitive information. Basic timing/error metadata is still
 recorded when capture is off. Turning capture off stops new captures and does not
 delete previous records. Input protection, calculator routing and automatic
 source lookup operate independently of these optional settings.
+TypeSafe's Jev adds typed intent routing, public-source ranking and answer support
+checks as core assistant stages. The sign-in notice and privacy details disclose
+that the latest protected question, public excerpts and a draft may reach TypeSafe.
+Source-backed drafts use only that question and public excerpts, excluding saved
+personal-memory text and earlier conversation. Tool receipts
+show actual execution without exposing decisions or confidence scores. Source-backed
+drafts are buffered until checking finishes; unsupported drafts become an abstention.
+Completed checking does not certify the truth of a source. See
+[`CHAT-GATEWAY.md`](CHAT-GATEWAY.md) for the client contract.
 Automatic source lookup checks a configured trusted-page index first, then uses
 a private SearXNG Lambda with Google, Bing and DuckDuckGo. Sources show whether
 they came from the index or web search, including snapshot dates. The backend
@@ -181,7 +190,8 @@ REST streaming, with shared quotas enforced before model invocation.
 The cost comparison shows the same estimated amount in its summary and details.
 Sub-cent values retain meaningful digits down to the backend ledger's nanodollar
 resolution; a real zero stays `$0.00` and is labelled as a difference. Larger
-values round to cents. This is the measured model-compute comparison described in
+values round to cents. TypeSafe decision API fees and other unmeasured service
+costs are excluded. This is the measured model-compute comparison described in
 `../davesbrain/model-lambda/COST_COMPARISON.md`, not total AWS billing savings.
 
 The collapsed **Experiment tools** panel offers personal memory (Mem0) and a
@@ -288,8 +298,9 @@ priced model requests from the date tracking begins. It assumes **US$3 per milli
 input tokens and US$15 per million output tokens**, with no named comparator,
 and subtracts measured model-worker compute. These are approximate reference
 rates, not a provider quote or net service bill savings. Gateway/search costs,
-initialization/export overhead, storage, failed/stopped requests and discounts
-are excluded. Different tokenizers, reasoning and answer quality limit the proxy.
+TypeSafe decision API fees, initialization/export overhead, storage, failed/stopped
+requests and discounts are excluded. Different tokenizers, reasoning and answer
+quality limit the proxy.
 Unpriced tool answers, missing data and negative differences remain explicit.
 The existing gateway exposes a read-only summary with a 30-second cache and
 separate throttle; a conditional request marker prevents duplicate increments.
