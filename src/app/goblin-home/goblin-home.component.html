@@ -155,7 +155,7 @@
           </nav>
           <section *ngIf="turn.review as review" class="repository-review" aria-label="Repository review scope">
             <p><strong>{{ review.status === 'checked' ? 'Guided repository inspection' : 'Guided inspection · model prioritization unavailable' }}</strong> · selected excerpts · tests not run</p>
-            <p>Revision <a [href]="'https://github.com/' + review.repository + '/tree/' + review.revision" target="_blank" rel="noopener noreferrer">{{ review.revision.slice(0, 8) }}</a><ng-container *ngIf="review.attempts"> · {{ review.attempts }} model {{ review.attempts === 1 ? 'attempt' : 'attempts' }}</ng-container></p>
+            <p>{{ review.repository }} · revision <a [href]="'https://github.com/' + review.repository + '/tree/' + review.revision" target="_blank" rel="noopener noreferrer">{{ review.revision.slice(0, 8) }}</a><ng-container *ngIf="review.attempts"> · {{ review.attempts }} model {{ review.attempts === 1 ? 'attempt' : 'attempts' }}</ng-container></p>
             <ul><li *ngFor="let file of review.filesRead"><code>{{ file }}</code></li></ul>
             <p>Explore files and concrete code checks. Structural observations come from server-defined checks; selection and citation checks do not prove a bug. This is a partial review; no repository changes were made.</p>
           </section>
@@ -270,7 +270,7 @@
             {{ sample }} <span aria-hidden="true">↗</span>
           </button>
         </div>
-        <p *ngIf="!turns().length && repositoryReviewAvailable" class="conversation-note">Repository inspection explores selected public files and concrete code checks. Tests are not run.</p>
+        <p *ngIf="!turns().length && repositoryReviewAvailable" class="conversation-note">Try <code>Review repository: https://github.com/owner/repo</code>, optionally followed by <code> : focus</code>. This inspects selected public files and concrete code checks. Tests are not run.</p>
         <aside *ngIf="!turns().length" class="experiment-note" aria-label="About this experiment">
           <strong>This interface is an experiment.</strong>
           <p>I’m rebuilding the AI assistant stack from first principles<br class="wide-break" /> and documenting each layer as I go.</p>

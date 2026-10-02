@@ -1,5 +1,5 @@
 <article>
-  <p class="eyebrow">INSIDE THE ASSISTANT · 1 OCT 2026</p>
+  <p class="eyebrow">INSIDE THE ASSISTANT · 2 OCT 2026</p>
   <h1>A question goes in.<br />What happens next?</h1>
   <p class="lede">The chat is the experiment. Open a layer to see what it does, where its boundary is, and what I’m learning by building it.</p>
   <div class="path-heading"><span class="tag">Implemented today</span><span>One request, end to end</span></div>
@@ -36,7 +36,7 @@
         <p>Personal memory and Python are separate, optional tools. Mem0 stores only explicit <code>Remember:</code> notes under your verified account. Clear personal-recall questions retrieve up to three relevant notes; ordinary public questions skip memory. You can inspect and delete saved notes. Retrieved notes are untrusted historical data; memory does not train the model.</p>
         <p><code>Run Python:</code> executes code you supply in a fresh E2B sandbox with internet access disabled, a 10-second execution limit and a 30-second lifetime. After sign-in, “Agree and continue” enables these tools and research recording together. You can instead continue with optional features off, or change each setting later. Shared free-credit limits still apply. The assistant does not automatically write memories or generate code to execute.</p>
         <p>The interface shows tool activity as the service starts and completes an operation, including intent routing, source ranking and answer support checks. Those events describe real execution. A completed decision check means it ran; it does not certify the answer’s truth.</p>
-        <p><code>Review the website repository</code> reads a pinned public revision and up to two source excerpts. Structural checks produce observations; the existing Qwen worker selects their IDs. It gets only the latest instruction and those observations. An invalid selection permits one repair, with at most two 128-token calls inside 75 seconds. A shared allowance permits three inspections daily. The result is partial, does not run tests and cannot change the repository. <a routerLink="/research/evaluations" fragment="wrong-review">Why freeform bug review failed →</a></p>
+        <p><code>Review repository: https://github.com/owner/repo</code>, optionally followed by <code> : focus</code>, reads a pinned public revision and up to two source excerpts. Private repositories and other hosts are unsupported; repository code is never executed. The original <code>Review the website repository</code> command still works. Structural checks produce observations; the existing Qwen worker selects their IDs. It gets only the latest instruction and those observations. An invalid selection permits one repair, with at most two 128-token calls inside 75 seconds. A shared allowance permits three inspections daily. The result is partial, does not run tests and cannot change the repository. <a routerLink="/research/evaluations" fragment="wrong-review">Why freeform bug review failed →</a></p>
         <a routerLink="/research/search">Retrieval changes the trust boundary →</a>
       </div>
     </details>

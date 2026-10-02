@@ -66,7 +66,7 @@ export interface ChatMetrics {
 export interface ChatSource { id: number; title: string; url: string; kind?: 'indexed' | 'web' | 'repository'; indexedAt?: string; revision?: string }
 export type MemoryRecall = 'off' | 'skipped_irrelevant' | 'used' | 'unavailable';
 export interface RepositoryReview {
-  repository: 'webstarcloud/webstarcloud.com';
+  repository: string;
   mode: 'guided';
   revision: string;
   filesRead: string[];

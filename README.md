@@ -187,6 +187,14 @@ Arithmetic-shaped requests use a bounded server calculator. No provider secrets
 are shipped to the browser. Production uses Cognito-authenticated API Gateway
 REST streaming, with shared quotas enforced before model invocation.
 
+Use `Review repository: https://github.com/owner/repo : focus` for a bounded,
+read-only inspection of public GitHub sources. The optional focus does not grant
+execution or write access. Private repositories, non-GitHub hosts and URLs with
+credentials or extra path/query/fragment components are rejected. The existing
+`Review the website repository` starter remains available. Sources and completion
+receipts must match the requested repository, pinned revision and inspected paths.
+This is a partial sample with structural observations; it runs no tests or repository code.
+
 The cost comparison shows the same estimated amount in its summary and details.
 Sub-cent values retain meaningful digits down to the backend ledger's nanodollar
 resolution; a real zero stays `$0.00` and is labelled as a difference. Larger

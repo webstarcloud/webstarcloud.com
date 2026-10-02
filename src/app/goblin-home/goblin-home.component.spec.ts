@@ -592,6 +592,28 @@ describe('Chat homepage', () => {
     expect(el.querySelector('.tool-activity')?.textContent).toContain('Answer support check completed');
     expect(el.querySelector('.working')).toBeNull();
   });
+  it('displays a requested public repository rather than assuming the website target', async () => {
+    service.configured = true;
+    const page = fixture.componentInstance;
+    page.acknowledgeExperiments(false);
+    const revision = 'a'.repeat(40);
+    const review: RepositoryReview = { repository: 'pallets/flask', mode: 'guided', revision,
+      filesRead: ['src/flask/app.py'], partial: true, testsRun: false, findingsReported: 1, attempts: 1, status: 'checked' };
+    service.stream.and.callFake(async (_model, _messages, _signal, onEvent: (event: ChatEvent) => void) => {
+      onEvent({ type: 'ready', servedModel: 'Qwen' });
+      onEvent({ type: 'delta', channel: 'answer', text: 'A selected public observation.' });
+      onEvent({ type: 'done', review, metrics: { startState: 'warm', ttftMs: 10, totalMs: 20,
+        outputTokens: 12, tokensPerSecond: 30 } });
+    });
+    page.draft = 'Review repository: https://github.com/pallets/flask : routing';
+    await page.send();
+    fixture.detectChanges();
+    const scope = fixture.nativeElement.querySelector('.repository-review') as HTMLElement;
+    expect(scope.textContent).toContain('pallets/flask');
+    expect(scope.querySelector('a')?.getAttribute('href')).toBe(`https://github.com/pallets/flask/tree/${revision}`);
+    expect(scope.textContent).toContain('tests not run');
+    expect(scope.textContent).toContain('partial review');
+  });
   it('keeps genuine milestones collapsed, separates output from answer and labels snapshot freshness honestly', async () => {
     service.configured = true;
     const page = fixture.componentInstance;

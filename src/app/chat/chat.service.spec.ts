@@ -213,6 +213,37 @@ describe('Protected chat stream', () => {
     request.and.resolveTo(response(frame('meta', meta) + reviewTools() + frame('done', { ...reviewUsage, review: invalid })));
     await expectAsync(runReview([])).toBeRejectedWithError(/review receipt/);
   });
+  it('validates arbitrary public repository receipts against the requested target and source scope', async () => {
+    const target = { ...review, repository: 'pallets/flask', filesRead: ['src/flask/app.py'] };
+    const source = { id: 1, title: 'app.py', kind: 'repository', revision,
+      url: `https://github.com/Pallets/Flask/blob/${revision}/src/flask/app.py#L1-L20` };
+    request.and.resolveTo(response(frame('meta', meta) + reviewTools() + frame('sources', { sources: [source] }) +
+      frame('delta', { channel: 'answer', text: 'A selected public source observation.' }) +
+      frame('done', { ...reviewUsage, review: target })));
+    const events: ChatEvent[] = [];
+    await runReview(events, 'Review repository: https://github.com/Pallets/Flask.git/ : routing');
+    expect(events[events.length - 1]).toEqual(jasmine.objectContaining({ type: 'done', review: target }));
+    for (const patch of [
+      { repository: 'other/repo' }, { filesRead: ['README.md'] }, { revision: 'b'.repeat(40) },
+    ]) {
+      request.and.resolveTo(response(frame('meta', meta) + reviewTools() + frame('sources', { sources: [source] }) +
+        frame('done', { ...reviewUsage, review: { ...target, ...patch } })));
+      await expectAsync(runReview([], 'Review repository: https://github.com/pallets/flask')).toBeRejectedWithError(/repository source|review receipt/);
+    }
+    request.and.resolveTo(response(frame('meta', meta) + reviewTools() + frame('sources', { sources: [source] }) +
+      frame('done', { ...reviewUsage, review: target })));
+    await expectAsync(runReview([], 'Review repository: https://github.com/other/repo')).toBeRejectedWithError(/repository source/);
+  });
+  it('displays fixed repository help and unavailable messages without echoing provider details or submitted URLs', async () => {
+    request.and.resolveTo(new Response(JSON.stringify({ error: 'invalid_repository_target' }), { status: 400 }));
+    await expectAsync(runReview([], 'Review repository: http://internal.example/private')).toBeRejectedWithError(/Only public GitHub repository root URLs/);
+    request.and.resolveTo(response(frame('meta', meta) + frame('error', {
+      code: 'repository_unavailable', message: 'sensitive provider detail', repository: 'hidden/private',
+    })));
+    await expectAsync(runReview([], 'Review repository: https://github.com/pallets/flask')).toBeRejectedWithError(
+      'I couldn’t read the requested public GitHub repository. It may be unavailable, rate limited or contain no supported source files. No code was run or changed.',
+    );
+  });
   it('matches review-command whitespace, optional words, punctuation and focus bounds with the gateway', async () => {
     for (const prompt of ['Review the website repository.', '  review\t website \nrepository!  ', 'REVIEW the REPOSITORY',
       'review repository : accessibility', 'review the website repository:\nsource selection', `review repository:${'a'.repeat(1500)}`]) {

@@ -2,7 +2,7 @@ import { Injectable, InjectionToken, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { readHardeningReceipt } from '../particles/chat-hardening';
 import { ChatMessage, ChatMetrics, ChatModelId, ChatRequestOptions, ChatSource, ChatToolActivity, MemoryRecall, RepositoryReview, decodeRate } from './chat.models';
-import { isRepositoryReview, readMemoryRecall, readRepositoryReview } from './repository-review';
+import { isRepositoryReview, parseReviewTarget, readMemoryRecall, readRepositoryReview, repositorySourceRevision } from './repository-review';
 import { EventStreamParser } from './event-stream';
 import { AuthService } from '../auth/auth.service';
 import { CostSummaryService } from './cost-summary.service';
@@ -99,6 +99,7 @@ export class ChatService {
     const showSavedMemories = lastMessage?.role === 'user' &&
       /^\s*Show saved memories[.!]?\s*$/i.test(lastMessage.content);
     const reviewRequested = model !== 'goblin' && lastMessage?.role === 'user' && isRepositoryReview(lastMessage.content);
+    const reviewRepository = reviewRequested ? parseReviewTarget(lastMessage!.content) : null;
     const controller = new AbortController();
     const abort = () => controller.abort();
     signal.addEventListener('abort', abort, { once: true });
@@ -114,6 +115,7 @@ export class ChatService {
     let phase: 'token' | 'fetch' | 'read' | null = 'token';
     const toolStates = new Map<ChatToolActivity['name'], ChatToolActivity['status']>();
     const repositoryRevisions = new Set<string>();
+    const repositoryPaths = new Set<string>();
     const interruption = (message: string): Error => {
       const notes: string[] = [message];
       if (outputLength) notes.push('The partial reply won’t be used in your next message.');
@@ -161,7 +163,9 @@ export class ChatService {
         };
         throw new Error(response.status === 401 ? 'Your session has expired. Sign out and sign in again to continue.'
           : response.status === 429 ? messages[failure?.error] ?? 'This model is busy. Try another model or wait a minute.'
-          : response.status === 400 ? 'This conversation is too long for the small model. Start a new chat.'
+          : response.status === 400 ? failure?.error === 'invalid_repository_target'
+            ? 'Use Review repository: https://github.com/owner/repo, optionally followed by : focus. Only public GitHub repository root URLs are supported.'
+            : 'This conversation is too long for the small model. Start a new chat.'
           : 'The model is unavailable. Please try again shortly.');
       }
       if (!response.body || !response.headers.get('content-type')?.includes('text/event-stream'))
@@ -216,7 +220,7 @@ export class ChatService {
             if (!checked || typeof name !== 'string' || typeof status !== 'string' ||
                 !['calculator', 'source_lookup', 'site_profile', 'memory_lookup', 'memory_write', 'python', 'repository_read', 'review_check', 'intent_routing', 'source_ranking', 'answer_check'].includes(name) ||
                 (['intent_routing', 'source_ranking', 'answer_check'].includes(name) && model === 'goblin') ||
-                (['repository_read', 'review_check'].includes(name) && !reviewRequested) ||
+                (['repository_read', 'review_check'].includes(name) && (!reviewRequested || !reviewRepository)) ||
                 (['memory_lookup', 'memory_write'].includes(name) && recording?.useMemory !== true) ||
                 (name === 'python' && recording?.useSandbox !== true) ||
                 !['running', 'complete', 'failed', 'unavailable'].includes(status) ||
@@ -251,16 +255,16 @@ export class ChatService {
               const revision = source['revision'];
               if (kind !== undefined && kind !== 'indexed' && kind !== 'web' && kind !== 'repository')
                 throw new Error('The search source type is invalid.');
-              const pinnedRevision = kind === 'repository'
-                ? /^\/webstarcloud\/webstarcloud\.com\/blob\/([a-f0-9]{40})\/[^?#]+$/.exec(url.pathname)?.[1]
-                : undefined;
-              if ((kind === 'repository' && (!reviewRequested || url.hostname !== 'github.com' || !pinnedRevision)) ||
+              const pinnedRevision = kind === 'repository' ? repositorySourceRevision(source['url'], reviewRepository) : null;
+              if ((reviewRequested && kind !== 'repository') ||
+                  (kind === 'repository' && (!reviewRequested || !pinnedRevision)) ||
                   (revision !== undefined && (kind !== 'repository' || typeof revision !== 'string' || !/^[a-f0-9]{40}$/.test(revision))))
                 throw new Error('The repository source receipt is invalid.');
               if (pinnedRevision) {
                 if (revision !== undefined && revision !== pinnedRevision)
                   throw new Error('The repository source revision is invalid.');
                 repositoryRevisions.add(pinnedRevision);
+                repositoryPaths.add(url.pathname.split('/').slice(5).join('/'));
               }
               if (kind === 'indexed' && (typeof indexedAt !== 'string' || indexedAt.length > 40 || !Number.isFinite(Date.parse(indexedAt))))
                 throw new Error('The indexed source date is invalid.');
@@ -327,11 +331,13 @@ export class ChatService {
               throw new Error('The repository review receipt is invalid.');
             if (data['review'] === undefined && ((reviewRequested && called !== false) || repositoryRevisions.size || toolStates.get('repository_read') === 'complete'))
               throw new Error('The service did not confirm a repository review.');
-            const review = data['review'] === undefined ? undefined : readRepositoryReview(data['review'], toolStates);
+            const review = data['review'] === undefined ? undefined : readRepositoryReview(data['review'], toolStates, reviewRepository);
             if (review && (called !== (review.attempts > 0) || (!review.attempts && review.findingsReported !== 0)))
               throw new Error('The repository review model usage is inconsistent.');
             if (review && [...repositoryRevisions].some(revision => revision !== review.revision))
               throw new Error('The repository source revision does not match the review.');
+            if (review && [...repositoryPaths].some(path => !review.filesRead.includes(path)))
+              throw new Error('The repository source path does not match the review.');
             if (data['memoryRecall'] !== undefined && model === 'goblin')
               throw new Error('The personal-memory recall receipt is invalid.');
             const memoryRecall = data['memoryRecall'] === undefined ? undefined : readMemoryRecall(data['memoryRecall'], recording?.useMemory === true, toolStates);
@@ -366,6 +372,8 @@ export class ChatService {
             });
             return;
           } else if (frame.event === 'error') {
+            if (data['code'] === 'repository_unavailable')
+              throw new Error('I couldn’t read the requested public GitHub repository. It may be unavailable, rate limited or contain no supported source files. No code was run or changed.');
             if (data['code'] === 'repetition')
               throw new Error('The model got stuck repeating, so generation was stopped. This partial answer may be wrong and won’t be used in your next message.');
             throw new Error('The model stopped unexpectedly. You can try the request again.');

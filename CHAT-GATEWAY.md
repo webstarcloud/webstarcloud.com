@@ -149,7 +149,9 @@ records. IDs must be sequential and URLs HTTPS without embedded credentials.
 Optional `kind` is `indexed`, `web` or `repository`; indexed sources must include a valid
 `indexedAt` date, shown with its year as an index snapshot, not publication or
 freshness evidence. Repository sources are accepted only for an explicit review;
-their GitHub URLs must pin the fixed website repository to the review's revision.
+their GitHub URLs must pin the requested repository to the review's revision and
+include a positive line anchor. Paths must be safe ASCII, at most 160 characters,
+without hidden or dot segments, and must appear in the final read-file receipt.
 An optional 40-character `revision` must agree with the URL. A selected-page index is tried
 before the private SearXNG service's configured whole-web engines.
 Search runs automatically for recognized factual questions. Qwen receives checked
@@ -182,14 +184,22 @@ The discoverable **Review the website repository** starter appears only with a
 connected chat endpoint and `environment.repositoryReviewEnabled`. This flag
 defaults off until reviewer quality and live route checks pass. Filling a starter
 only prepares a draft; sending still requires normal sign-in and acknowledgement.
-Explicit `Review repository` and `Review the website repository`, optionally
-followed by `: <focus>` of up to 1,500 characters, use a separate coder worker with Think or Flash; they do
-not add a model-menu option. Goblin stays a text-continuation experiment.
+Explicit `Review repository: https://github.com/owner/repo`, optionally followed by
+` : <focus>` of up to 1,500 characters, selects a public GitHub repository. Only
+HTTPS root URLs on github.com are admitted: no ports, credentials, query strings,
+fragments, encoded characters or extra path segments. A trailing slash or `.git`
+suffix is normalized. Malformed URL-looking review requests fail with fixed help
+before shared review quotas or external repository calls; they
+never become ordinary chat or search. Embedded URLs in legacy focus are rejected.
+Legacy `Review repository` and `Review the website repository`, optionally followed
+by `: <focus>`, still inspect this website. The existing Qwen worker handles Think
+or Flash inspections; no model-menu option is added. Goblin remains a continuation experiment.
 The command allows case/whitespace variations, optional `the`/`website`, and a
 final period or exclamation mark, matching the gateway and worker parser.
 
-The first version inspects bounded excerpts from the public
-`webstarcloud/webstarcloud.com` repository. The model selects concrete structural
+The inspection reads bounded excerpts from a public repository at an immutable
+revision; the default is `webstarcloud/webstarcloud.com`. Private repositories and
+non-GitHub hosts are unsupported. Repository text is never executed. The model selects concrete structural
 observations from server-defined checks; freeform bug diagnosis is disabled.
 Only the latest instruction reaches that worker, without previous chat history,
 personal memories or sandbox credentials. There are no GitHub writes or test
@@ -198,7 +208,7 @@ reviews return `review_daily_limit` and accurate midnight-UTC guidance.
 
 Real `repository_read` and `review_check` events preserve running/terminal order.
 `meta.model` matches the selected Think/Flash alias, while `servedModel` identifies
-the actual coder. `done.review` must carry the fixed repository, `mode: guided`,
+the actual model. `done.review` must carry the requested repository, `mode: guided`,
 an immutable 40-character revision, up to three unique read paths, `partial: true`,
 `testsRun: false`, zero to three observations in `findingsReported`, zero to two
 attempts, and `status: checked|invalid`. Checked means selection and citations
@@ -206,12 +216,15 @@ were validated, not that a defect was proved. Invalid selection requires a faile
 model-prioritization receipt; fixed server checks can still report up to three
 structural observations. The UI labels this guided fallback as model prioritization
 unavailable, preserves the observations, labels scope and links
-the revision; it rejects unconfirmed reviews or mismatched source revisions.
+the revision; it rejects unconfirmed reviews, mismatched repositories, source
+revisions or file paths. Repository names are matched case-insensitively.
 Zero attempts means no applicable structural observations and no model call,
 with real repository receipts and zero native tokens; model-backed inspections
 must report their actual attempts. Native token totals include all attempts.
 Backend bounds and provenance are in
 [`REPOSITORY_REVIEW.md`](../davesbrain/model-lambda/REPOSITORY_REVIEW.md).
+Unavailable, private, rate-limited or unreadable repositories return a fixed
+`repository_unavailable` error explanation without provider details or raw URLs.
 
 Every new turn has collapsed **Request details** with at most 24 milestones:
 request start, received protection/tool/source receipts, first output, first
